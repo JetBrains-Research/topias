@@ -15,7 +15,6 @@ import java.util.Objects;
 
 public final class FileMapper {
 
-    //Method name (like org.smth.ImbaClass.getSmth) to it boundaries
     final private Map<PsiMethod, TextRange> methodToBounds;
     final private PsiManager pm;
 
@@ -29,14 +28,14 @@ public final class FileMapper {
                 .map(pm::findFile)
                 .filter(Objects::nonNull)
                 .forEach(x -> x.acceptChildren(new JavaRecursiveElementVisitor() {
-            @Override
-            public void visitElement(PsiElement element) {
-                if (element instanceof PsiMethod)
-                    methodToBounds.put((PsiMethod) element, element.getTextRange());
+                    @Override
+                    public void visitElement(PsiElement element) {
+                        if (element instanceof PsiMethod)
+                            methodToBounds.put((PsiMethod) element, element.getTextRange());
 
-                super.visitElement(element);
-            }
-        }));
+                        super.visitElement(element);
+                    }
+                }));
     }
 
     public Map<PsiMethod, TextRange> getMethodToBounds() {

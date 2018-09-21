@@ -21,4 +21,9 @@
     <actions>
         <!-- Add your actions here -->
     </actions>
+    <application-components>
+        <component>
+            <implementation-class>state.ChangesState</implementation-class>
+        </component>
+    </application-components>
 </idea-plugin>
