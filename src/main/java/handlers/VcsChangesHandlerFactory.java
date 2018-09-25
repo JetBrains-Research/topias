@@ -1,40 +1,34 @@
 package handlers;
 
 
-import com.intellij.diff.DiffManager;
-import com.intellij.diff.DiffRequestFactory;
 import com.intellij.diff.comparison.ComparisonManager;
 import com.intellij.diff.comparison.ComparisonPolicy;
-import com.intellij.diff.fragments.DiffFragment;
 import com.intellij.diff.fragments.LineFragment;
 import com.intellij.openapi.progress.EmptyProgressIndicator;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vcs.*;
+import com.intellij.openapi.vcs.CheckinProjectPanel;
+import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.CommitContext;
-import com.intellij.openapi.vcs.changes.ContentRevision;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory;
-import com.intellij.openapi.vcs.checkin.VcsCheckinHandlerFactory;
-import com.intellij.openapi.vcs.history.VcsDiffUtil;
-import com.intellij.openapi.vcs.history.VcsHistoryUtil;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.diff.Diff;
 import diff.FileMapper;
-import git4idea.branch.GitBrancher;
-import git4idea.diff.GitDiffProvider;
+import helper.MethodInfo;
 import org.jetbrains.annotations.NotNull;
 import state.ChangesState;
 
-import com.intellij.diff.requests.DiffRequest;
-
-import java.util.ArrayList;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.*;
+
+//todo: concurrency issues
 public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
 
     @NotNull
@@ -44,8 +38,10 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
     }
 
     private static class GitCommitHandler extends CheckinHandler {
-        @NotNull private final CheckinProjectPanel panel;
-        @NotNull private final Project project;
+        @NotNull
+        private final CheckinProjectPanel panel;
+        @NotNull
+        private final Project project;
 
 
         private GitCommitHandler(@NotNull CheckinProjectPanel panel) {
@@ -55,26 +51,67 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
 
         @Override
         public void checkinSuccessful() {
-            final List<String> changes = panel.getSelectedChanges().stream().map(x -> {
+            final Function<Change, String> before = x -> {
                 try {
-                    return x.getBeforeRevision().getContent();
+                    return Objects.requireNonNull(x.getBeforeRevision()).getContent();
                 } catch (VcsException e) {
+                    //Not ok, but for beginning it may be OK...
                     return "";
                 }
-            }).collect(Collectors.toList());
-            final List<String> changesAfter = panel.getSelectedChanges().stream().map(x -> {
+            };
+
+            final Function<Change, String> after = x -> {
                 try {
-                    return x.getAfterRevision().getContent();
+                    return Objects.requireNonNull(x.getAfterRevision()).getContent();
                 } catch (VcsException e) {
+                    //Not ok, but for beginning it may be OK...
                     return "";
                 }
-            }).collect(Collectors.toList());
+            };
 
+            final Map<String, String> changesBefore = changesToMap(panel.getSelectedChanges().stream(), before);
+            final Map<String, String> changesAfter = changesToMap(panel.getSelectedChanges().stream(), after);
 
-            final List<LineFragment> fragments = ComparisonManager.getInstance().compareLines(changes.get(0), changesAfter.get(0), ComparisonPolicy.DEFAULT, new EmptyProgressIndicator());
-            final FileMapper mapper = new FileMapper(project, panel.getVirtualFiles());
-            ChangesState.getInstance().loadState(mapper.getMethodToBounds());
+            final ComparisonManager comparisonManager = ComparisonManager.getInstance();
+            final ProgressIndicator indicator = new EmptyProgressIndicator();
+
+            //Idk how to call flatMap in collect(...)
+            final Map<String, List<List<LineFragment>>> fragments = changesBefore.keySet().stream().map(x ->
+                    new SimpleEntry<>(x, comparisonManager.compareLines(changesBefore.get(x), changesAfter.get(x),
+                            ComparisonPolicy.DEFAULT, indicator)))
+                    .collect(groupingBy(SimpleEntry::getKey, mapping(SimpleEntry::getValue, toList())));
+
+            final FileMapper mapper = new FileMapper(project);
+            final Map<String, List<MethodInfo>> infos = mapper.init(panel.getVirtualFiles());
+
+            //Same issue with flatmap and collecting here
+            //Pretty complex structure, I don't need this yet, but probably will need later.
+            final List<SimpleEntry<String, List<MethodInfo>>> changedMethods = infos.keySet().stream().map(x ->
+                    new SimpleEntry<>(x, fragments.get(x).stream().flatMap(Collection::stream).collect(toList())))
+                    .map(x -> {
+                        final List<MethodInfo> methods = infos.get(x.getKey());
+                        final List<SimpleEntry<Integer, Integer>> boundariesOfChanges =
+                                x.getValue().stream().map(y -> new SimpleEntry<>(y.getStartLine2(), y.getEndLine2())).collect(toList());
+                        final List<MethodInfo> selected = methods.stream()
+                                .flatMap(y ->
+                                        boundariesOfChanges.stream().map(y::ifWithin).filter(Objects::nonNull).distinct()).collect(toList()
+                                );
+                        return new SimpleEntry<>(x.getKey(), selected);
+                    }).collect(toList());
+
+            final ChangesState state = ChangesState.getInstance();
+            state.update(changedMethods.stream()
+                    .flatMap(x -> x.getValue().stream())
+                    .map(MethodInfo::getMethod).collect(toList()));
+
             super.checkinSuccessful();
+        }
+
+        private Map<String, String> changesToMap(Stream<Change> changes, Function<Change, String> getContent) {
+            return changes.map(x -> new SimpleEntry<>(Objects.requireNonNull(x.getVirtualFile()).getCanonicalPath(), getContent.apply(x)))
+                    .collect(groupingBy(
+                            SimpleEntry::getKey, mapping(SimpleEntry::getValue, joining("")))
+                    );
         }
     }
 }

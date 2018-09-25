@@ -12,13 +12,11 @@ public class ShowStatsAction extends AnAction {
         final StringBuilder builder = new StringBuilder();
         assert state.getState() != null;
 
-        state.getState().forEach((x, y) -> builder.append("Method ")
-                .append(x.getName())
-                .append(" has range from ")
-                .append(y.getKey())
-                .append(" to ")
-                .append(y.getValue())
-                .append("\n"));
+        state.getState().persistentState.forEach((x, y) -> builder.append("Method ")
+                .append(x)
+                .append(" has been changed ")
+                .append(y)
+                .append(" times!\n"));
 
         Messages.showInfoMessage(builder.toString(), "Topias");
     }

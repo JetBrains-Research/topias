@@ -1,38 +1,60 @@
 package state;
 
 import com.intellij.openapi.components.*;
-import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiMethod;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @State(name = "ChangesState",
         storages = { @Storage( file = "counter.xml", scheme = StorageScheme.DIRECTORY_BASED) })
 public final class ChangesState implements ApplicationComponent,
-        PersistentStateComponent<Map<PsiMethod, SimpleEntry<Integer, Integer>>> {
-    private Map<PsiMethod, SimpleEntry<Integer, Integer>> persistentState;
+        PersistentStateComponent<ChangesState.InnerState> {
+    private InnerState innerState = new InnerState();
+
+    public static class InnerState {
+        InnerState() {
+            persistentState = new HashMap<>();
+        }
+
+        @NotNull
+        public Map<String, Integer> persistentState;
+    }
 
     @Nullable
     @Override
-    public Map<PsiMethod, SimpleEntry<Integer, Integer>> getState() {
-        return persistentState;
+    public InnerState getState() {
+        return innerState;
     }
 
     @Override
-    public void loadState(@NotNull Map<PsiMethod, SimpleEntry<Integer, Integer>> state) {
-        this.persistentState = state;
+    public void loadState(@NotNull InnerState state) {
+        this.innerState = state;
     }
 
-    @Override
-    public void noStateLoaded() {
-        this.persistentState = new HashMap<>();
+    public void update(List<PsiMethod> changedMethods) {
+        changedMethods.forEach(x -> innerState.persistentState.merge(x.getName(), 1, (a, b) -> a + b));
     }
 
+    @NotNull
     public static ChangesState getInstance() {
         return ServiceManager.getService(ChangesState.class);
+    }
+
+    @NotNull
+    @Override
+    public String getComponentName() {
+        return String.valueOf(ChangesState.class);
+    }
+
+    @Override
+    public void initComponent() {
+    }
+
+    @Override
+    public void disposeComponent() {
     }
 }

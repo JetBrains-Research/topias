@@ -17,6 +17,11 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <checkinHandlerFactory implementation="handlers.VcsChangesHandlerFactory"/>
+        <applicationService
+                serviceImplementation="state.ChangesState"
+                serviceInterface="state.ChangesState"
+                overrides="true"
+        />
     </extensions>
 
     <actions>
@@ -30,6 +35,7 @@
     <application-components>
         <component>
             <implementation-class>state.ChangesState</implementation-class>
+            <interface-class>state.ChangesState</interface-class>
         </component>
     </application-components>
 </idea-plugin>
