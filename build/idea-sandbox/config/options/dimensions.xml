@@ -1,0 +1,12 @@
+<application>
+  <component name="DimensionService">
+    <location key="new project wizard.0.0.1920.1080" x="593" y="75" />
+    <location key="WELCOME_SCREEN.0.0.1920.1080" x="961" y="450" />
+    <location key="com.intellij.ide.util.TipDialog.1920.0.1920.1080" x="2563" y="367" />
+    <location key="CommitChangelistDialog2.1920.0.1920.1080" x="2518" y="141" />
+    <location key="IDE.errors.dialog.1920.0.1920.1080" x="2101" y="152" />
+    <size key="new project wizard.0.0.1920.1080" width="729" height="751" />
+    <size key="CommitChangelistDialog2.1920.0.1920.1080" width="716" height="796" />
+    <size key="IDE.errors.dialog.1920.0.1920.1080" width="1341" height="720" />
+  </component>
+</application>
