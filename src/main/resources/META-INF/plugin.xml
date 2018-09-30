@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>io.github.likeanowl.VCS_stat_plugin</id>
+    <id>io.github.likeanowl.topias</id>
     <name>VCS statistics plugin</name>
     <vendor email="svitkovsergey@gmail.com" url="io.github.likeanowl">My web-site</vendor>
 
@@ -16,9 +16,26 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
+        <checkinHandlerFactory implementation="handlers.VcsChangesHandlerFactory"/>
+        <applicationService
+                serviceImplementation="state.ChangesState"
+                serviceInterface="state.ChangesState"
+                overrides="true"
+        />
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
+        <group id="Topias.SampleMenu" text="VCS stats"
+               description="Shows your vcs changes stats">
+            <add-to-group group-id="MainMenu" anchor="last"/>
+            <!-- Add your actions here -->
+            <action id="actions.ShowStatsAction" class="actions.ShowStatsAction" text="Show VCS statistics"/>
+        </group>
     </actions>
+    <application-components>
+        <component>
+            <implementation-class>state.ChangesState</implementation-class>
+            <interface-class>state.ChangesState</interface-class>
+        </component>
+    </application-components>
 </idea-plugin>
