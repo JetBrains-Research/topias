@@ -7,12 +7,14 @@ import java.util.AbstractMap;
 public final class MethodInfo {
     private final Integer startOffset;
     private final Integer endOffset;
-    private final PsiMethod method;
+    private final String methodFullName;
+    private final PsiMethod psiMethod;
 
     public MethodInfo(Integer startOffset, Integer endOffset, PsiMethod method) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
-        this.method = method;
+        this.psiMethod = method;
+        this.methodFullName = MethodUtils.calculateSignature(method);
     }
 
     public MethodInfo ifWithin(AbstractMap.SimpleEntry<Integer, Integer> diapason) {
@@ -27,7 +29,11 @@ public final class MethodInfo {
         return endOffset;
     }
 
-    public PsiMethod getMethod() {
-        return method;
+    public String getMethodFullName() {
+        return methodFullName;
+    }
+
+    public PsiMethod getPsiMethod() {
+        return psiMethod;
     }
 }

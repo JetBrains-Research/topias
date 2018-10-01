@@ -102,7 +102,7 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
             final ChangesState state = ChangesState.getInstance();
             state.update(changedMethods.stream()
                     .flatMap(x -> x.getValue().stream())
-                    .map(MethodInfo::getMethod).collect(toList()));
+                    .map(MethodInfo::getMethodFullName).collect(toList()));
 
             super.checkinSuccessful();
         }

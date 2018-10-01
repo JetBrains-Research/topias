@@ -1,7 +1,6 @@
 package state;
 
 import com.intellij.openapi.components.*;
-import com.intellij.psi.PsiMethod;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,8 +34,8 @@ public final class ChangesState implements ApplicationComponent,
         this.innerState = state;
     }
 
-    public void update(List<PsiMethod> changedMethods) {
-        changedMethods.forEach(x -> innerState.persistentState.merge(x.getName(), 1, (a, b) -> a + b));
+    public void update(List<String> changedMethods) {
+        changedMethods.forEach(x -> innerState.persistentState.merge(x, 1, (a, b) -> a + b));
     }
 
     @NotNull
