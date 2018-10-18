@@ -38,4 +38,9 @@
             <interface-class>state.ChangesState</interface-class>
         </component>
     </application-components>
+    <project-components>
+        <component>
+            <implementation-class>handlers.ProjectOpenListener</implementation-class>
+        </component>
+    </project-components>
 </idea-plugin>

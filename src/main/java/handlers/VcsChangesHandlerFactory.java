@@ -30,7 +30,6 @@ import static java.util.stream.Collectors.*;
 
 //todo: concurrency issues
 public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
-
     @NotNull
     @Override
     public CheckinHandler createHandler(@NotNull CheckinProjectPanel panel, @NotNull CommitContext commitContext) {
@@ -51,6 +50,7 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
 
         @Override
         public void checkinSuccessful() {
+
             final Function<Change, String> before = x -> {
                 try {
                     return Objects.requireNonNull(x.getBeforeRevision()).getContent();
@@ -82,7 +82,7 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
                     .collect(groupingBy(SimpleEntry::getKey, mapping(SimpleEntry::getValue, toList())));
 
             final FileMapper mapper = new FileMapper(project);
-            final Map<String, List<MethodInfo>> infos = mapper.init(panel.getVirtualFiles());
+            final Map<String, List<MethodInfo>> infos = mapper.vfsToMethodsData(panel.getVirtualFiles());
 
             //Same issue with flatmap and collecting here
             //Pretty complex structure, I don't need this yet, but probably will need later.

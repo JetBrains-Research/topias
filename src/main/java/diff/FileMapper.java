@@ -1,5 +1,7 @@
 package diff;
 
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
@@ -21,35 +23,42 @@ public final class FileMapper {
         this.psiDocumentManager = PsiDocumentManager.getInstance(project);
     }
 
-    public Map<String, List<MethodInfo>> init(Collection<VirtualFile> files) {
+    public Map<String, List<MethodInfo>> vfsToMethodsData(Collection<VirtualFile> files) {
         final List<SimpleEntry<String, MethodInfo>> temporaryListOfTuples = new LinkedList<>();
+        final Application app = ApplicationManager.getApplication();
 
-        files.stream()
-                .map(psiManager::findFile)
-                .filter(Objects::nonNull)
-                .forEach(x -> x.acceptChildren(new JavaRecursiveElementVisitor() {
-                    @Override
-                    public void visitElement(PsiElement element) {
-                        if (element instanceof PsiMethod) {
-                            final PsiMethod method = (PsiMethod) element;
-                            final Document document = psiDocumentManager.getDocument(x);
-                            final String fullClassName = x.getVirtualFile().getCanonicalPath();
-                            assert document != null;
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                files.stream()
+                        .map(psiManager::findFile)
+                        .filter(Objects::nonNull)
+                        .forEach(x -> x.acceptChildren(new JavaRecursiveElementVisitor() {
+                            @Override
+                            public void visitElement(PsiElement element) {
+                                if (element instanceof PsiMethod) {
+                                    final PsiMethod method = (PsiMethod) element;
+                                    final Document document = psiDocumentManager.getDocument(x);
+                                    final String fullClassName = x.getVirtualFile().getCanonicalPath();
+                                    assert document != null;
+                                    final TextRange range = method.getTextRange();
+                                    final int start = document.getLineNumber(range.getStartOffset());
+                                    final int end = document.getLineNumber(range.getEndOffset());
+                                    temporaryListOfTuples.add(new SimpleEntry<>(fullClassName, new MethodInfo(start, end, method)));
+                                }
+                                super.visitElement(element);
 
-                            final TextRange range = method.getTextRange();
-                            final int start = document.getLineNumber(range.getStartOffset());
-                            final int end = document.getLineNumber(range.getEndOffset());
+                            }
+                        }));
+            }
+        };
 
-                            temporaryListOfTuples.add(new SimpleEntry<>(fullClassName, new MethodInfo(start, end, method)));
-                        }
+        app.invokeAndWait(runnable);
 
-                        super.visitElement(element);
-                    }
-                }));
-
-        return temporaryListOfTuples.stream().collect(Collectors.groupingBy(
-                SimpleEntry::getKey, Collectors.mapping(SimpleEntry::getValue, Collectors.toList())
-        ));
+        return temporaryListOfTuples.stream().
+                collect(Collectors.groupingBy(
+                        SimpleEntry::getKey, Collectors.mapping(SimpleEntry::getValue, Collectors.toList())
+                ));
     }
 }
 

@@ -1,8 +1,6 @@
 package helper;
 
 import com.intellij.psi.*;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 public final class MethodUtils {
     private MethodUtils() {}
