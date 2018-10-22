@@ -7,6 +7,7 @@ import com.intellij.openapi.progress.EmptyProgressIndicator;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
+import com.intellij.openapi.vcs.FileStatus;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.Change;
 import diff.FileMapper;
@@ -25,7 +26,6 @@ import static java.util.stream.Collectors.*;
 
 public final class CommitUtils {
     private final static Logger logger = LoggerFactory.getLogger(CommitUtils.class);
-    private static int count = 0;
 
     private static Map<String, String> changesToMap(Stream<Change> changes, Function<Change, String> getContent) {
         return changes.map(x -> new AbstractMap.SimpleEntry<>(Objects.requireNonNull(x.getVirtualFile()).getCanonicalPath(), getContent.apply(x)))
@@ -35,8 +35,6 @@ public final class CommitUtils {
     }
 
     public static void processCommit(GitCommit commit, Project project) {
-        System.out.println("Processing commit number " + count);
-        count += 1;
         processNewCommit(project, commit.getChanges());
     }
 
@@ -47,7 +45,11 @@ public final class CommitUtils {
     private static void processNewCommit(Project project, Collection<Change> changes) {
         final Function<Change, String> before = x -> {
             try {
+                if (x.getFileStatus() == FileStatus.ADDED)
+                    return "";
+
                 return Objects.requireNonNull(x.getBeforeRevision()).getContent();
+
             } catch (VcsException e) {
                 //Not ok, but for beginning it may be OK...
                 logger.debug("Got vcs exception while getting before commit revisions. Stacktrace:");
@@ -58,6 +60,9 @@ public final class CommitUtils {
 
         final Function<Change, String> after = x -> {
             try {
+                if (x.getFileStatus() == FileStatus.DELETED)
+                    return "";
+
                 return Objects.requireNonNull(x.getAfterRevision()).getContent();
             } catch (VcsException e) {
                 //Not ok, but for beginning it may be OK...
