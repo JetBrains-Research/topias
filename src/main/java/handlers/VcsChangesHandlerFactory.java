@@ -16,6 +16,8 @@ import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory;
 import diff.FileMapper;
 import helper.MethodInfo;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import state.ChangesState;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -30,6 +32,8 @@ import static java.util.stream.Collectors.*;
 
 //todo: concurrency issues
 public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
+    private final static Logger logger = LoggerFactory.getLogger(VcsChangesHandlerFactory.class);
+
     @NotNull
     @Override
     public CheckinHandler createHandler(@NotNull CheckinProjectPanel panel, @NotNull CommitContext commitContext) {
@@ -56,6 +60,8 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
                     return Objects.requireNonNull(x.getBeforeRevision()).getContent();
                 } catch (VcsException e) {
                     //Not ok, but for beginning it may be OK...
+                    logger.debug("Got vcs exception while getting before commit revisions. Stacktrace:");
+                    e.printStackTrace();
                     return "";
                 }
             };
@@ -65,6 +71,8 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
                     return Objects.requireNonNull(x.getAfterRevision()).getContent();
                 } catch (VcsException e) {
                     //Not ok, but for beginning it may be OK...
+                    logger.debug("Got vcs exception while getting after commit revisions. Stacktrace:");
+                    e.printStackTrace();
                     return "";
                 }
             };
