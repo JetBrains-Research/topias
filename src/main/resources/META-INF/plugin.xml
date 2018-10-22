@@ -2,7 +2,7 @@
     <id>io.github.likeanowl.topias</id>
     <name>VCS statistics plugin</name>
     <vendor email="svitkovsergey@gmail.com" url="io.github.likeanowl">My web-site</vendor>
-
+    <depends>Git4Idea</depends>
     <description><![CDATA[
     Enter short description for your plugin here.<br>
     <em>most HTML tags may be used</em>

@@ -1,8 +1,10 @@
-package helper;
+package state;
 
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.SmartPointerManager;
 import com.intellij.psi.SmartPsiElementPointer;
+import helper.MethodUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractMap;
 
@@ -21,6 +23,7 @@ public final class MethodInfo {
         this.changesCount = 0L;
     }
 
+    @Nullable
     public MethodInfo ifWithin(AbstractMap.SimpleEntry<Integer, Integer> diapason) {
         return startOffset <= diapason.getKey() && endOffset >= diapason.getValue() ? this : null;
     }

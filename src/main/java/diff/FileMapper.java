@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import helper.MethodInfo;
+import state.MethodInfo;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;

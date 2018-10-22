@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @State(name = "ChangesState",
-        storages = { @Storage( file = "counter.xml", scheme = StorageScheme.DIRECTORY_BASED) })
+        storages = { @Storage( file = "counter.xml") })
 public final class ChangesState implements ApplicationComponent,
         PersistentStateComponent<ChangesState.InnerState> {
     private InnerState innerState = new InnerState();

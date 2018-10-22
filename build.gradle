@@ -21,7 +21,6 @@ intellij {
     version '2018.2'
     plugins 'git4idea'
     pluginName 'topias'
-    updateSinceUntilBuild true
     downloadSources true
 }
 patchPluginXml {
