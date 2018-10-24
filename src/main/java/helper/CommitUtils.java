@@ -1,5 +1,6 @@
 package helper;
 
+import com.esotericsoftware.kryo.KryoException;
 import com.intellij.diff.comparison.ComparisonManager;
 import com.intellij.diff.comparison.ComparisonPolicy;
 import com.intellij.diff.fragments.LineFragment;
@@ -15,8 +16,10 @@ import git4idea.GitCommit;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import state.BranchInfo;
 import state.ChangesState;
 import state.MethodInfo;
+import state.Serializator;
 
 import java.util.*;
 import java.util.function.Function;
@@ -102,9 +105,16 @@ public final class CommitUtils {
                     return new AbstractMap.SimpleEntry<>(x.getKey(), selected);
                 }).collect(toList());
 
-        final ChangesState state = ChangesState.getInstance();
-        state.update(changedMethods.stream()
+        /*BranchInfo state;
+        try {
+            state = Serializator.loadState();
+        } catch (KryoException exception) {
+            state = new BranchInfo();
+        }
+        changedMethods.stream().flatMap(x -> x.getValue().stream()).forEach(state::add);
+        Serializator.saveState(state);*/
+        /*state.add(changedMethods.stream()
                 .flatMap(x -> x.getValue().stream())
-                .map(MethodInfo::getMethodFullName).collect(toList()));
+                .map(MethodInfo::getMethodFullName).collect(toList()));*/
     }
 }

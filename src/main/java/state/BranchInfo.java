@@ -1,5 +1,6 @@
 package state;
 
+import com.intellij.psi.PsiMethod;
 import com.intellij.vcs.log.Hash;
 
 import java.util.Collection;
@@ -14,6 +15,8 @@ public final class BranchInfo {
         lastCommitId = commitId;
     }
 
+    public BranchInfo() { }
+
     public void add(MethodInfo info) {
         methodsHistory.add(info);
     }
@@ -25,6 +28,10 @@ public final class BranchInfo {
     public void addCommit(Collection<MethodInfo> infos, Hash id) {
         methodsHistory.addAll(infos);
         lastCommitId = id;
+    }
+
+    public MethodInfo findMethod(PsiMethod method) {
+        return methodsHistory.stream().filter(x -> x.getPsiMethod().equals(method)).findFirst().orElse(null);
     }
 
     public Hash getLastCommitId() {

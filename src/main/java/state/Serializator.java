@@ -4,21 +4,27 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+import java.util.LinkedList;
+
 public final class Serializator {
-    private final Kryo kryo;
-    private final Output output;
 
-    public Serializator() {
-        kryo = new Kryo();
-        output = new Output(1024);
+    public static void saveState(BranchInfo state) {
+        final Kryo kryo = new Kryo();
         kryo.register(BranchInfo.class);
-    }
-
-    public void saveState(BranchInfo state) {
+        kryo.register(LinkedList.class);
+        final Output output = new Output(1024);
         kryo.writeObject(output, state);
+        output.flush();
+        output.close();
     }
 
-    public BranchInfo loadState() {
-        return kryo.readObject(new Input(output.getBuffer(), 0, output.position()), BranchInfo.class);
+    public static BranchInfo loadState() {
+        final Kryo kryo = new Kryo();
+        kryo.register(BranchInfo.class);
+        kryo.register(LinkedList.class);
+        final Output output = new Output(1024);
+        final Input input = new Input(output.getBuffer(), 0, output.position());
+        final BranchInfo info = kryo.readObject(input, BranchInfo.class);
+        return info != null ? info : new BranchInfo();
     }
 }
