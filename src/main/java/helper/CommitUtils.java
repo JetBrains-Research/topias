@@ -1,6 +1,5 @@
 package helper;
 
-import com.esotericsoftware.kryo.KryoException;
 import com.intellij.diff.comparison.ComparisonManager;
 import com.intellij.diff.comparison.ComparisonPolicy;
 import com.intellij.diff.fragments.LineFragment;
@@ -16,11 +15,10 @@ import git4idea.GitCommit;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.BranchInfo;
 import state.ChangesState;
 import state.MethodInfo;
-import state.Serializator;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -31,9 +29,9 @@ public final class CommitUtils {
     private final static Logger logger = LoggerFactory.getLogger(CommitUtils.class);
 
     private static Map<String, String> changesToMap(Stream<Change> changes, Function<Change, String> getContent) {
-        return changes.map(x -> new AbstractMap.SimpleEntry<>(Objects.requireNonNull(x.getVirtualFile()).getCanonicalPath(), getContent.apply(x)))
+        return changes.map(x -> new SimpleEntry<>(Objects.requireNonNull(x.getVirtualFile()).getCanonicalPath(), getContent.apply(x)))
                 .collect(groupingBy(
-                        AbstractMap.SimpleEntry::getKey, mapping(AbstractMap.SimpleEntry::getValue, joining("")))
+                        SimpleEntry::getKey, mapping(SimpleEntry::getValue, joining("")))
                 );
     }
 
@@ -81,30 +79,33 @@ public final class CommitUtils {
         final ComparisonManager comparisonManager = ComparisonManager.getInstance();
         final ProgressIndicator indicator = new EmptyProgressIndicator();
 
-        //Idk how to call flatMap in collect(...)
-        final Map<String, List<List<LineFragment>>> fragments = changesBefore.keySet().stream().map(x ->
-                new AbstractMap.SimpleEntry<>(x, comparisonManager.compareLines(changesBefore.get(x), changesAfter.get(x),
-                        ComparisonPolicy.DEFAULT, indicator)))
-                .collect(groupingBy(AbstractMap.SimpleEntry::getKey, mapping(AbstractMap.SimpleEntry::getValue, toList())));
+        final Map<String, List<LineFragment>> fragments = changesBefore.keySet().stream()
+                .map(
+                        x ->
+                                new SimpleEntry<>(x,
+                                        comparisonManager.compareLines(changesBefore.get(x), changesAfter.get(x), ComparisonPolicy.DEFAULT, indicator)
+                                ))
+                .collect(groupingBy(SimpleEntry::getKey, collectingAndThen(mapping(SimpleEntry::getValue, toList()), x -> x.stream().flatMap(Collection::stream).collect(toList()))));
 
         final FileMapper mapper = new FileMapper(project);
         final Map<String, List<MethodInfo>> infos = mapper.vfsToMethodsData(changes.stream().map(Change::getVirtualFile).collect(toList()));
 
-        //Same issue with flatmap and collecting here
-        //Pretty complex structure, I don't need this yet, but probably will need later.
-        final List<AbstractMap.SimpleEntry<String, List<MethodInfo>>> changedMethods = infos.keySet().stream().map(x ->
-                new AbstractMap.SimpleEntry<>(x, fragments.get(x).stream().flatMap(Collection::stream).collect(toList())))
+        final Map<String, Set<MethodInfo>> changedMethods = infos.keySet().stream().map(x ->
+                new SimpleEntry<>(x, fragments.get(x)))
                 .map(x -> {
                     final List<MethodInfo> methods = infos.get(x.getKey());
-                    final List<AbstractMap.SimpleEntry<Integer, Integer>> boundariesOfChanges =
-                            x.getValue().stream().map(y -> new AbstractMap.SimpleEntry<>(y.getStartLine2(), y.getEndLine2())).collect(toList());
-                    final List<MethodInfo> selected = methods.stream()
+                    final List<SimpleEntry<Integer, Integer>> boundariesOfChanges =
+                            x.getValue().stream().map(y -> new SimpleEntry<>(y.getStartLine2(), y.getEndLine2())).collect(toList());
+                    final Set<MethodInfo> selected = methods.stream()
                             .flatMap(y ->
-                                    boundariesOfChanges.stream().map(y::ifWithin).filter(Objects::nonNull).distinct()).collect(toList()
+                                    boundariesOfChanges.stream().map(y::ifWithin).filter(Objects::nonNull).distinct()).collect(toSet()
                             );
-                    return new AbstractMap.SimpleEntry<>(x.getKey(), selected);
-                }).collect(toList());
+                    return new SimpleEntry<>(x.getKey(), selected);
+                })
+                .collect(groupingBy(SimpleEntry::getKey, collectingAndThen(mapping(SimpleEntry::getValue, toList()), x -> x.stream().flatMap(Collection::stream).collect(toSet()))));
 
+        final ChangesState state = ChangesState.getInstance();
+        state.update(changedMethods);
         /*BranchInfo state;
         try {
             state = Serializator.loadState();

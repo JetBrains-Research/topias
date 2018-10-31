@@ -1,16 +1,10 @@
 package state;
 
 import com.intellij.openapi.components.*;
-import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.FileEditorManagerListener;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.messages.MessageBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @State(name = "ChangesState",
         storages = { @Storage( file = "counter.xml") })
@@ -24,7 +18,7 @@ public final class ChangesState implements ApplicationComponent,
         }
 
         @NotNull
-        public Map<String, Integer> persistentState;
+        public Map<String, List<ShortInfo>> persistentState;
     }
 
     @Nullable
@@ -38,8 +32,14 @@ public final class ChangesState implements ApplicationComponent,
         this.innerState = state;
     }
 
-    public void update(List<String> changedMethods) {
-        changedMethods.forEach(x -> innerState.persistentState.merge(x, 1, (a, b) -> a + b));
+    public void update(Map<String, Set<MethodInfo>> changedMethods) {
+        changedMethods.keySet().stream().ma
+        final List<MethodInfo> infos = innerState.persistentState.getOrDefault(fileName, new LinkedList<>());
+        //increment all existing
+        infos.stream().filter(x -> changedMethods.contains(x.getMethodFullName())).forEach(MethodInfo::incrementChanges);
+
+        //add new
+        innerState.persistentState.putAll();
     }
 
     @NotNull

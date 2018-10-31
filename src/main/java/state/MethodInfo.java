@@ -12,15 +12,11 @@ public final class MethodInfo {
     private final Integer startOffset;
     private final Integer endOffset;
     private final String methodFullName;
-    private final SmartPsiElementPointer<PsiMethod> methodPtr;
-    private Long changesCount;
 
     public MethodInfo(Integer startOffset, Integer endOffset, PsiMethod method) {
-        this.methodPtr = SmartPointerManager.getInstance(method.getProject()).createSmartPsiElementPointer(method);
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.methodFullName = MethodUtils.calculateSignature(method);
-        this.changesCount = 0L;
     }
 
     @Nullable
@@ -38,21 +34,5 @@ public final class MethodInfo {
 
     public String getMethodFullName() {
         return methodFullName;
-    }
-
-    public PsiMethod getPsiMethod() {
-        return methodPtr.getElement();
-    }
-
-    public SmartPsiElementPointer<PsiMethod> getMethodPtr() {
-        return methodPtr;
-    }
-
-    public Long getChangesCount() {
-        return changesCount;
-    }
-
-    public void setChangesCount(Long changesCount) {
-        this.changesCount = changesCount;
     }
 }
