@@ -18,7 +18,7 @@ public final class ChangesState implements ApplicationComponent,
         }
 
         @NotNull
-        public Map<String, List<ShortInfo>> persistentState;
+        public Map<String, List<MethodInfo>> persistentState;
     }
 
     @Nullable
@@ -33,7 +33,7 @@ public final class ChangesState implements ApplicationComponent,
     }
 
     public void update(Map<String, Set<MethodInfo>> changedMethods) {
-        changedMethods.keySet().stream().ma
+
         final List<MethodInfo> infos = innerState.persistentState.getOrDefault(fileName, new LinkedList<>());
         //increment all existing
         infos.stream().filter(x -> changedMethods.contains(x.getMethodFullName())).forEach(MethodInfo::incrementChanges);
