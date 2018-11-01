@@ -12,11 +12,13 @@ public final class MethodInfo {
     private final Integer startOffset;
     private final Integer endOffset;
     private final String methodFullName;
+    private int changesCount;
 
     public MethodInfo(Integer startOffset, Integer endOffset, PsiMethod method) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.methodFullName = MethodUtils.calculateSignature(method);
+        this.changesCount = 0;
     }
 
     @Nullable
@@ -34,5 +36,13 @@ public final class MethodInfo {
 
     public String getMethodFullName() {
         return methodFullName;
+    }
+
+    public void incrementChangesCount() {
+        changesCount++;
+    }
+
+    public int getChangesCount() {
+        return changesCount;
     }
 }

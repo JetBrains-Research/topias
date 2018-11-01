@@ -1,6 +1,7 @@
 package state;
 
 import com.intellij.openapi.components.*;
+import com.intellij.util.Functions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +19,7 @@ public final class ChangesState implements ApplicationComponent,
         }
 
         @NotNull
-        public Map<String, List<MethodInfo>> persistentState;
+        public Map<String, Set<MethodInfo>> persistentState;
     }
 
     @Nullable
@@ -34,12 +35,10 @@ public final class ChangesState implements ApplicationComponent,
 
     public void update(Map<String, Set<MethodInfo>> changedMethods) {
 
-        final List<MethodInfo> infos = innerState.persistentState.getOrDefault(fileName, new LinkedList<>());
-        //increment all existing
-        infos.stream().filter(x -> changedMethods.contains(x.getMethodFullName())).forEach(MethodInfo::incrementChanges);
-
-        //add new
-        innerState.persistentState.putAll();
+        changedMethods.forEach((x, y) -> innerState.persistentState.merge(x, y, (a, b) -> {
+            a.addAll(b);
+            return a;
+        }));
     }
 
     @NotNull

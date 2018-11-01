@@ -28,8 +28,8 @@ public final class FileMapper {
 
     final private PsiManager psiManager;
     final private PsiDocumentManager psiDocumentManager;
-    final private TriFunction<PsiFile, Map<String, List<MethodInfo>>, PsiMethod, Boolean> isExists = (file, state, method) ->
-            state.get(file.getVirtualFile().getCanonicalPath()).stream()
+    final private TriFunction<PsiFile, Map<String, Set<MethodInfo>>, PsiMethod, Boolean> isExists = (file, state, method) ->
+            state.getOrDefault(file.getVirtualFile().getCanonicalPath(), new HashSet<>()).stream()
             .map(MethodInfo::getMethodFullName)
             .anyMatch(x -> x.equals(MethodUtils.calculateSignature(method)));
 
@@ -42,7 +42,7 @@ public final class FileMapper {
         final List<SimpleEntry<String, MethodInfo>> temporaryListOfTuples = new LinkedList<>();
         final Application app = ApplicationManager.getApplication();
 
-        final Map<String, List<MethodInfo>> state = ChangesState.getInstance().getState().persistentState;
+        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState()).persistentState;
 
         final Runnable runnable = new Runnable() {
             @Override
@@ -61,8 +61,15 @@ public final class FileMapper {
                                     final TextRange range = method.getTextRange();
                                     final int start = document.getLineNumber(range.getStartOffset());
                                     final int end = document.getLineNumber(range.getEndOffset());
-                                    final MethodInfo info = isExists.apply(x, state, method) ? state.get(x.getVirtualFile().getCanonicalPath());
-                                    temporaryListOfTuples.add(new SimpleEntry<>(fullClassName, new MethodInfo(start, end, method)));
+                                    final String fullName = MethodUtils.calculateSignature(method);
+
+                                    final MethodInfo info = isExists.apply(x, state, method) ?
+                                            state.get(x.getVirtualFile().getCanonicalPath()).stream()
+                                                    .filter(x -> x.getMethodFullName().equals(fullName))
+                                                    .findFirst().get() :
+                                            new MethodInfo(start, end, method);
+
+                                    temporaryListOfTuples.add(new SimpleEntry<>(fullClassName, info));
                                 }
                                 super.visitElement(element);
 

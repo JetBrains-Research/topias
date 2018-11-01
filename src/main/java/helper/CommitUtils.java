@@ -104,6 +104,7 @@ public final class CommitUtils {
                 })
                 .collect(groupingBy(SimpleEntry::getKey, collectingAndThen(mapping(SimpleEntry::getValue, toList()), x -> x.stream().flatMap(Collection::stream).collect(toSet()))));
 
+        changedMethods.values().stream().flatMap(Collection::stream).forEach(MethodInfo::incrementChangesCount);
         final ChangesState state = ChangesState.getInstance();
         state.update(changedMethods);
         /*BranchInfo state;
