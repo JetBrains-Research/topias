@@ -4,11 +4,12 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.SmartPointerManager;
 import com.intellij.psi.SmartPsiElementPointer;
 import helper.MethodUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractMap;
 
-public final class MethodInfo {
+public final class MethodInfo implements Comparable<MethodInfo> {
     private final Integer startOffset;
     private final Integer endOffset;
     private final String methodFullName;
@@ -44,5 +45,10 @@ public final class MethodInfo {
 
     public int getChangesCount() {
         return changesCount;
+    }
+
+    @Override
+    public int compareTo(@NotNull MethodInfo o) {
+        return this.getStartOffset() - o.getStartOffset();
     }
 }

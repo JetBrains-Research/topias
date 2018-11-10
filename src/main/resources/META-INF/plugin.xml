@@ -22,7 +22,7 @@
                 serviceInterface="state.ChangesState"
                 overrides="true"
         />
-        <codeInsight.parameterNameHints language="JAVA" implementationClass="editor.StatisticsHintsProvider"/>
+        <!--<codeInsight.parameterNameHints language="JAVA" implementationClass="editor.StatisticsHintsProvider"/>-->
         <editor.linePainter implementation="editor.EditorLP"/>
     </extensions>
 
