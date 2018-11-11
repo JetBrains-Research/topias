@@ -1,17 +1,21 @@
 package state;
 
 import com.intellij.openapi.components.*;
-import com.intellij.util.Functions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @State(name = "ChangesState",
         storages = { @Storage( file = "counter.xml") })
 public final class ChangesState implements ApplicationComponent,
         PersistentStateComponent<ChangesState.InnerState> {
     private InnerState innerState = new InnerState();
+    private static final Logger log = LoggerFactory.getLogger(ChangesState.class);
 
     public static class InnerState {
         InnerState() {
@@ -33,6 +37,11 @@ public final class ChangesState implements ApplicationComponent,
         this.innerState = state;
     }
 
+    @Override
+    public void noStateLoaded() {
+        log.debug("No state was loaded");
+    }
+
     public void update(Map<String, Set<MethodInfo>> changedMethods) {
 
         changedMethods.forEach((x, y) -> innerState.persistentState.merge(x, y, (a, b) -> {
@@ -41,22 +50,7 @@ public final class ChangesState implements ApplicationComponent,
         }));
     }
 
-    @NotNull
     public static ChangesState getInstance() {
         return ServiceManager.getService(ChangesState.class);
-    }
-
-    @NotNull
-    @Override
-    public String getComponentName() {
-        return String.valueOf(ChangesState.class);
-    }
-
-    @Override
-    public void initComponent() {
-    }
-
-    @Override
-    public void disposeComponent() {
     }
 }

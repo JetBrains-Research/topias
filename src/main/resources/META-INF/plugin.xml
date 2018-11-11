@@ -34,15 +34,15 @@
             <action id="actions.ShowStatsAction" class="actions.ShowStatsAction" text="Show VCS statistics"/>
         </group>
     </actions>
+    <project-components>
+        <component>
+            <implementation-class>handlers.ProjectOpenListener</implementation-class>
+        </component>
+    </project-components>
     <application-components>
         <component>
             <implementation-class>state.ChangesState</implementation-class>
             <interface-class>state.ChangesState</interface-class>
         </component>
     </application-components>
-    <project-components>
-        <component>
-            <implementation-class>handlers.ProjectOpenListener</implementation-class>
-        </component>
-    </project-components>
 </idea-plugin>

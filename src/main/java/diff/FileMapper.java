@@ -2,6 +2,8 @@ package diff;
 
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.components.impl.ServiceManagerImpl;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
@@ -42,8 +44,8 @@ public final class FileMapper {
         final List<SimpleEntry<String, MethodInfo>> temporaryListOfTuples = new LinkedList<>();
         final Application app = ApplicationManager.getApplication();
 
-        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState()).persistentState;
 
+        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState()).persistentState;
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
