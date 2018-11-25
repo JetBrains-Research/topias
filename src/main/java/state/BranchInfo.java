@@ -2,6 +2,7 @@ package state;
 
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.vcs.log.Hash;
 import com.intellij.vcs.log.impl.HashImpl;
 import org.jetbrains.annotations.NotNull;
@@ -9,13 +10,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class BranchInfo implements Comparable<BranchInfo>, PersistentStateComponent<BranchInfo> {
-    private final Map<String, TreeSet<MethodInfo>> methods;
+public class BranchInfo implements PersistentStateComponent<BranchInfo> {
+    @Attribute
+    private final Map<String, SortedSet<MethodInfo>> methods;
+
+    @Attribute
     private String hashValue;
 
-    public Map<String, TreeSet<MethodInfo>> getMethods() {
+    public Map<String, SortedSet<MethodInfo>> getMethods() {
         return methods;
     }
 
@@ -41,10 +46,5 @@ public class BranchInfo implements Comparable<BranchInfo>, PersistentStateCompon
     @Override
     public void loadState(@NotNull BranchInfo state) {
         XmlSerializerUtil.copyBean(state, this);
-    }
-
-    @Override
-    public int compareTo(@NotNull BranchInfo o) {
-        return 0;
     }
 }

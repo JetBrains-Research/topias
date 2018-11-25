@@ -18,7 +18,7 @@ dependencies {
 }
 
 intellij {
-    version '2018.2'
+    version '2018.3'
     plugins 'git4idea'
     pluginName 'topias'
     downloadSources true

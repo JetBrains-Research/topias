@@ -2,8 +2,6 @@ package diff;
 
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.components.impl.ServiceManagerImpl;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
@@ -15,11 +13,7 @@ import state.MethodInfo;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.intellij.util.ArrayUtil.contains;
 
 //@todo: rename
 public final class FileMapper {
@@ -30,8 +24,8 @@ public final class FileMapper {
 
     final private PsiManager psiManager;
     final private PsiDocumentManager psiDocumentManager;
-    final private TriFunction<PsiFile, Map<String, Set<MethodInfo>>, PsiMethod, Boolean> isExists = (file, state, method) ->
-            state.getOrDefault(file.getVirtualFile().getCanonicalPath(), new HashSet<>()).stream()
+    final private TriFunction<PsiFile, Map<String, SortedSet<MethodInfo>>, PsiMethod, Boolean> isExists = (file, state, method) ->
+            state.getOrDefault(file.getVirtualFile().getCanonicalPath(), new TreeSet<>()).stream()
             .map(MethodInfo::getMethodFullName)
             .anyMatch(x -> x.equals(MethodUtils.calculateSignature(method)));
 
@@ -40,12 +34,12 @@ public final class FileMapper {
         this.psiDocumentManager = PsiDocumentManager.getInstance(project);
     }
 
-    public Map<String, List<MethodInfo>> vfsToMethodsData(Collection<VirtualFile> files) {
+    public Map<String, SortedSet<MethodInfo>> vfsToMethodsData(Collection<VirtualFile> files) {
         final List<SimpleEntry<String, MethodInfo>> temporaryListOfTuples = new LinkedList<>();
         final Application app = ApplicationManager.getApplication();
 
 
-        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState()).persistentState;
+        final Map<String, SortedSet<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState()).persistentState;
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -84,7 +78,7 @@ public final class FileMapper {
 
         return temporaryListOfTuples.stream().
                 collect(Collectors.groupingBy(
-                        SimpleEntry::getKey, Collectors.mapping(SimpleEntry::getValue, Collectors.toList())
+                        SimpleEntry::getKey, Collectors.mapping(SimpleEntry::getValue, Collectors.toCollection(TreeSet::new))
                 ));
     }
 }

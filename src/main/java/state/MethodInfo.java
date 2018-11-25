@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractMap;
+import java.util.Objects;
 
 public final class MethodInfo implements Comparable<MethodInfo>, PersistentStateComponent<MethodInfo> {
     @Attribute
@@ -41,6 +42,19 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
         return startOffset <= diapason.getKey() && endOffset >= diapason.getValue() ? this : null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MethodInfo that = (MethodInfo) o;
+        return methodFullName.equals(that.methodFullName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(methodFullName);
+    }
+
     public Integer getStartOffset() {
         return startOffset;
     }
@@ -66,7 +80,6 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
         return this.getStartOffset() - o.getStartOffset();
     }
 
-    @Nullable
     @Override
     public MethodInfo getState() {
         return this;
