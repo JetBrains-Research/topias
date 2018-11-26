@@ -11,11 +11,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
-public class BranchInfo implements PersistentStateComponent<BranchInfo> {
+public class BranchInfo implements Comparable<BranchInfo>, PersistentStateComponent<BranchInfo> {
     @Attribute
-    private final Map<String, SortedSet<MethodInfo>> methods;
+    private Map<String, SortedSet<MethodInfo>> methods;
 
     @Attribute
     private String hashValue;
@@ -46,5 +45,10 @@ public class BranchInfo implements PersistentStateComponent<BranchInfo> {
     @Override
     public void loadState(@NotNull BranchInfo state) {
         XmlSerializerUtil.copyBean(state, this);
+    }
+
+    @Override
+    public int compareTo(@NotNull BranchInfo o) {
+        return this.getHashValue().hashCode() - o.getHashValue().hashCode();
     }
 }

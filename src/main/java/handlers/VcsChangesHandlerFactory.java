@@ -27,15 +27,21 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
         @NotNull
         private final Project project;
 
+        private CommitUtils utils = null;
 
         private GitCommitHandler(@NotNull CheckinProjectPanel panel) {
             this.panel = panel;
             this.project = panel.getProject();
+            try {
+                this.utils = new CommitUtils(project);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
         public void checkinSuccessful() {
-            CommitUtils.processCommit(panel, project);
+            utils.processCommit(panel);
             super.checkinSuccessful();
         }
     }

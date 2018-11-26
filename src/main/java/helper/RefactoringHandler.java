@@ -3,13 +3,12 @@ package helper;
 import gr.uom.java.xmi.diff.*;
 import org.refactoringminer.api.Refactoring;
 import org.refactoringminer.api.RefactoringType;
-import state.BranchInfo;
 import state.ChangesState;
 import state.MethodInfo;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.Set;
 import java.util.function.Function;
 
 import static org.refactoringminer.api.RefactoringType.*;
@@ -17,11 +16,11 @@ import static org.refactoringminer.api.RefactoringType.*;
 public final class RefactoringHandler {
 
     private final String branchName;
-    private final BranchInfo info;
+    private final Map<String, Set<MethodInfo>> info;
 
     public RefactoringHandler(String branchName) {
         this.branchName = branchName;
-        this.info = ChangesState.getInstance().getState().persistentState.get(branchName);
+        this.info = ChangesState.getInstance().getState().persistentState;
     }
 
     private final Map<RefactoringType, Function<Refactoring, RefactoringData>> handlers =
@@ -47,7 +46,7 @@ public final class RefactoringHandler {
             final int startLineBefore = ref.getSourceOperationCodeRangeBeforeRename().getStartLine();
             final int startLine = ref.getTargetOperationCodeRangeAfterRename().getStartLine();
             final int endLine = ref.getTargetOperationCodeRangeAfterRename().getEndLine();
-            final MethodInfo methodInfo = info.getMethods().get(path).stream().filter(x -> x.getStartOffset() == startLineBefore)
+            final MethodInfo methodInfo = info.get(path).stream().filter(x -> x.getStartOffset() == startLineBefore)
                     .findFirst().get();
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,
@@ -66,7 +65,7 @@ public final class RefactoringHandler {
             final int startLineBefore = ref.getTargetOperationCodeRangeBeforeInline().getStartLine();
             final int startLine = ref.getTargetOperationCodeRangeAfterInline().getStartLine();
             final int endLine = ref.getTargetOperationCodeRangeAfterInline().getEndLine();
-            final MethodInfo methodInfo = info.getMethods().get(path).stream().filter(x -> x.getStartOffset() == startLineBefore)
+            final MethodInfo methodInfo = info.get(path).stream().filter(x -> x.getStartOffset() == startLineBefore)
                     .findFirst().get();
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,
@@ -85,7 +84,7 @@ public final class RefactoringHandler {
             final int startLineBefore = ref.getSourceOperationCodeRangeBeforeMove().getStartLine();
             final int startLine = ref.getTargetOperationCodeRangeAfterMove().getStartLine();
             final int endLine = ref.getTargetOperationCodeRangeAfterMove().getEndLine();
-            final MethodInfo methodInfo = info.getMethods().get(path).stream().filter(x -> x.getStartOffset() == startLineBefore)
+            final MethodInfo methodInfo = info.get(path).stream().filter(x -> x.getStartOffset() == startLineBefore)
                     .findFirst().get();
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,

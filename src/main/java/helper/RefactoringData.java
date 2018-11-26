@@ -2,6 +2,8 @@ package helper;
 
 import state.MethodInfo;
 
+import java.util.Objects;
+
 public class RefactoringData {
     private final MethodInfo oldMethod;
     private final MethodInfo newMethod;

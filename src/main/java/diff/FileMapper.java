@@ -1,5 +1,6 @@
 package diff;
 
+import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
@@ -14,7 +15,6 @@ import state.MethodInfo;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 //@todo: rename
@@ -24,47 +24,46 @@ public final class FileMapper {
         public D apply(A a, B b, C c);
     }
 
+    private final PsiFileFactory psiFileFactory;
     final private PsiManager psiManager;
     final private PsiDocumentManager psiDocumentManager;
-    final private TriFunction<PsiFile, Map<String, SortedSet<MethodInfo>>, PsiMethod, Boolean> isExists = (file, state, method) ->
-            state.getOrDefault(file.getVirtualFile().getCanonicalPath(), new TreeSet<>()).stream()
-            .map(MethodInfo::getMethodFullName)
-            .anyMatch(x -> x.equals(MethodUtils.calculateSignature(method)));
+    final private TriFunction<PsiFile, Map<String, Set<MethodInfo>>, PsiMethod, Boolean> isExists = (file, state, method) ->
+            state.getOrDefault(file.getVirtualFile().getCanonicalPath(), new HashSet<>()).stream()
+                    .map(MethodInfo::getMethodFullName)
+                    .anyMatch(x -> x.equals(MethodUtils.calculateSignature(method)));
 
     public FileMapper(Project project) {
         this.psiManager = PsiManager.getInstance(project);
         this.psiDocumentManager = PsiDocumentManager.getInstance(project);
+        this.psiFileFactory = PsiFileFactory.getInstance(project);
     }
 
-    public SimpleEntry<String, SortedSet<MethodInfo>> vfsToMethodsData(VirtualFile file, String branchName) {
-        final Entry<String, SortedSet<MethodInfo>> entry =
-                vfsToMethodsData(Collections.singleton(file), branchName).entrySet().iterator().next();
+    public SimpleEntry<String, Set<MethodInfo>> vfsToMethodsData(String content, String fileName) {
+        if (!vfsToMethodsData(Collections.singleton(content), fileName).entrySet().iterator().hasNext())
+            System.out.println("No next");
+        final Entry<String, Set<MethodInfo>> entry =
+                vfsToMethodsData(Collections.singleton(content), fileName).entrySet().iterator().next();
         return new SimpleEntry<>(entry.getKey(), entry.getValue());
     }
 
-    public Map<String, SortedSet<MethodInfo>> vfsToMethodsData(Collection<VirtualFile> files, String branchName) {
+    public Map<String, Set<MethodInfo>> vfsToMethodsData(Collection<String> contents, String fileName) {
         final List<SimpleEntry<String, MethodInfo>> temporaryListOfTuples = new LinkedList<>();
         final Application app = ApplicationManager.getApplication();
+        final List<PsiFile> files = contents.stream().map(x -> psiFileFactory.createFileFromText(JavaLanguage.INSTANCE, x))
+                .collect(Collectors.toList());
 
-
-        final Map<String, SortedSet<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState())
-                .persistentState
-                .get(branchName)
-                .getMethods();
+        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState())
+                .persistentState;
 
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                files.stream()
-                        .map(psiManager::findFile)
-                        .filter(Objects::nonNull)
-                        .forEach(x -> x.acceptChildren(new JavaRecursiveElementVisitor() {
+                files.forEach(x -> x.acceptChildren(new JavaRecursiveElementVisitor() {
                             @Override
                             public void visitElement(PsiElement element) {
                                 if (element instanceof PsiMethod) {
                                     final PsiMethod method = (PsiMethod) element;
                                     final Document document = psiDocumentManager.getDocument(x);
-                                    final String fullClassName = x.getVirtualFile().getCanonicalPath();
                                     assert document != null;
                                     final TextRange range = method.getTextRange();
                                     final int start = document.getLineNumber(range.getStartOffset());
@@ -78,7 +77,7 @@ public final class FileMapper {
                                             new MethodInfo(start, end, method);
                                     info.update(start, end);
 
-                                    temporaryListOfTuples.add(new SimpleEntry<>(fullClassName, info));
+                                    temporaryListOfTuples.add(new SimpleEntry<>(fileName, info));
                                 }
                                 super.visitElement(element);
 
@@ -91,7 +90,7 @@ public final class FileMapper {
 
         return temporaryListOfTuples.stream().
                 collect(Collectors.groupingBy(
-                        SimpleEntry::getKey, Collectors.mapping(SimpleEntry::getValue, Collectors.toCollection(TreeSet::new))
+                        SimpleEntry::getKey, Collectors.mapping(SimpleEntry::getValue, Collectors.toCollection(HashSet::new))
                 ));
     }
 }
