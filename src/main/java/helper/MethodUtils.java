@@ -1,9 +1,11 @@
 package helper;
 
 import com.intellij.psi.*;
+import gr.uom.java.xmi.UMLOperation;
 
 public final class MethodUtils {
-    private MethodUtils() {}
+    private MethodUtils() {
+    }
 
     public static String calculateSignature(PsiMethod method) {
         final PsiClass containingClass = method.getContainingClass();
@@ -31,5 +33,22 @@ public final class MethodUtils {
         }
         out.append(')');
         return out.toString();
+    }
+
+    public static String calculateSignatureForEcl(UMLOperation operation) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(operation.getClassName())
+                .append(".")
+                .append(operation.getName())
+                .append("(");
+
+        operation.getParameterTypeList().forEach(x -> builder.append(x).append(","));
+
+        if (operation.getParameterTypeList().size() > 0)
+            builder.deleteCharAt(builder.length() - 1);
+
+        builder.append(")");
+        return builder.toString();
     }
 }

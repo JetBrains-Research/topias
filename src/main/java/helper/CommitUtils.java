@@ -11,7 +11,7 @@ import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.Change.Type;
 import com.intellij.openapi.vcs.changes.ContentRevision;
-import com.intellij.util.Consumer;
+import com.intellij.openapi.vfs.VirtualFile;
 import diff.FileMapper;
 import git4idea.GitCommit;
 import org.eclipse.jgit.lib.Repository;
@@ -31,17 +31,17 @@ import state.MethodInfo;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import static java.util.stream.Collectors.*;
 
 public final class CommitUtils {
     private final static Logger logger = LoggerFactory.getLogger(CommitUtils.class);
-    private final Map<Type, Consumer<Change>> handlers;
+    private final Map<Type, Function<Change, SimpleEntry<VirtualFile, SortedSet<MethodInfo>>>> handlers;
     private final Project project;
     private final GitHistoryRefactoringMiner miner = new GitHistoryRefactoringMinerImpl();
     private final Repository repository;
-    private final helper.RefactoringHandler handler = new helper.RefactoringHandler();
+    private final helper.RefactoringHandler handler;
     private String branchName;
 
     public CommitUtils(Project project) throws Exception {
@@ -50,36 +50,34 @@ public final class CommitUtils {
         GitService gitService = new GitServiceImpl();
         this.repository = gitService.openRepository(project.getBasePath());
         this.branchName = repository.getBranch();
-        handlers.put(Type.DELETED, new AddedChangeHandler());
+        this.handler = new helper.RefactoringHandler(branchName);
+        handlers.put(Type.DELETED, new DeletedChangeHandler());
         handlers.put(Type.MODIFICATION, new ModifiedChangeHandler());
         handlers.put(Type.MOVED, new MovedChangeHandler());
         handlers.put(Type.NEW, new AddedChangeHandler());
     }
 
-    private class AddedChangeHandler implements Consumer<Change> {
+    private class AddedChangeHandler implements Function<Change, SimpleEntry<VirtualFile, SortedSet<MethodInfo>>> {
         @Override
-        public void consume(Change change) {
+        public SimpleEntry<VirtualFile, SortedSet<MethodInfo>> apply(Change change) {
             final ContentRevision newRevision = change.getAfterRevision();
-            if (newRevision != null) {
-                final String content = newRevision.getFile().getPath();
-                final FileMapper mapper = new FileMapper(project);
-                final Map<String, SortedSet<MethodInfo>> infos =
-                        mapper.vfsToMethodsData(Collections.singleton(change.getVirtualFile()));
+            final FileMapper mapper = new FileMapper(project);
+            final VirtualFile file = newRevision.getFile().getVirtualFile()
+            return new SimpleEntry<>(file, mapper.vfsToMethodsData(file, branchName).getValue());
 
-                infos.values().stream().flatMap(Collection::stream).forEach(MethodInfo::incrementChangesCount);
+                /*infos.values().stream().flatMap(Collection::stream).forEach(MethodInfo::incrementChangesCount);
                 final ChangesState state = ChangesState.getInstance();
-                state.update(infos, branchName);
-            }
+                state.update(infos, branchName);*/
         }
     }
 
-    private class ModifiedChangeHandler implements Consumer<Change> {
+    private class ModifiedChangeHandler implements Function<Change, SimpleEntry<VirtualFile, SortedSet<MethodInfo>>> {
         @Override
-        public void consume(Change change) {
+        public SimpleEntry<VirtualFile, SortedSet<MethodInfo>> apply(Change change) {
             final ContentRevision before = change.getBeforeRevision();
             final ContentRevision after = change.getAfterRevision();
 
-            final String path = after.getFile().getPath();
+            final String path = before.getFile().getPath();
 
             final ComparisonManager comparisonManager = ComparisonManager.getInstance();
             final ProgressIndicator indicator = new EmptyProgressIndicator();
@@ -93,60 +91,43 @@ public final class CommitUtils {
                                 comparisonManager.compareLines(contentBefore, contentAfter, ComparisonPolicy.DEFAULT, indicator));
 
                 final FileMapper mapper = new FileMapper(project);
-                final Map<String, SortedSet<MethodInfo>> infos = mapper.vfsToMethodsData(Collections.singleton(change.getVirtualFile()));
+                final SimpleEntry<String, SortedSet<MethodInfo>> infos = mapper.vfsToMethodsData(before.getFile().getVirtualFile(), branchName);
 
-                final Map<String, SortedSet<MethodInfo>> changedMethods = infos.keySet().stream().map(x ->
-                        new SimpleEntry<>(x, parsedChanges.getValue()))
-                        .map(x -> {
-                            final SortedSet<MethodInfo> methods = infos.get(x.getKey());
-                            final List<SimpleEntry<Integer, Integer>> boundariesOfChanges =
-                                    x.getValue().stream().map(y -> new SimpleEntry<>(y.getStartLine2(), y.getEndLine2())).collect(toList());
-                            final Set<MethodInfo> selected = methods.stream()
-                                    .flatMap(y ->
-                                            boundariesOfChanges.stream().map(y::ifWithin).filter(Objects::nonNull).distinct()).collect(toSet()
-                                    );
-                            return new SimpleEntry<>(x.getKey(), selected);
-                        })
-                        .collect(groupingBy(SimpleEntry::getKey, collectingAndThen(mapping(SimpleEntry::getValue,
-                                toList()), x -> x.stream().flatMap(Collection::stream).collect(Collectors.toCollection(TreeSet::new)))));
+                final List<SimpleEntry<Integer, Integer>> boundariesOfChanges =
+                        parsedChanges.getValue()
+                                .stream()
+                                .map(y -> new SimpleEntry<>(y.getStartLine2(), y.getEndLine2())).collect(toList());
 
-                changedMethods.values().stream().flatMap(Collection::stream).forEach(MethodInfo::incrementChangesCount);
+                final SortedSet<MethodInfo> selected = infos.getValue().stream()
+                        .flatMap(y ->
+                                boundariesOfChanges.stream().map(y::ifWithin).filter(Objects::nonNull).distinct()).collect(toCollection(TreeSet::new));
+
+                return new SimpleEntry<>(before.getFile().getVirtualFile(), selected);
+
+                /*changedMethods.values().stream().flatMap(Collection::stream).forEach(MethodInfo::incrementChangesCount);
                 final ChangesState state = ChangesState.getInstance();
-                state.update(changedMethods, branchName);
+                state.update(changedMethods, branchName);*/
             } catch (VcsException e) {
+                logger.debug("VCS exception has occured");
                 e.printStackTrace();
+                return null;
             }
         }
     }
 
-    private class MovedChangeHandler implements Consumer<Change> {
+    private class MovedChangeHandler implements Function<Change, SimpleEntry<VirtualFile, SortedSet<MethodInfo>>> {
         @Override
-        public void consume(Change changes) {
-            final ContentRevision revision = changes.getBeforeRevision();
-            if (revision != null) {
-                final ChangesState state = ChangesState.getInstance();
-                final String path = changes.getAfterRevision().getFile().getPath();
-                assert state.getState() != null;
-
-                state.getState().persistentState.get(branchName).getMethods().put(
-                        path,
-                        state.getState().persistentState.get("master").getMethods().remove(revision.getFile().getPath())
-                );
-            }
+        public SimpleEntry<VirtualFile, SortedSet<MethodInfo>> apply(Change change) {
+            return new SimpleEntry<>(change.getAfterRevision().getFile().getVirtualFile(),
+                    new ModifiedChangeHandler().apply(change).getValue());
         }
     }
 
-    private class DeletedChangeHandler implements Consumer<Change> {
+    private class DeletedChangeHandler implements Function<Change, SimpleEntry<VirtualFile, SortedSet<MethodInfo>>> {
         @Override
-        public void consume(Change changes) {
-            final ContentRevision revision = changes.getBeforeRevision();
-            if (revision != null) {
-                final ChangesState state = ChangesState.getInstance();
-
-                assert state.getState() != null;
-
-                state.getState().persistentState.get("master").getMethods().remove(revision.getFile().getPath());
-            }
+        public SimpleEntry<VirtualFile, SortedSet<MethodInfo>> apply(Change change) {
+            final ContentRevision revision = change.getBeforeRevision();
+            return new SimpleEntry<>(revision.getFile().getVirtualFile(), null);
         }
     }
 
@@ -156,7 +137,7 @@ public final class CommitUtils {
         miner.churnAtCommit(repository, commit.getId().asString(), new RefactoringHandler() {
             @Override
             public void handle(RevCommit commitData, List<Refactoring> refactorings) {
-                data.addAll(refactorings.stream().map(handler::process).collect(Collectors.toSet()));
+                data.addAll(refactorings.stream().map(handler::process).collect(toSet()));
             }
         });
 
@@ -169,6 +150,17 @@ public final class CommitUtils {
     }
 
     private void processNewCommit(Collection<Change> changes, @Nullable Set<RefactoringData> data) {
-        changes.parallelStream().forEach(x -> handlers.get(x.getType()).consume(x));
+        final Map<String, SortedSet<MethodInfo>> state = ChangesState.getInstance().getState().persistentState.get(branchName).getMethods();
+        if (data != null) {
+            final Set<MethodInfo> oldMethods = data.stream().map(RefactoringData::getOldMethod).collect(toSet());
+            for (Change change : changes) {
+                final SimpleEntry<VirtualFile, SortedSet<MethodInfo>> res = handlers.get(change.getType()).apply(change);
+                if (res.getValue() == null) {
+                    state.remove(res.getKey().getCanonicalPath());
+                    return;
+                }
+
+            }
+        }
     }
 }

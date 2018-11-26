@@ -15,11 +15,11 @@ import java.util.Objects;
 
 public final class MethodInfo implements Comparable<MethodInfo>, PersistentStateComponent<MethodInfo> {
     @Attribute
-    private final Integer startOffset;
+    private Integer startOffset;
     @Attribute
-    private final Integer endOffset;
+    private Integer endOffset;
     @Attribute
-    private final String methodFullName;
+    private String methodFullName;
     @Attribute
     private int changesCount;
 
@@ -30,11 +30,31 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
         this.changesCount = 0;
     }
 
+    public MethodInfo(int startOffset, int endOffset, String methodFullName, int changesCount) {
+        this.startOffset = startOffset;
+        this.endOffset = endOffset;
+        this.methodFullName = methodFullName;
+        this.changesCount = changesCount;
+    }
+
     public MethodInfo() {
         this.startOffset = 0;
         this.endOffset = 0;
         this.methodFullName = "";
         this.changesCount = 0;
+    }
+
+    public void update(int startOffset, int endOffset) {
+        this.startOffset = startOffset;
+        this.endOffset = endOffset;
+        this.changesCount++;
+    }
+
+    public void update(int startOffset, int endOffset, String newName) {
+        this.startOffset = startOffset;
+        this.endOffset = endOffset;
+        this.methodFullName = newName;
+        this.changesCount++;
     }
 
     @Nullable

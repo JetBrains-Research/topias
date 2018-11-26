@@ -13,6 +13,8 @@ import state.MethodInfo;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 //@todo: rename
@@ -34,12 +36,22 @@ public final class FileMapper {
         this.psiDocumentManager = PsiDocumentManager.getInstance(project);
     }
 
-    public Map<String, SortedSet<MethodInfo>> vfsToMethodsData(Collection<VirtualFile> files) {
+    public SimpleEntry<String, SortedSet<MethodInfo>> vfsToMethodsData(VirtualFile file, String branchName) {
+        final Entry<String, SortedSet<MethodInfo>> entry =
+                vfsToMethodsData(Collections.singleton(file), branchName).entrySet().iterator().next();
+        return new SimpleEntry<>(entry.getKey(), entry.getValue());
+    }
+
+    public Map<String, SortedSet<MethodInfo>> vfsToMethodsData(Collection<VirtualFile> files, String branchName) {
         final List<SimpleEntry<String, MethodInfo>> temporaryListOfTuples = new LinkedList<>();
         final Application app = ApplicationManager.getApplication();
 
 
-        final Map<String, SortedSet<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState()).persistentState;
+        final Map<String, SortedSet<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState())
+                .persistentState
+                .get(branchName)
+                .getMethods();
+
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -64,6 +76,7 @@ public final class FileMapper {
                                                     .filter(x -> x.getMethodFullName().equals(fullName))
                                                     .findFirst().get() :
                                             new MethodInfo(start, end, method);
+                                    info.update(start, end);
 
                                     temporaryListOfTuples.add(new SimpleEntry<>(fullClassName, info));
                                 }
