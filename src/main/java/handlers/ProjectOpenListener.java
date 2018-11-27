@@ -26,8 +26,7 @@ public class ProjectOpenListener implements ProjectComponent {
             final CommitUtils utils = new CommitUtils(project);
             instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
                 try {
-                    final List<GitCommit> commitList = GitHistoryUtils.history(project, project.getBaseDir());
-                    GitHistoryUtils.loadDetails(project, project.getBaseDir(), utils::processCommit);
+                    GitHistoryUtils.loadDetails(project, project.getBaseDir(), utils::processCommit, "--reverse");
                 } catch (VcsException e) {
                     e.printStackTrace();
                 }

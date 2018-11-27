@@ -14,11 +14,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <checkinHandlerFactory implementation="handlers.VcsChangesHandlerFactory"/>
-        <applicationService
-                serviceImplementation="state.ChangesState"
-                serviceInterface="state.ChangesState"
-                overrides="true"
-        />
+        <projectService serviceInterface="state.ChangesState" serviceImplementation="state.ChangesState"/>
         <!--<codeInsight.parameterNameHints language="JAVA" implementationClass="editor.StatisticsHintsProvider"/>-->
         <!--<editor.linePainter implementation="editor.EditorLP"/>-->
     </extensions>
@@ -35,11 +31,9 @@
         <component>
             <implementation-class>handlers.ProjectOpenListener</implementation-class>
         </component>
-    </project-components>
-    <application-components>
         <component>
             <implementation-class>state.ChangesState</implementation-class>
             <interface-class>state.ChangesState</interface-class>
         </component>
-    </application-components>
+    </project-components>
 </idea-plugin>

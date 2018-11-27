@@ -47,14 +47,12 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
     public void update(int startOffset, int endOffset) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
-        this.changesCount++;
     }
 
     public void update(int startOffset, int endOffset, String newName) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.methodFullName = newName;
-        this.changesCount++;
     }
 
     @Nullable

@@ -53,7 +53,7 @@ public final class CommitUtils {
         GitService gitService = new GitServiceImpl();
         this.repository = gitService.openRepository(project.getBasePath());
         this.branchName = repository.getBranch();
-        this.handler = new helper.RefactoringHandler(branchName);
+        this.handler = new helper.RefactoringHandler(branchName, project);
         handlers.put(Type.DELETED, new DeletedChangeHandler());
         handlers.put(Type.MODIFICATION, new ModifiedChangeHandler());
         handlers.put(Type.MOVED, new MovedChangeHandler());
@@ -130,8 +130,15 @@ public final class CommitUtils {
     private class MovedChangeHandler implements Function<Change, SimpleEntry<String, Set<MethodInfo>>> {
         @Override
         public SimpleEntry<String, Set<MethodInfo>> apply(Change change) {
-            return new SimpleEntry<>(change.getAfterRevision().getFile().getPath(),
-                    new ModifiedChangeHandler().apply(change).getValue());
+            final FileMapper mapper = new FileMapper(project);
+            final ContentRevision after = change.getAfterRevision();
+            final ContentRevision before = change.getBeforeRevision();
+            try {
+                return mapper.vfsToMethodsData(after.getContent(), before.getFile().getPath());
+            } catch (VcsException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
@@ -161,7 +168,7 @@ public final class CommitUtils {
     }
 
     private void processNewCommit(Collection<Change> changes, @Nullable Set<RefactoringData> data) {
-        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState()).persistentState;
+        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance(project).getState()).persistentState;
 
         for (Change change : changes) {
             final Change.Type type = change.getType();
@@ -169,7 +176,13 @@ public final class CommitUtils {
             final Set<MethodInfo> changedMethods = res.getValue();
             if (res.getValue() == null) {
                 state.remove(res.getKey());
-                return;
+                continue;
+            }
+
+            if (change.getType().equals(Type.MOVED)) {
+                state.remove(change.getBeforeRevision().getFile().getPath());
+                state.put(res.getKey(), res.getValue());
+                continue;
             }
 
             if (data != null) {
@@ -180,6 +193,8 @@ public final class CommitUtils {
                     }
                 }
             }
+
+            changedMethods.forEach(MethodInfo::incrementChangesCount);
 
             state.merge(res.getKey(), changedMethods, (a, b) -> {
                 a.addAll(b);

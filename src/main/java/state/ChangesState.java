@@ -1,6 +1,7 @@
 package state;
 
 import com.intellij.openapi.components.*;
+import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ import java.util.SortedSet;
 
 @State(name = "ChangesState",
         storages = { @Storage( file = "counter.xml") })
-public final class ChangesState implements ApplicationComponent,
+public final class ChangesState implements ProjectComponent,
         PersistentStateComponent<ChangesState.InnerState> {
     private InnerState innerState = new InnerState();
     private static final Logger log = LoggerFactory.getLogger(ChangesState.class);
@@ -43,7 +44,7 @@ public final class ChangesState implements ApplicationComponent,
         log.debug("No state was loaded");
     }
 
-    public static ChangesState getInstance() {
-        return ServiceManager.getService(ChangesState.class);
+    public static ChangesState getInstance(Project project) {
+        return project.getComponent(ChangesState.class);
     }
 }

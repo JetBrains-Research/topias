@@ -1,5 +1,6 @@
 package helper;
 
+import com.intellij.openapi.project.Project;
 import gr.uom.java.xmi.diff.*;
 import org.refactoringminer.api.Refactoring;
 import org.refactoringminer.api.RefactoringType;
@@ -18,9 +19,9 @@ public final class RefactoringHandler {
     private final String branchName;
     private final Map<String, Set<MethodInfo>> info;
 
-    public RefactoringHandler(String branchName) {
+    public RefactoringHandler(String branchName, Project project) {
         this.branchName = branchName;
-        this.info = ChangesState.getInstance().getState().persistentState;
+        this.info = ChangesState.getInstance(project).getState().persistentState;
     }
 
     private final Map<RefactoringType, Function<Refactoring, RefactoringData>> handlers =

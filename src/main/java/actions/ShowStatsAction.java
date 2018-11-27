@@ -10,7 +10,7 @@ import java.util.Collection;
 public class ShowStatsAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
-        final ChangesState state = ChangesState.getInstance();
+        final ChangesState state = ChangesState.getInstance(e.getProject());
         final StringBuilder builder = new StringBuilder();
         assert state.getState() != null;
 

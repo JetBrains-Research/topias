@@ -27,8 +27,9 @@ public final class FileMapper {
     private final PsiFileFactory psiFileFactory;
     final private PsiManager psiManager;
     final private PsiDocumentManager psiDocumentManager;
-    final private TriFunction<PsiFile, Map<String, Set<MethodInfo>>, PsiMethod, Boolean> isExists = (file, state, method) ->
-            state.getOrDefault(file.getVirtualFile().getCanonicalPath(), new HashSet<>()).stream()
+    final private Project project;
+    final private TriFunction<String, Map<String, Set<MethodInfo>>, PsiMethod, Boolean> isExists = (fileName, state, method) ->
+            state.getOrDefault(fileName, new HashSet<>()).stream()
                     .map(MethodInfo::getMethodFullName)
                     .anyMatch(x -> x.equals(MethodUtils.calculateSignature(method)));
 
@@ -36,6 +37,7 @@ public final class FileMapper {
         this.psiManager = PsiManager.getInstance(project);
         this.psiDocumentManager = PsiDocumentManager.getInstance(project);
         this.psiFileFactory = PsiFileFactory.getInstance(project);
+        this.project = project;
     }
 
     public SimpleEntry<String, Set<MethodInfo>> vfsToMethodsData(String content, String fileName) {
@@ -49,16 +51,15 @@ public final class FileMapper {
     public Map<String, Set<MethodInfo>> vfsToMethodsData(Collection<String> contents, String fileName) {
         final List<SimpleEntry<String, MethodInfo>> temporaryListOfTuples = new LinkedList<>();
         final Application app = ApplicationManager.getApplication();
-        final List<PsiFile> files = contents.stream().map(x -> psiFileFactory.createFileFromText(JavaLanguage.INSTANCE, x))
-                .collect(Collectors.toList());
-
-        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance().getState())
+        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance(project).getState())
                 .persistentState;
 
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                files.forEach(x -> x.acceptChildren(new JavaRecursiveElementVisitor() {
+                contents.stream()
+                        .map(x -> psiFileFactory.createFileFromText(JavaLanguage.INSTANCE, x))
+                        .forEach(x -> x.acceptChildren(new JavaRecursiveElementVisitor() {
                             @Override
                             public void visitElement(PsiElement element) {
                                 if (element instanceof PsiMethod) {
@@ -70,11 +71,12 @@ public final class FileMapper {
                                     final int end = document.getLineNumber(range.getEndOffset());
                                     final String fullName = MethodUtils.calculateSignature(method);
 
-                                    final MethodInfo info = isExists.apply(x, state, method) ?
-                                            state.get(x.getVirtualFile().getCanonicalPath()).stream()
+                                    final MethodInfo info = isExists.apply(fileName, state, method) ?
+                                            state.get(fileName).stream()
                                                     .filter(x -> x.getMethodFullName().equals(fullName))
                                                     .findFirst().get() :
                                             new MethodInfo(start, end, method);
+
                                     info.update(start, end);
 
                                     temporaryListOfTuples.add(new SimpleEntry<>(fileName, info));
