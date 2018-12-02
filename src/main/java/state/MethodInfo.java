@@ -93,6 +93,22 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
         return changesCount;
     }
 
+    public void setStartOffset(Integer startOffset) {
+        this.startOffset = startOffset;
+    }
+
+    public void setEndOffset(Integer endOffset) {
+        this.endOffset = endOffset;
+    }
+
+    public void setMethodFullName(String methodFullName) {
+        this.methodFullName = methodFullName;
+    }
+
+    public void setChangesCount(int changesCount) {
+        this.changesCount = changesCount;
+    }
+
     @Override
     public int compareTo(@NotNull MethodInfo o) {
         return this.getStartOffset() - o.getStartOffset();

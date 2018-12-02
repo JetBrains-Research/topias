@@ -40,19 +40,21 @@ public final class FileMapper {
         this.project = project;
     }
 
-    public SimpleEntry<String, Set<MethodInfo>> vfsToMethodsData(String content, String fileName) {
-        if (!vfsToMethodsData(Collections.singleton(content), fileName).entrySet().iterator().hasNext())
+    public SimpleEntry<String, Set<MethodInfo>> vfsToMethodsData(String content, String fileName, String branchName) {
+        if (!vfsToMethodsData(Collections.singleton(content), fileName, branchName).entrySet().iterator().hasNext())
             System.out.println("No next");
         final Entry<String, Set<MethodInfo>> entry =
-                vfsToMethodsData(Collections.singleton(content), fileName).entrySet().iterator().next();
+                vfsToMethodsData(Collections.singleton(content), fileName, branchName).entrySet().iterator().next();
         return new SimpleEntry<>(entry.getKey(), entry.getValue());
     }
 
-    public Map<String, Set<MethodInfo>> vfsToMethodsData(Collection<String> contents, String fileName) {
+    public Map<String, Set<MethodInfo>> vfsToMethodsData(Collection<String> contents, String fileName, String branchName) {
         final List<SimpleEntry<String, MethodInfo>> temporaryListOfTuples = new LinkedList<>();
         final Application app = ApplicationManager.getApplication();
         final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance(project).getState())
-                .persistentState;
+                .persistentState
+                .get(branchName)
+                .getMethods();
 
         final Runnable runnable = new Runnable() {
             @Override

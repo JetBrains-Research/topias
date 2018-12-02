@@ -4,11 +4,13 @@ import com.intellij.openapi.project.Project;
 import gr.uom.java.xmi.diff.*;
 import org.refactoringminer.api.Refactoring;
 import org.refactoringminer.api.RefactoringType;
+import state.BranchInfo;
 import state.ChangesState;
 import state.MethodInfo;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -21,7 +23,11 @@ public final class RefactoringHandler {
 
     public RefactoringHandler(String branchName, Project project) {
         this.branchName = branchName;
-        this.info = ChangesState.getInstance(project).getState().persistentState;
+        ChangesState.InnerState info = Objects.requireNonNull(ChangesState.getInstance(project).getState());
+        if (info.persistentState.get(branchName) == null)
+            Objects.requireNonNull(ChangesState.getInstance(project).getState()).persistentState.put(branchName, new BranchInfo("", new HashMap<>()));
+
+        this.info = info.persistentState.get(branchName).getMethods();
     }
 
     private final Map<RefactoringType, Function<Refactoring, RefactoringData>> handlers =

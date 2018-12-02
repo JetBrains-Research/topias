@@ -27,6 +27,7 @@ import org.refactoringminer.rm1.GitHistoryRefactoringMinerImpl;
 import org.refactoringminer.util.GitServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import state.BranchInfo;
 import state.ChangesState;
 import state.MethodInfo;
 
@@ -46,6 +47,8 @@ public final class CommitUtils {
     private final Repository repository;
     private final helper.RefactoringHandler handler;
     private String branchName;
+    private boolean foundLastHash = false;
+    private final BranchInfo state;
 
     public CommitUtils(Project project) throws Exception {
         handlers = new HashMap<>();
@@ -54,6 +57,11 @@ public final class CommitUtils {
         this.repository = gitService.openRepository(project.getBasePath());
         this.branchName = repository.getBranch();
         this.handler = new helper.RefactoringHandler(branchName, project);
+
+        this.state = Objects.requireNonNull(ChangesState.getInstance(project).getState())
+                .persistentState
+                .get(branchName);
+
         handlers.put(Type.DELETED, new DeletedChangeHandler());
         handlers.put(Type.MODIFICATION, new ModifiedChangeHandler());
         handlers.put(Type.MOVED, new MovedChangeHandler());
@@ -67,7 +75,7 @@ public final class CommitUtils {
             final FileMapper mapper = new FileMapper(project);
             try {
                 return new SimpleEntry<>(newRevision.getFile().getPath(),
-                        mapper.vfsToMethodsData(newRevision.getContent(), newRevision.getFile().getPath()).getValue());
+                        mapper.vfsToMethodsData(newRevision.getContent(), newRevision.getFile().getPath(), branchName).getValue());
             } catch (VcsException e) {
                 e.printStackTrace();
             }
@@ -102,7 +110,7 @@ public final class CommitUtils {
 
                 final FileMapper mapper = new FileMapper(project);
                 final SimpleEntry<String, Set<MethodInfo>> infos = mapper.vfsToMethodsData(
-                        after.getContent(), after.getFile().getPath()
+                        after.getContent(), after.getFile().getPath(), branchName
                 );
 
                 final List<SimpleEntry<Integer, Integer>> boundariesOfChanges =
@@ -134,7 +142,7 @@ public final class CommitUtils {
             final ContentRevision after = change.getAfterRevision();
             final ContentRevision before = change.getBeforeRevision();
             try {
-                return mapper.vfsToMethodsData(after.getContent(), before.getFile().getPath());
+                return mapper.vfsToMethodsData(after.getContent(), after.getFile().getPath(), branchName);
             } catch (VcsException e) {
                 e.printStackTrace();
                 return null;
@@ -151,8 +159,16 @@ public final class CommitUtils {
     }
 
     public void processCommit(GitCommit commit) {
-        final Set<RefactoringData> data = new HashSet<>();
+        if (commit.getId().asString().equals(state.getHashValue())) {
+            System.out.println("Found last parsed commit");
+            foundLastHash = true;
+            return;
+        }
 
+        if (!foundLastHash)
+            return;
+
+        final Set<RefactoringData> data = new HashSet<>();
         miner.churnAtCommit(repository, commit.getId().asString(), new RefactoringHandler() {
             @Override
             public void handle(RevCommit commitData, List<Refactoring> refactorings) {
@@ -161,14 +177,23 @@ public final class CommitUtils {
         });
 
         processNewCommit(commit.getChanges(), data);
+        state.updateHashValue(commit.getId());
     }
 
     public void processCommit(@NotNull CheckinProjectPanel panel) {
         processNewCommit(panel.getSelectedChanges(), null);
     }
 
+    private static String methodNameWithoutPackage(MethodInfo info) {
+        final String[] splitted = info.getMethodFullName().split("\\.");
+        return splitted[splitted.length - 1];
+    }
+
     private void processNewCommit(Collection<Change> changes, @Nullable Set<RefactoringData> data) {
-        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance(project).getState()).persistentState;
+        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance(project).getState())
+                .persistentState
+                .get(branchName)
+                .getMethods();
 
         for (Change change : changes) {
             final Change.Type type = change.getType();
@@ -180,9 +205,14 @@ public final class CommitUtils {
             }
 
             if (change.getType().equals(Type.MOVED)) {
-                state.remove(change.getBeforeRevision().getFile().getPath());
-                state.put(res.getKey(), res.getValue());
-                continue;
+                final Set<MethodInfo> beforeMoveMethods = state.remove(change.getBeforeRevision().getFile().getPath());
+
+                changedMethods.forEach(x -> {
+                    beforeMoveMethods.forEach(y -> {
+                        if (methodNameWithoutPackage(y).equals(methodNameWithoutPackage(x)))
+                            x.setChangesCount(y.getChangesCount());
+                    });
+                });
             }
 
             if (data != null) {

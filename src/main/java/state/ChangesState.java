@@ -2,6 +2,8 @@ package state;
 
 import com.intellij.openapi.components.*;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.xmlb.annotations.Attribute;
+import com.intellij.util.xmlb.annotations.MapAnnotation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -25,7 +27,8 @@ public final class ChangesState implements ProjectComponent,
         }
 
         @NotNull
-        public Map<String, Set<MethodInfo>> persistentState;
+        @MapAnnotation
+        public Map<String, BranchInfo> persistentState;
     }
 
     @Nullable
