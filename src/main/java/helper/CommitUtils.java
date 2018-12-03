@@ -159,13 +159,13 @@ public final class CommitUtils {
     }
 
     public void processCommit(GitCommit commit) {
-        if (commit.getId().asString().equals(state.getHashValue())) {
+        if (!state.getHashValue().isEmpty() && commit.getId().asString().equals(state.getHashValue())) {
             System.out.println("Found last parsed commit");
             foundLastHash = true;
             return;
         }
 
-        if (!foundLastHash)
+        if (!state.getHashValue().isEmpty() && !foundLastHash)
             return;
 
         final Set<RefactoringData> data = new HashSet<>();
@@ -190,22 +190,17 @@ public final class CommitUtils {
     }
 
     private void processNewCommit(Collection<Change> changes, @Nullable Set<RefactoringData> data) {
-        final Map<String, Set<MethodInfo>> state = Objects.requireNonNull(ChangesState.getInstance(project).getState())
-                .persistentState
-                .get(branchName)
-                .getMethods();
-
         for (Change change : changes) {
             final Change.Type type = change.getType();
             final SimpleEntry<String, Set<MethodInfo>> res = handlers.get(change.getType()).apply(change);
             final Set<MethodInfo> changedMethods = res.getValue();
             if (res.getValue() == null) {
-                state.remove(res.getKey());
+                state.getMethods().remove(res.getKey());
                 continue;
             }
 
             if (change.getType().equals(Type.MOVED)) {
-                final Set<MethodInfo> beforeMoveMethods = state.remove(change.getBeforeRevision().getFile().getPath());
+                final Set<MethodInfo> beforeMoveMethods = state.getMethods().remove(change.getBeforeRevision().getFile().getPath());
 
                 changedMethods.forEach(x -> {
                     beforeMoveMethods.forEach(y -> {
@@ -226,7 +221,7 @@ public final class CommitUtils {
 
             changedMethods.forEach(MethodInfo::incrementChangesCount);
 
-            state.merge(res.getKey(), changedMethods, (a, b) -> {
+            state.getMethods().merge(res.getKey(), changedMethods, (a, b) -> {
                 a.addAll(b);
                 return a;
             });
