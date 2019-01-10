@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//todo: concurrency issues
 public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
     private final static Logger logger = LoggerFactory.getLogger(VcsChangesHandlerFactory.class);
 

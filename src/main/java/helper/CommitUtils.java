@@ -80,10 +80,6 @@ public final class CommitUtils {
                 e.printStackTrace();
             }
             return null;
-
-                /*infos.values().stream().flatMap(Collection::stream).forEach(MethodInfo::incrementChangesCount);
-                final ChangesState state = ChangesState.getInstance();
-                state.update(infos, branchName);*/
         }
     }
 
@@ -123,10 +119,6 @@ public final class CommitUtils {
                                 boundariesOfChanges.stream().map(y::ifWithin).filter(Objects::nonNull).distinct()).collect(toCollection(HashSet::new));
 
                 return new SimpleEntry<>(before.getFile().getPath(), selected);
-
-                /*changedMethods.values().stream().flatMap(Collection::stream).forEach(MethodInfo::incrementChangesCount);
-                final ChangesState state = ChangesState.getInstance();
-                state.update(changedMethods, branchName);*/
             } catch (VcsException e) {
                 logger.debug("VCS exception has occured");
                 e.printStackTrace();
