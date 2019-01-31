@@ -52,9 +52,9 @@
               <text value="Enable graphics by default"/>
             </properties>
           </component>
-          <component id="231bf" class="javax.swing.JComboBox" binding="dateCheckBox">
+          <component id="231bf" class="javax.swing.JComboBox" binding="dateComboBox">
             <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <model>
@@ -64,40 +64,28 @@
               </model>
             </properties>
           </component>
-          <component id="7597d" class="javax.swing.JComboBox" binding="fontCheckBox">
+          <component id="7597d" class="com.intellij.ui.FontComboBox" binding="fontComboBox">
             <constraints>
-              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
-            <properties>
-              <model>
-                <item value="Monospace"/>
-                <item value="Comic Sans"/>
-                <item value="Serif"/>
-              </model>
-            </properties>
-          </component>
-          <component id="14857" class="javax.swing.JComboBox" binding="fontSizeCheckBox">
-            <constraints>
-              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <model>
-                <item value="10"/>
-                <item value="11"/>
-                <item value="12"/>
-                <item value="13"/>
-                <item value="14"/>
-                <item value="15"/>
-              </model>
-            </properties>
+            <properties/>
           </component>
           <component id="caa15" class="javax.swing.JCheckBox" binding="graphticsCheckBox">
             <constraints>
-              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <selected value="true"/>
               <text value=""/>
+            </properties>
+          </component>
+          <component id="b3c5e" class="javax.swing.JTextField" binding="fontSizeTextField">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <columns value="0"/>
+              <text value="12"/>
             </properties>
           </component>
         </children>
