@@ -17,6 +17,7 @@
         <projectService serviceInterface="state.ChangesState" serviceImplementation="state.ChangesState"/>
         <!--<codeInsight.parameterNameHints language="JAVA" implementationClass="editor.StatisticsHintsProvider"/>-->
         <!--<editor.linePainter implementation="editor.EditorLP"/>-->
+        <projectConfigurable groupId="tools" displayName="Topias Plugin" id="settings.PluginSettingsConfigurable" instance="settings.PluginSettingsConfigurable" />
     </extensions>
 
     <actions>

@@ -1,7 +1,10 @@
 package handlers;
 
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vcs.AbstractVcs;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
@@ -37,7 +40,9 @@ public class ProjectOpenListener implements ProjectComponent {
 
                 if (gitRootPath == null || gitRootPath.getPath() == null) {
                     logger.debug("VCS root not found for project {}", project.getName());
-                    Messages.showWarningDialog("Git VCS Root unfortunately not found!", "Topias");
+                    ApplicationManager.getApplication().invokeLater(() ->
+                            Messages.showWarningDialog("Git VCS Root unfortunately not found!", "Topias"));
+
                     return;
                 }
 

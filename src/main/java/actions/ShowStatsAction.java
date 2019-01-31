@@ -22,9 +22,15 @@ import java.awt.*;
 
 public class ShowStatsAction extends AnAction {
     @Override
-    public void actionPerformed(AnActionEvent e) {
+    public void actionPerformed(@NotNull AnActionEvent e) {
+        if (e.getProject() == null)
+            return;
+
         final ChangesState state = ChangesState.getInstance(e.getProject());
-        assert state.getState() != null;
+
+        if (state == null || state.getState() == null || state.getState().persistentState.isEmpty())
+            return;
+
         final Editor editor = e.getData(CommonDataKeys.EDITOR);
         final VirtualFile file = e.getData(CommonDataKeys.VIRTUAL_FILE);
         final Document doc = editor.getDocument();

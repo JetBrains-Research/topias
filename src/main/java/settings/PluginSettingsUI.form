@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="settings.PluginSettingsUI">
+  <grid id="27dc6" binding="settingsPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="500" height="421"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="c2e51" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="55" height="62"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none">
+          <color color="-16777216"/>
+        </border>
+        <children>
+          <component id="9665f" class="javax.swing.JLabel" binding="showDataLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Show data for"/>
+            </properties>
+          </component>
+          <component id="40d00" class="javax.swing.JLabel" binding="fontLabel">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Font"/>
+            </properties>
+          </component>
+          <component id="7ab66" class="javax.swing.JLabel" binding="fontSizeLabel">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Font size"/>
+            </properties>
+          </component>
+          <component id="8d139" class="javax.swing.JLabel" binding="graphicsLabel">
+            <constraints>
+              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Enable graphics by default"/>
+            </properties>
+          </component>
+          <component id="231bf" class="javax.swing.JComboBox" binding="dateCheckBox">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <model>
+                <item value="Day"/>
+                <item value="Week"/>
+                <item value="Month"/>
+              </model>
+            </properties>
+          </component>
+          <component id="7597d" class="javax.swing.JComboBox" binding="fontCheckBox">
+            <constraints>
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <model>
+                <item value="Monospace"/>
+                <item value="Comic Sans"/>
+                <item value="Serif"/>
+              </model>
+            </properties>
+          </component>
+          <component id="14857" class="javax.swing.JComboBox" binding="fontSizeCheckBox">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <model>
+                <item value="10"/>
+                <item value="11"/>
+                <item value="12"/>
+                <item value="13"/>
+                <item value="14"/>
+                <item value="15"/>
+              </model>
+            </properties>
+          </component>
+          <component id="caa15" class="javax.swing.JCheckBox" binding="graphticsCheckBox">
+            <constraints>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <selected value="true"/>
+              <text value=""/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <vspacer id="d6899">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+    </children>
+  </grid>
+</form>
