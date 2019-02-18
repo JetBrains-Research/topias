@@ -13,7 +13,6 @@ import com.intellij.openapi.vcs.changes.Change.Type;
 import com.intellij.openapi.vcs.changes.ContentRevision;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import diff.FileMapper;
 import git4idea.GitCommit;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;

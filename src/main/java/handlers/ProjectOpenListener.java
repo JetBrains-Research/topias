@@ -16,6 +16,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.impl.Message;
 import git4idea.history.GitHistoryUtils;
 import helper.CommitUtils;
+import jdbc.DatabaseInitialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public class ProjectOpenListener implements ProjectComponent {
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
                 final CommitUtils utils = new CommitUtils(project);
+                DatabaseInitialization.createNewDatabase(project.getBasePath() + "/.idea/state.db");
                 final VcsRoot gitRootPath = Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
                         .filter(x -> x.getVcs().getName().equals("git"))
                         .findAny().orElse(null);
