@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public final class FileMapper {
     @FunctionalInterface
     private interface TriFunction<A, B, C, D> {
-        public D apply(A a, B b, C c);
+        D apply(A a, B b, C c);
     }
 
     private final PsiFileFactory psiFileFactory;

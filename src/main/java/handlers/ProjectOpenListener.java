@@ -1,27 +1,25 @@
 package handlers;
 
-import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vcs.AbstractVcs;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
-import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.openapi.vcs.impl.VcsInitObject;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.messages.impl.Message;
+import com.intellij.util.messages.MessageBus;
 import git4idea.history.GitHistoryUtils;
 import helper.CommitUtils;
 import jdbc.DatabaseInitialization;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 
 public class ProjectOpenListener implements ProjectComponent {
@@ -32,12 +30,16 @@ public class ProjectOpenListener implements ProjectComponent {
     public void projectOpened() {
         final ProjectLevelVcsManagerImpl instance = (ProjectLevelVcsManagerImpl) ProjectLevelVcsManager.getInstance(project);
 
+        // Register file opened listener
+        MessageBus bus = project.getMessageBus();
+        bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileOpenListener());
+
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
                 final CommitUtils utils = new CommitUtils(project);
                 DatabaseInitialization.createNewDatabase(project.getBasePath() + "/.idea/state.db");
                 final VcsRoot gitRootPath = Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
-                        .filter(x -> x.getVcs().getName().equals("git"))
+                        .filter(x -> x.getVcs().getName().equalsIgnoreCase("git"))
                         .findAny().orElse(null);
 
                 if (gitRootPath == null || gitRootPath.getPath() == null) {

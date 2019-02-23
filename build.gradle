@@ -14,8 +14,8 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compileClasspath files('lib/RefactoringMiner.jar')
-    compileClasspath group:'org.xerial', name:'sqlite-jdbc', version:'3.25.2'
+    compile files('lib/RefactoringMiner.jar')
+    compile group:'org.xerial', name:'sqlite-jdbc', version:'3.25.2'
 }
 
 intellij {
