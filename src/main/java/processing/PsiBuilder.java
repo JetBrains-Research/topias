@@ -1,4 +1,4 @@
-package helper;
+package processing;
 
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.application.Application;
@@ -6,19 +6,15 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import helper.MethodUtils;
 import state.ChangesState;
 import state.MethodInfo;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-//@todo: rename
-public final class FileMapper {
+public final class PsiBuilder {
     @FunctionalInterface
     private interface TriFunction<A, B, C, D> {
         D apply(A a, B b, C c);
@@ -33,7 +29,7 @@ public final class FileMapper {
                     .map(MethodInfo::getMethodFullName)
                     .anyMatch(x -> x.equals(MethodUtils.calculateSignature(method)));
 
-    public FileMapper(Project project) {
+    public PsiBuilder(Project project) {
         this.psiManager = PsiManager.getInstance(project);
         this.psiDocumentManager = PsiDocumentManager.getInstance(project);
         this.psiFileFactory = PsiFileFactory.getInstance(project);

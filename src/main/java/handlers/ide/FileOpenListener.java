@@ -1,4 +1,4 @@
-package handlers;
+package handlers.ide;
 
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;

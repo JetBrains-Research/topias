@@ -1,4 +1,4 @@
-package helper;
+package processing;
 
 import com.intellij.psi.*;
 import gr.uom.java.xmi.UMLOperation;

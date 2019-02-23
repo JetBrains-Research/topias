@@ -1,4 +1,4 @@
-package handlers;
+package handlers.ide;
 
 
 import com.intellij.openapi.project.Project;
@@ -6,7 +6,7 @@ import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.CommitContext;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory;
-import helper.CommitUtils;
+import processing.CommitProcessor;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +26,13 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
         @NotNull
         private final Project project;
 
-        private CommitUtils utils = null;
+        private CommitProcessor utils = null;
 
         private GitCommitHandler(@NotNull CheckinProjectPanel panel) {
             this.panel = panel;
             this.project = panel.getProject();
             try {
-                this.utils = new CommitUtils(project);
+                this.utils = new CommitProcessor(project);
             } catch (Exception e) {
                 e.printStackTrace();
             }

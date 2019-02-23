@@ -1,8 +1,7 @@
-package handlers;
+package handlers.ide;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
@@ -10,12 +9,10 @@ import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.openapi.vcs.impl.VcsInitObject;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBus;
 import git4idea.history.GitHistoryUtils;
-import helper.CommitUtils;
+import processing.CommitProcessor;
 import jdbc.DatabaseInitialization;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +33,7 @@ public class ProjectOpenListener implements ProjectComponent {
 
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
-                final CommitUtils utils = new CommitUtils(project);
+                final CommitProcessor utils = new CommitProcessor(project);
                 DatabaseInitialization.createNewDatabase(project.getBasePath() + "/.idea/state.db");
                 final VcsRoot gitRootPath = Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
                         .filter(x -> x.getVcs().getName().equalsIgnoreCase("git"))

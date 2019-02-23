@@ -2,11 +2,9 @@ package state;
 
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.psi.PsiMethod;
-import com.intellij.psi.SmartPointerManager;
-import com.intellij.psi.SmartPsiElementPointer;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Attribute;
-import helper.MethodUtils;
+import processing.MethodUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

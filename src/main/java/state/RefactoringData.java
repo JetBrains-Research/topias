@@ -1,8 +1,6 @@
-package helper;
+package state;
 
 import state.MethodInfo;
-
-import java.util.Objects;
 
 public class RefactoringData {
     private final MethodInfo oldMethod;
