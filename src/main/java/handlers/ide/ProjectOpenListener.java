@@ -10,13 +10,17 @@ import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.openapi.vcs.impl.VcsInitObject;
 import com.intellij.util.messages.MessageBus;
+import git4idea.GitReference;
 import git4idea.history.GitHistoryUtils;
+import git4idea.repo.GitRepository;
+import git4idea.repo.GitRepositoryManager;
 import processing.CommitProcessor;
 import jdbc.DatabaseInitialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 
 public class ProjectOpenListener implements ProjectComponent {
@@ -33,7 +37,6 @@ public class ProjectOpenListener implements ProjectComponent {
 
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
-                final CommitProcessor utils = new CommitProcessor(project);
                 DatabaseInitialization.createNewDatabase(project.getBasePath() + "/.idea/state.db");
                 final VcsRoot gitRootPath = Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
                         .filter(x -> x.getVcs().getName().equalsIgnoreCase("git"))
@@ -46,8 +49,13 @@ public class ProjectOpenListener implements ProjectComponent {
 
                     return;
                 }
-
-                GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), utils::processCommit, "--reverse");
+                final String currentBranchName = GitRepositoryManager.getInstance(project).getRepositories().stream().filter(x -> x.getRoot().equals(gitRootPath.getPath()))
+                        .map(GitRepository::getCurrentBranch)
+                        .filter(Objects::nonNull)
+                        .map(GitReference::getName)
+                        .findFirst().orElse("master");
+                final CommitProcessor commitProcessor = new CommitProcessor(project, currentBranchName);
+                GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit, "--reverse");
             } catch (Exception e) {
                 logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
                 e.printStackTrace();

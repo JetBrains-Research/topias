@@ -7,21 +7,28 @@ import com.intellij.openapi.vcs.changes.ContentRevision;
 import processing.PsiBuilder;
 import state.MethodInfo;
 
-import java.util.AbstractMap;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-public class AddedChangeHandler implements BiFunction<Project, Change, AbstractMap.SimpleEntry<String, Set<MethodInfo>>> {
+public class AddedChangeHandler implements BiFunction<Project, Change, Optional<Set<MethodInfo>>> {
     @Override
-    public AbstractMap.SimpleEntry<String, Set<MethodInfo>> apply(Project project, Change change) {
+    public Optional<Set<MethodInfo>> apply(Project project, Change change) {
         final ContentRevision newRevision = change.getAfterRevision();
         final PsiBuilder mapper = new PsiBuilder(project);
         try {
-            return new AbstractMap.SimpleEntry<>(newRevision.getFile().getPath(),
-                    mapper.vfsToMethodsData(newRevision.getContent(), newRevision.getFile().getPath(), branchName).getValue());
+            if (newRevision == null)
+                return Optional.empty();
+
+            final String content = newRevision.getContent();
+
+            if (content == null || content.isEmpty())
+                return Optional.empty();
+            //@TODO add methods to Storage.addToDict
+            return Optional.of(mapper.buildMethodInfoSetFromContent(content));
         } catch (VcsException e) {
             e.printStackTrace();
+            return Optional.empty();
         }
-        return null;
     }
 }

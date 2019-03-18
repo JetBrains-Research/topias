@@ -1,26 +1,31 @@
 package handlers.commit;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ContentRevision;
 import processing.PsiBuilder;
 import state.MethodInfo;
 
-import java.util.AbstractMap;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
-public class MovedChangeHandler implements Function<Change, AbstractMap.SimpleEntry<String, Set<MethodInfo>>> {
+public class MovedChangeHandler implements BiFunction<Project, Change, Optional<Set<MethodInfo>>> {
     @Override
-    public AbstractMap.SimpleEntry<String, Set<MethodInfo>> apply(Change change) {
+    public Optional<Set<MethodInfo>> apply(Project project, Change change) {
         final PsiBuilder mapper = new PsiBuilder(project);
         final ContentRevision after = change.getAfterRevision();
-        final ContentRevision before = change.getBeforeRevision();
+        //TODO: update method names in dictionary
+
         try {
-            return mapper.vfsToMethodsData(after.getContent(), after.getFile().getPath(), branchName);
+            if (after == null)
+                return Optional.empty();
+
+            return Optional.of(mapper.buildMethodInfoSetFromContent(after.getContent()));
         } catch (VcsException e) {
             e.printStackTrace();
-            return null;
+            return Optional.empty();
         }
     }
 }

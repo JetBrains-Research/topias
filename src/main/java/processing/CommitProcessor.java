@@ -28,27 +28,26 @@ import state.RefactoringData;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class CommitProcessor {
     private final static Logger logger = LoggerFactory.getLogger(CommitProcessor.class);
-    private final Map<Type, Function<Change, SimpleEntry<String, Set<MethodInfo>>>> handlers;
-    private final Project project;
+    private final Map<Type, BiFunction<Project, Change, SimpleEntry<String, Set<MethodInfo>>>> handlers;
     private final GitHistoryRefactoringMiner miner = new GitHistoryRefactoringMinerImpl();
+    private final Project project;
     private final Repository repository;
-    private final RefactoringProcessor handler;
     private String branchName;
     private boolean foundLastHash = false;
     private final BranchInfo state;
 
-    public CommitProcessor(Project project) throws Exception {
+    public CommitProcessor(Project project, String branchName) throws Exception {
         handlers = new HashMap<>();
         this.project = project;
         GitService gitService = new GitServiceImpl();
         this.repository = gitService.openRepository(project.getBasePath());
-        this.branchName = repository.getBranch();
-        this.handler = new RefactoringProcessor(branchName, project);
+        this.branchName = branchName;
 
         this.state = Objects.requireNonNull(ChangesState.getInstance(project).getState())
                 .persistentState
@@ -70,20 +69,22 @@ public final class CommitProcessor {
         if (!state.getHashValue().isEmpty() && !foundLastHash)
             return;
 
+        final Set<MethodInfo> changedMethods = processNewCommit(commit.getChanges());
+        final RefactoringProcessor processor = new RefactoringProcessor(branchName, project, changedMethods);
         final Set<RefactoringData> data = new HashSet<>();
         miner.churnAtCommit(repository, commit.getId().asString(), new RefactoringHandler() {
             @Override
             public void handle(RevCommit commitData, List<Refactoring> refactorings) {
-                data.addAll(refactorings.stream().map(handler::process).collect(Collectors.toCollection(HashSet::new)));
+                data.addAll(refactorings.stream().map(processor::process).collect(Collectors.toCollection(HashSet::new)));
             }
         });
 
-        processNewCommit(commit.getChanges(), data);
+
         state.updateHashValue(commit.getId());
     }
 
     public void processCommit(@NotNull CheckinProjectPanel panel) {
-        processNewCommit(panel.getSelectedChanges(), null);
+        processNewCommit(panel.getSelectedChanges());
     }
 
     private static String methodNameWithoutPackage(MethodInfo info) {
@@ -91,11 +92,12 @@ public final class CommitProcessor {
         return splitted[splitted.length - 1];
     }
 
-    private void processNewCommit(Collection<Change> changes, @Nullable Set<RefactoringData> data) {
+    private Set<MethodInfo> processNewCommit(Collection<Change> changes) {
+
         for (Change change : changes) {
             final Change.Type type = change.getType();
-            final SimpleEntry<String, Set<MethodInfo>> res = handlers.get(change.getType()).apply(change);
-            final Set<MethodInfo> changedMethods = res.getValue();
+            final Set<MethodInfo> res = handlers.get(type).apply(project, change);
+
             if (res.getValue() == null) {
                 state.getMethods().remove(res.getKey());
                 continue;
@@ -121,12 +123,6 @@ public final class CommitProcessor {
                 }
             }
 
-            changedMethods.forEach(MethodInfo::incrementChangesCount);
-
-            state.getMethods().merge(res.getKey(), changedMethods, (a, b) -> {
-                a.addAll(b);
-                return a;
-            });
         }
     }
 }
