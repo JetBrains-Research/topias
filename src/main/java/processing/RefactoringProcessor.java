@@ -1,17 +1,13 @@
 package processing;
 
-import com.intellij.openapi.project.Project;
 import gr.uom.java.xmi.diff.*;
 import org.refactoringminer.api.Refactoring;
 import org.refactoringminer.api.RefactoringType;
-import state.BranchInfo;
-import state.ChangesState;
 import state.MethodInfo;
 import state.RefactoringData;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -73,7 +69,7 @@ public final class RefactoringProcessor {
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,
                     endLine,
-                    MethodUtils.calculateSignatureForEcl(ref.getTargetOperationAfterInline()),
+                    Utils.calculateSignatureForEcl(ref.getTargetOperationAfterInline()),
                     methodInfo.getChangesCount()
             ));
         }
@@ -92,7 +88,7 @@ public final class RefactoringProcessor {
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,
                     endLine,
-                    MethodUtils.calculateSignatureForEcl(ref.getMovedOperation()),
+                    Utils.calculateSignatureForEcl(ref.getMovedOperation()),
                     methodInfo.getChangesCount()
             ));
         }
@@ -128,7 +124,7 @@ public final class RefactoringProcessor {
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,
                     endLine,
-                    MethodUtils.calculateSignatureForEcl(ref.getRenamedOperation()),
+                    Utils.calculateSignatureForEcl(ref.getRenamedOperation()),
                     methodInfo.getChangesCount()
             ));
         }

@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 public final class CommitProcessor {
     private final static Logger logger = LoggerFactory.getLogger(CommitProcessor.class);
-    private final Map<Type, BiFunction<Project, Change, SimpleEntry<String, Set<MethodInfo>>>> handlers;
+    private final Map<Type, BiFunction<Project, Change, Optional<Set<MethodInfo>>>> handlers;
     private final GitHistoryRefactoringMiner miner = new GitHistoryRefactoringMinerImpl();
     private final Project project;
     private final Repository repository;
@@ -69,8 +69,13 @@ public final class CommitProcessor {
         if (!state.getHashValue().isEmpty() && !foundLastHash)
             return;
 
-        final Set<MethodInfo> changedMethods = processNewCommit(commit.getChanges());
-        final RefactoringProcessor processor = new RefactoringProcessor(branchName, project, changedMethods);
+        final Set<MethodInfo> changedMethods = commit.getChanges().stream()
+                .map(x -> handlers.get(x.getType()).apply(project, x))
+                .filter(Optional::isPresent)
+                .flatMap(x -> x.get().stream())
+                .collect(Collectors.toSet());
+
+        final RefactoringProcessor processor = new RefactoringProcessor(changedMethods);
         final Set<RefactoringData> data = new HashSet<>();
         miner.churnAtCommit(repository, commit.getId().asString(), new RefactoringHandler() {
             @Override

@@ -4,7 +4,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.psi.PsiMethod;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Attribute;
-import processing.MethodUtils;
+import processing.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +24,7 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
     public MethodInfo(Integer startOffset, Integer endOffset, PsiMethod method) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
-        this.methodFullName = MethodUtils.calculateSignature(method);
+        this.methodFullName = Utils.calculateSignature(method);
         this.changesCount = 0;
     }
 

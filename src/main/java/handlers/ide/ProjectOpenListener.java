@@ -18,7 +18,9 @@ import processing.CommitProcessor;
 import jdbc.DatabaseInitialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import processing.Utils;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -31,13 +33,18 @@ public class ProjectOpenListener implements ProjectComponent {
     public void projectOpened() {
         final ProjectLevelVcsManagerImpl instance = (ProjectLevelVcsManagerImpl) ProjectLevelVcsManager.getInstance(project);
 
+        final File sqliteFile = new File(project.getBasePath() + "/.idea/state.db");
+        if (!sqliteFile.exists()) {
+            DatabaseInitialization.createNewDatabase(project.getBasePath() + "/.idea/state.db");
+        }
+
         // Register file opened listener
         MessageBus bus = project.getMessageBus();
         bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileOpenListener());
 
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
-                DatabaseInitialization.createNewDatabase(project.getBasePath() + "/.idea/state.db");
+
                 final VcsRoot gitRootPath = Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
                         .filter(x -> x.getVcs().getName().equalsIgnoreCase("git"))
                         .findAny().orElse(null);
@@ -49,11 +56,7 @@ public class ProjectOpenListener implements ProjectComponent {
 
                     return;
                 }
-                final String currentBranchName = GitRepositoryManager.getInstance(project).getRepositories().stream().filter(x -> x.getRoot().equals(gitRootPath.getPath()))
-                        .map(GitRepository::getCurrentBranch)
-                        .filter(Objects::nonNull)
-                        .map(GitReference::getName)
-                        .findFirst().orElse("master");
+                final String currentBranchName = Utils.getCurrentBranchName(project);
                 final CommitProcessor commitProcessor = new CommitProcessor(project, currentBranchName);
                 GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit, "--reverse");
             } catch (Exception e) {
