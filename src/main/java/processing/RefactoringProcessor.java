@@ -7,6 +7,7 @@ import state.MethodInfo;
 import state.RefactoringData;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -15,9 +16,9 @@ import static org.refactoringminer.api.RefactoringType.*;
 
 public final class RefactoringProcessor {
 
-    private final Set<MethodInfo> changedMethods;
+    private final List<MethodInfo> changedMethods;
 
-    public RefactoringProcessor(Set<MethodInfo> changedMethods) {
+    public RefactoringProcessor(List<MethodInfo> changedMethods) {
         this.changedMethods = changedMethods;
     }
 

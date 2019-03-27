@@ -6,14 +6,15 @@ import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ContentRevision;
 import processing.PsiBuilder;
 import state.MethodInfo;
+import state.Storage;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiFunction;
 
-public class AddedChangeHandler implements BiFunction<Project, Change, Optional<Set<MethodInfo>>> {
+public class AddedChangeHandler implements BiFunction<Project, Change, Optional<List<MethodInfo>>> {
     @Override
-    public Optional<Set<MethodInfo>> apply(Project project, Change change) {
+    public Optional<List<MethodInfo>> apply(Project project, Change change) {
         final ContentRevision newRevision = change.getAfterRevision();
         final PsiBuilder mapper = new PsiBuilder(project);
         try {
@@ -24,8 +25,13 @@ public class AddedChangeHandler implements BiFunction<Project, Change, Optional<
 
             if (content == null || content.isEmpty())
                 return Optional.empty();
-            //@TODO add methods to Storage.addToDict
-            return Optional.of(mapper.buildMethodInfoSetFromContent(content));
+
+            final List<MethodInfo> addedMethods = mapper.buildMethodInfoSetFromContent(content);
+
+            final Storage storage = Storage.getInstance();
+            storage.storeAddedMethods(addedMethods);
+
+            return Optional.of(addedMethods);
         } catch (VcsException e) {
             e.printStackTrace();
             return Optional.empty();

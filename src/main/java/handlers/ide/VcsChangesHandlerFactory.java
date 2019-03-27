@@ -28,6 +28,7 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
     @NotNull
     @Override
     public CheckinHandler createHandler(@NotNull CheckinProjectPanel panel, @NotNull CommitContext commitContext) {
+        final String userData = commitContext.getUserDataString();
         return new GitCommitHandler(panel);
     }
 

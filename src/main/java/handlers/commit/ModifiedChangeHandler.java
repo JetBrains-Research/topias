@@ -9,6 +9,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ContentRevision;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import processing.PsiBuilder;
 import state.MethodInfo;
 
@@ -18,9 +20,11 @@ import java.util.function.BiFunction;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
-public class ModifiedChangeHandler implements BiFunction<Project, Change, Optional<Set<MethodInfo>>> {
+public class ModifiedChangeHandler implements BiFunction<Project, Change, Optional<List<MethodInfo>>> {
+    private final static Logger logger = LoggerFactory.getLogger(ModifiedChangeHandler.class);
+
     @Override
-    public Optional<Set<MethodInfo>> apply(Project project, Change change) {
+    public Optional<List<MethodInfo>> apply(Project project, Change change) {
         final ContentRevision before = change.getBeforeRevision();
         final ContentRevision after = change.getAfterRevision();
 
@@ -39,7 +43,7 @@ public class ModifiedChangeHandler implements BiFunction<Project, Change, Option
                             comparisonManager.compareLines(contentBefore, contentAfter, ComparisonPolicy.DEFAULT, indicator);
 
             final PsiBuilder psiBuilder = new PsiBuilder(project);
-            final Set<MethodInfo> methodsInNewRev = psiBuilder.buildMethodInfoSetFromContent(
+            final List<MethodInfo> methodsInNewRev = psiBuilder.buildMethodInfoSetFromContent(
                     after.getContent()
             );
 
@@ -47,13 +51,13 @@ public class ModifiedChangeHandler implements BiFunction<Project, Change, Option
                     parsedChanges.stream().map(y ->
                             new AbstractMap.SimpleEntry<>(y.getStartLine2(), y.getEndLine2())).collect(toList());
 
-            final Set<MethodInfo> selected = methodsInNewRev.stream()
+            final List<MethodInfo> selected = methodsInNewRev.stream()
                     .flatMap(y ->
-                            boundariesOfChanges.stream().map(y::ifWithin).filter(Objects::nonNull).distinct()).collect(toCollection(HashSet::new));
+                            boundariesOfChanges.stream().map(y::ifWithin).filter(Objects::nonNull).distinct()).collect(toCollection(LinkedList::new));
 
             return Optional.of(selected);
         } catch (VcsException e) {
-            e.printStackTrace();
+            logger.error("Vcs exception occured while trying to build PsiTree for modified class", e);
             return Optional.empty();
         }
     }

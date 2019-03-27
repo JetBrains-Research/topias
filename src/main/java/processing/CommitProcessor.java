@@ -21,10 +21,7 @@ import org.refactoringminer.rm1.GitHistoryRefactoringMinerImpl;
 import org.refactoringminer.util.GitServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.BranchInfo;
-import state.ChangesState;
-import state.MethodInfo;
-import state.RefactoringData;
+import state.*;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
@@ -34,7 +31,7 @@ import java.util.stream.Collectors;
 
 public final class CommitProcessor {
     private final static Logger logger = LoggerFactory.getLogger(CommitProcessor.class);
-    private final Map<Type, BiFunction<Project, Change, Optional<Set<MethodInfo>>>> handlers;
+    private final Map<Type, BiFunction<Project, Change, Optional<List<MethodInfo>>>> handlers;
     private final GitHistoryRefactoringMiner miner = new GitHistoryRefactoringMinerImpl();
     private final Project project;
     private final Repository repository;
@@ -75,14 +72,7 @@ public final class CommitProcessor {
                 .flatMap(x -> x.get().stream())
                 .collect(Collectors.toSet());
 
-        final RefactoringProcessor processor = new RefactoringProcessor(changedMethods);
-        final Set<RefactoringData> data = new HashSet<>();
-        miner.churnAtCommit(repository, commit.getId().asString(), new RefactoringHandler() {
-            @Override
-            public void handle(RevCommit commitData, List<Refactoring> refactorings) {
-                data.addAll(refactorings.stream().map(processor::process).collect(Collectors.toCollection(HashSet::new)));
-            }
-        });
+
 
 
         state.updateHashValue(commit.getId());
@@ -90,6 +80,7 @@ public final class CommitProcessor {
 
     public void processCommit(@NotNull CheckinProjectPanel panel) {
         processNewCommit(panel.getSelectedChanges());
+        panel.get
     }
 
     private static String methodNameWithoutPackage(MethodInfo info) {
@@ -97,7 +88,31 @@ public final class CommitProcessor {
         return splitted[splitted.length - 1];
     }
 
-    private Set<MethodInfo> processNewCommit(Collection<Change> changes) {
+    private Set<MethodInfo> processNewCommit(Collection<Change> changes, String commitId) {
+        //@TODO: filter only java files
+        final List<MethodInfo> changedMethods = changes.stream()
+                .map(x -> handlers.get(x.getType()).apply(project, x))
+                .filter(Optional::isPresent)
+                .flatMap(x -> x.get().stream())
+                .collect(Collectors.toList());
+
+        final RefactoringProcessor processor = new RefactoringProcessor(changedMethods);
+        final List<RefactoringData> data = new LinkedList<>();
+        miner.churnAtCommit(repository, commitId, new RefactoringHandler() {
+            @Override
+            public void handle(RevCommit commitData, List<Refactoring> refactorings) {
+                data.addAll(refactorings.stream().map(processor::process).collect(Collectors.toCollection(LinkedList::new)));
+            }
+        });
+
+        final Storage storage = Storage.getInstance();
+        final List<MethodInfo> deleted = storage.getDeletedMethods();
+        final List<MethodInfo> added = storage.getAddedMethods();
+        final List<MethodInfo> moved = storage.getMovedMethods();
+
+        for (RefactoringData refactoringData: data) {
+            
+        }
 
         for (Change change : changes) {
             final Change.Type type = change.getType();

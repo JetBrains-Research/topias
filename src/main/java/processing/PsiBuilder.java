@@ -23,9 +23,9 @@ public final class PsiBuilder {
         this.psiFileFactory = PsiFileFactory.getInstance(project);
     }
 
-    public Set<MethodInfo> buildMethodInfoSetFromContent(String content) {
+    public List<MethodInfo> buildMethodInfoSetFromContent(String content) {
         final Application app = ApplicationManager.getApplication();
-        final Set<MethodInfo> infos = new HashSet<>();
+        final List<MethodInfo> infos = new LinkedList<>();
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
