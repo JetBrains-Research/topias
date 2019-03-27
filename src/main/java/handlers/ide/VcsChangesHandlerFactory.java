@@ -42,6 +42,8 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
 
         private GitCommitHandler(@NotNull CheckinProjectPanel panel) {
             this.panel = panel;
+
+
             this.project = panel.getProject();
             final String currentBranchName;
             try {
