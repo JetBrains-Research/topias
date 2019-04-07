@@ -84,8 +84,12 @@ public final class RefactoringProcessor {
             final int startLineBefore = ref.getSourceOperationCodeRangeBeforeMove().getStartLine();
             final int startLine = ref.getTargetOperationCodeRangeAfterMove().getStartLine();
             final int endLine = ref.getTargetOperationCodeRangeAfterMove().getEndLine();
-            final MethodInfo methodInfo = info.get(path).stream().filter(x -> x.getStartOffset() == startLineBefore)
-                    .findFirst().get();
+
+
+            final MethodInfo methodInfo = new MethodInfo(startLineBefore,
+                    endLine,
+                    Utils.calculateSignatureForEcl(ref.getOriginalOperation()),
+                    0);
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,
                     endLine,
@@ -120,8 +124,10 @@ public final class RefactoringProcessor {
             final int startLineBefore = ref.getSourceOperationCodeRangeBeforeRename().getStartLine();
             final int startLine = ref.getTargetOperationCodeRangeAfterRename().getStartLine();
             final int endLine = ref.getTargetOperationCodeRangeAfterRename().getEndLine();
-            final MethodInfo methodInfo = info.get(path).stream().filter(x -> x.getStartOffset() == startLineBefore)
-                    .findFirst().get();
+            final MethodInfo methodInfo = new MethodInfo(startLineBefore,
+                    endLine,
+                    Utils.calculateSignatureForEcl(ref.getOriginalOperation()),
+                    0);
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,
                     endLine,

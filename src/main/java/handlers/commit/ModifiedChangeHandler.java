@@ -9,10 +9,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ContentRevision;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.PsiBuilder;
 import state.MethodInfo;
+import state.MethodsStorage;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -27,6 +29,8 @@ public class ModifiedChangeHandler implements BiFunction<Project, Change, Option
     public Optional<List<MethodInfo>> apply(Project project, Change change) {
         final ContentRevision before = change.getBeforeRevision();
         final ContentRevision after = change.getAfterRevision();
+
+        final MethodsStorage methodsStorage = MethodsStorage.getInstance();
 
         if (before == null || after == null)
             return Optional.empty();
@@ -43,9 +47,17 @@ public class ModifiedChangeHandler implements BiFunction<Project, Change, Option
                             comparisonManager.compareLines(contentBefore, contentAfter, ComparisonPolicy.DEFAULT, indicator);
 
             final PsiBuilder psiBuilder = new PsiBuilder(project);
+
             final List<MethodInfo> methodsInNewRev = psiBuilder.buildMethodInfoSetFromContent(
                     after.getContent()
             );
+
+            final Set<MethodInfo> methodsInOldRev = new HashSet<>(psiBuilder.buildMethodInfoSetFromContent(
+                    before.getContent()
+            ));
+
+            methodsStorage.storeDeletedMethods(new LinkedList<>(CollectionUtils.subtract(methodsInOldRev, methodsInNewRev)));
+            methodsStorage.storeAddedMethods(new LinkedList<>(CollectionUtils.subtract(methodsInNewRev, methodsInOldRev)));
 
             final List<AbstractMap.SimpleEntry<Integer, Integer>> boundariesOfChanges =
                     parsedChanges.stream().map(y ->

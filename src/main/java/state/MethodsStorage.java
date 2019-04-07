@@ -3,21 +3,21 @@ package state;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Storage {
+public class MethodsStorage {
     private final List<MethodInfo> deletedMethods;
     private final List<MethodInfo> movedMethods;
     private final List<MethodInfo> addedMethods;
-    private static Storage instance = null;
+    private static MethodsStorage instance = null;
 
-    public static Storage getInstance() {
+    public static MethodsStorage getInstance() {
         if (instance == null) {
-            instance = new Storage();
+            instance = new MethodsStorage();
         }
 
         return instance;
     }
 
-    private Storage() {
+    private MethodsStorage() {
          this.deletedMethods = new ArrayList<>();
          this.movedMethods = new ArrayList<>();
          this.addedMethods = new ArrayList<>();

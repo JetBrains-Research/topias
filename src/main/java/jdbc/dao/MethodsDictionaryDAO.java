@@ -1,17 +1,15 @@
 package jdbc.dao;
 
+import jdbc.entities.MethodChangeLogEntity;
 import jdbc.entities.MethodDictionaryEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.Utils;
+import state.MethodInfo;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.sql.*;
+import java.sql.Date;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MethodsDictionaryDAO {
@@ -151,5 +149,59 @@ public class MethodsDictionaryDAO {
             }
         });
         return methodId.get();
+    }
+
+    public List<MethodChangeLogEntity> buildChangelogs(List<MethodInfo> changes) {
+        final String sql = "select id from methodsDictionary where fullSignature = ?";
+
+        final List<MethodChangeLogEntity> entities = new LinkedList<>();
+        final Optional<Connection> connectionOpt = Utils.connect(url);
+        final AtomicInteger updatedObjectsCount = new AtomicInteger();
+        final Iterator<MethodInfo> iter = changes.iterator();
+        connectionOpt.ifPresent(x -> {
+            try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
+                changes.forEach(y -> {
+                    try {
+                        statement.setString(1, y.getMethodFullName());
+                        statement.addBatch();
+                    } catch (SQLException e) {
+                        logger.error("Sql exception occured while trying to prepare update statements for methodsDictionary table", e);
+                    }
+                });
+                final ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    MethodInfo info = iter.next();
+                    entities.add(new MethodChangeLogEntity(
+                            new Date(info.getTimeChangeMade()),
+                            info.getAuthorInfo(),
+                            info.getBranchName(),
+                            resultSet.getInt(1)
+                    ));
+                }
+            } catch (SQLException e) {
+                logger.error("Sql exception occured while trying to execute batch update to methodsDictionary table", e);
+            }
+        });
+        return entities;
+    }
+
+    public int updateBySignature(String oldSignature, MethodDictionaryEntity entity) {
+        final String sql = "update methodsDictionary set fullSignature = ?, "
+                + "startOffset = ? "
+                + "where fullSignature = ?";
+
+        final Optional<Connection> connectionOpt = Utils.connect(url);
+        final AtomicInteger updatedObjectsCount = new AtomicInteger();
+        connectionOpt.ifPresent(x -> {
+            try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
+                statement.setString(1, entity.getFullMethodSignature());
+                statement.setInt(2, entity.getStartOffset());
+                statement.setString(3, oldSignature);
+                updatedObjectsCount.set(statement.executeUpdate());
+            } catch (SQLException e) {
+                logger.error("Sql exception occured while trying to update methodsDictionary table", e);
+            }
+        });
+        return updatedObjectsCount.get();
     }
 }

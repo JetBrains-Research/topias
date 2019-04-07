@@ -20,6 +20,9 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
     private String methodFullName;
     @Attribute
     private int changesCount;
+    private long timeChangeMade;
+    private String authorInfo;
+    private String branchName;
 
     public MethodInfo(Integer startOffset, Integer endOffset, PsiMethod method) {
         this.startOffset = startOffset;
@@ -120,5 +123,29 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
     @Override
     public void loadState(@NotNull MethodInfo state) {
         XmlSerializerUtil.copyBean(state, this);
+    }
+
+    public String getAuthorInfo() {
+        return authorInfo;
+    }
+
+    public void setAuthorInfo(String authorInfo) {
+        this.authorInfo = authorInfo;
+    }
+
+    public long getTimeChangeMade() {
+        return timeChangeMade;
+    }
+
+    public void setTimeChangeMade(long timeChangeMade) {
+        this.timeChangeMade = timeChangeMade;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
     }
 }

@@ -6,7 +6,7 @@ import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ContentRevision;
 import processing.PsiBuilder;
 import state.MethodInfo;
-import state.Storage;
+import state.MethodsStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,8 +28,8 @@ public class AddedChangeHandler implements BiFunction<Project, Change, Optional<
 
             final List<MethodInfo> addedMethods = mapper.buildMethodInfoSetFromContent(content);
 
-            final Storage storage = Storage.getInstance();
-            storage.storeAddedMethods(addedMethods);
+            final MethodsStorage methodsStorage = MethodsStorage.getInstance();
+            methodsStorage.storeAddedMethods(addedMethods);
 
             return Optional.of(addedMethods);
         } catch (VcsException e) {
