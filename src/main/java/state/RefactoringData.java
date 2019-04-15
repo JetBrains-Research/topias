@@ -1,7 +1,5 @@
 package state;
 
-import state.MethodInfo;
-
 public class RefactoringData {
     private final MethodInfo oldMethod;
     private final MethodInfo newMethod;

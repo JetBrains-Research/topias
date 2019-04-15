@@ -4,9 +4,9 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.psi.PsiMethod;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Attribute;
-import processing.MethodUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import processing.Utils;
 
 import java.util.AbstractMap;
 import java.util.Objects;
@@ -20,11 +20,14 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
     private String methodFullName;
     @Attribute
     private int changesCount;
+    private long timeChangeMade;
+    private String authorInfo;
+    private String branchName;
 
     public MethodInfo(Integer startOffset, Integer endOffset, PsiMethod method) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
-        this.methodFullName = MethodUtils.calculateSignature(method);
+        this.methodFullName = Utils.calculateSignature(method);
         this.changesCount = 0;
     }
 
@@ -59,6 +62,11 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(methodFullName);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -66,21 +74,28 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
         return methodFullName.equals(that.methodFullName);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(methodFullName);
-    }
-
     public Integer getStartOffset() {
         return startOffset;
+    }
+
+    public void setStartOffset(Integer startOffset) {
+        this.startOffset = startOffset;
     }
 
     public Integer getEndOffset() {
         return endOffset;
     }
 
+    public void setEndOffset(Integer endOffset) {
+        this.endOffset = endOffset;
+    }
+
     public String getMethodFullName() {
         return methodFullName;
+    }
+
+    public void setMethodFullName(String methodFullName) {
+        this.methodFullName = methodFullName;
     }
 
     public void incrementChangesCount() {
@@ -89,18 +104,6 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
 
     public int getChangesCount() {
         return changesCount;
-    }
-
-    public void setStartOffset(Integer startOffset) {
-        this.startOffset = startOffset;
-    }
-
-    public void setEndOffset(Integer endOffset) {
-        this.endOffset = endOffset;
-    }
-
-    public void setMethodFullName(String methodFullName) {
-        this.methodFullName = methodFullName;
     }
 
     public void setChangesCount(int changesCount) {
@@ -120,5 +123,29 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
     @Override
     public void loadState(@NotNull MethodInfo state) {
         XmlSerializerUtil.copyBean(state, this);
+    }
+
+    public String getAuthorInfo() {
+        return authorInfo;
+    }
+
+    public void setAuthorInfo(String authorInfo) {
+        this.authorInfo = authorInfo;
+    }
+
+    public long getTimeChangeMade() {
+        return timeChangeMade;
+    }
+
+    public void setTimeChangeMade(long timeChangeMade) {
+        this.timeChangeMade = timeChangeMade;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
     }
 }

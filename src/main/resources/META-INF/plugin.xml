@@ -24,8 +24,8 @@
         <group id="Topias.SampleMenu" text="VCS stats"
                description="Shows your vcs changes stats">
             <add-to-group group-id="MainMenu" anchor="last"/>
-            <!-- Add your actions here -->
-            <action id="editor.ShowStatsAction" class="editor.ShowStatsAction" text="Show VCS statistics"/>
+
+            <action id="editor.ShowStatsAction" class="handlers.ide.Action" text="Show VCS statistics"/>
         </group>
     </actions>
     <project-components>

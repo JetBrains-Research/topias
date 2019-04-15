@@ -11,11 +11,13 @@ import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.openapi.vcs.impl.VcsInitObject;
 import com.intellij.util.messages.MessageBus;
 import git4idea.history.GitHistoryUtils;
-import processing.CommitProcessor;
 import jdbc.DatabaseInitialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import processing.CommitProcessor;
+import processing.Utils;
 
+import java.io.File;
 import java.util.Arrays;
 
 
@@ -23,9 +25,18 @@ public class ProjectOpenListener implements ProjectComponent {
     private final static Logger logger = LoggerFactory.getLogger(ProjectOpenListener.class);
     private final Project project;
 
+    public ProjectOpenListener(Project project) {
+        this.project = project;
+    }
+
     @Override
     public void projectOpened() {
         final ProjectLevelVcsManagerImpl instance = (ProjectLevelVcsManagerImpl) ProjectLevelVcsManager.getInstance(project);
+
+        final File sqliteFile = new File(project.getBasePath() + "/.idea/state.db");
+        if (!sqliteFile.exists()) {
+            DatabaseInitialization.createNewDatabase(project.getBasePath() + "/.idea/state.db");
+        }
 
         // Register file opened listener
         MessageBus bus = project.getMessageBus();
@@ -33,8 +44,7 @@ public class ProjectOpenListener implements ProjectComponent {
 
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
-                final CommitProcessor utils = new CommitProcessor(project);
-                DatabaseInitialization.createNewDatabase(project.getBasePath() + "/.idea/state.db");
+
                 final VcsRoot gitRootPath = Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
                         .filter(x -> x.getVcs().getName().equalsIgnoreCase("git"))
                         .findAny().orElse(null);
@@ -46,17 +56,16 @@ public class ProjectOpenListener implements ProjectComponent {
 
                     return;
                 }
+                final String currentBranchName = Utils.getCurrentBranchName(project);
+                final CommitProcessor commitProcessor = new CommitProcessor(project, currentBranchName);
 
-                GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), utils::processCommit, "--reverse");
+                GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
+                        "--since=\"last month\" --reverse");
             } catch (Exception e) {
                 logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
                 e.printStackTrace();
             }
         });
 
-    }
-
-    public ProjectOpenListener(Project project) {
-        this.project = project;
     }
 }
