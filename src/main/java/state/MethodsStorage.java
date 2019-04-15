@@ -1,13 +1,21 @@
 package state;
 
+import kotlin.Pair;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MethodsStorage {
-    private final List<MethodInfo> deletedMethods;
-    private final List<MethodInfo> movedMethods;
-    private final List<MethodInfo> addedMethods;
     private static MethodsStorage instance = null;
+    private final List<MethodInfo> deletedMethods;
+    private final List<Pair<MethodInfo, MethodInfo>> movedMethods;
+    private final List<MethodInfo> addedMethods;
+
+    private MethodsStorage() {
+        this.deletedMethods = new ArrayList<>();
+        this.movedMethods = new ArrayList<>();
+        this.addedMethods = new ArrayList<>();
+    }
 
     public static MethodsStorage getInstance() {
         if (instance == null) {
@@ -17,17 +25,11 @@ public class MethodsStorage {
         return instance;
     }
 
-    private MethodsStorage() {
-         this.deletedMethods = new ArrayList<>();
-         this.movedMethods = new ArrayList<>();
-         this.addedMethods = new ArrayList<>();
-    }
-
     public List<MethodInfo> getDeletedMethods() {
         return deletedMethods;
     }
 
-    public List<MethodInfo> getMovedMethods() {
+    public List<Pair<MethodInfo, MethodInfo>> getMovedMethods() {
         return movedMethods;
     }
 
@@ -39,7 +41,7 @@ public class MethodsStorage {
         this.deletedMethods.addAll(deletedMethods);
     }
 
-    public void storeMovedMethods(List<MethodInfo> movedMethods) {
+    public void storeMovedMethods(List<Pair<MethodInfo, MethodInfo>> movedMethods) {
         this.movedMethods.addAll(movedMethods);
     }
 

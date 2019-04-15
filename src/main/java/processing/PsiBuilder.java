@@ -7,12 +7,10 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
-import state.ChangesState;
 import state.MethodInfo;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.LinkedList;
+import java.util.List;
 
 public final class PsiBuilder {
     private final PsiFileFactory psiFileFactory;

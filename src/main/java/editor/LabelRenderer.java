@@ -7,25 +7,45 @@ import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.markup.TextAttributes;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ValueAxis;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import sun.awt.X11.XToolkit;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class LabelRenderer extends HintRenderer {
     private final int lineStartOffset;
+    private XYSeries xySeries;
 
-    public LabelRenderer(@Nullable String text, int lineStartOffset) {
+    public LabelRenderer(@Nullable String text, int lineStartOffset, XYSeries xySeries) {
         super(text);
         this.lineStartOffset = lineStartOffset;
+        this.xySeries = xySeries;
     }
 
     @Override
     public int calcWidthInPixels(Inlay inlay) {
-        return 300;
+        return 100000;
 //            Editor editor = inlay.getEditor();
 //            FontMetrics fontMetrics = getFontMetrics(editor).getMetrics();
 //            return doCalcWidth(super.getText(), fontMetrics) + calcWidthAdjustment(editor, fontMetrics);
+    }
+
+    @Override
+    public int calcHeightInPixels(@NotNull Inlay inlay) {
+        return 40;
     }
 
     @Override
@@ -38,6 +58,40 @@ public class LabelRenderer extends HintRenderer {
         final int descent = impl.getDescent();
         final Graphics2D g2d = (Graphics2D) g;
         final TextAttributes attributes = getTextAttributes(editor);
+
+        final XYSeriesCollection data = new XYSeriesCollection(xySeries);
+        final JFreeChart chart = ChartFactory.createHistogram(
+                null,
+                null,
+                null,
+                data,
+                PlotOrientation.VERTICAL,
+                false,
+                false,
+                false
+        );
+final XYPlot xyPlot = chart.getXYPlot();
+        chart.getXYPlot().setBackgroundPaint(new Color(255, 255, 255));
+        chart.getXYPlot().getRenderer().setSeriesPaint(0, new Color(0, 0, 255));
+        final ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new java.awt.Dimension(150, 45));
+        chartPanel.getScreenDataArea();
+        xyPlot.getDomainAxis().setAxisLineVisible(false);
+        xyPlot.getDomainAxis().setTickMarksVisible(false);
+        xyPlot.getRangeAxis().setAxisLineVisible(false);
+        xyPlot.getRangeAxis().setTickMarksVisible(false);
+        xyPlot.getRangeAxis().setVisible(false);
+        xyPlot.getDomainAxis().setVisible(false);
+
+        XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
+        renderer.setDrawBarOutline(false);
+        // flat bars look best...
+        renderer.setBarPainter(new StandardXYBarPainter());
+
+
+        final BufferedImage bufferedImage = chart.createBufferedImage(150, 45 );
+
+
         if (super.getText() != null && attributes != null) {
             MyFontMetrics fontMetrics = getFontMetrics(editor);
             final int gap = r.height < fontMetrics.getLineHeight() + 2 ? 1 : 2;
@@ -49,14 +103,15 @@ public class LabelRenderer extends HintRenderer {
                 g.setColor(foregroundColor);
                 g.setFont(getFont(editor));
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(false));
-                g.clipRect(r.x + 3, r.y + 2, r.width - 6, r.height - 4);
+                g2d.setClip(r.x, r.y, 10000, 100);
                 final FontMetrics metrics = fontMetrics.getMetrics();
                 final int startX = r.x + 7 + fontMetrics.getMetrics().stringWidth(String.format("%"+ lineStartOffset +"s", ""));
                 final int startY = r.y + Math.max(ascent, (r.height + metrics.getAscent() - metrics.getDescent()) / 2) - 1;
 
                 final int widthAdjustment = calcWidthAdjustment(editor, g.getFontMetrics());
                 if (widthAdjustment == 0) {
-                    g.drawString(super.getText(), startX, startY);
+                    g.drawString(super.getText(), startX + 3, startY);
+                    g2d.drawImage(bufferedImage, null, startX + 620, startY - 35);
                 } else {
                     final int adjustmentPosition = this.getWidthAdjustment().getAdjustmentPosition();
                     final String firstPart = this.getText().substring(0, adjustmentPosition);

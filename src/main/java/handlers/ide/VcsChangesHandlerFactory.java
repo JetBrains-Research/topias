@@ -10,7 +10,6 @@ import com.intellij.openapi.vcs.changes.CommitContext;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
-import git4idea.history.GitHistoryUtils;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryImpl;
 import org.jetbrains.annotations.NotNull;
@@ -35,11 +34,11 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
     }
 
     private class GitCommitHandler extends CheckinHandler {
+        final ProjectLevelVcsManagerImpl instance;
         @NotNull
         private final CheckinProjectPanel panel;
         @NotNull
         private final Project project;
-        final ProjectLevelVcsManagerImpl instance;
         private CommitProcessor utils;
 
         private GitCommitHandler(@NotNull CheckinProjectPanel panel) {

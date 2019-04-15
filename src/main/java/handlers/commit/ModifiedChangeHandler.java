@@ -44,7 +44,7 @@ public class ModifiedChangeHandler implements BiFunction<Project, Change, Option
             final String contentAfter = after.getContent() != null ? after.getContent() : "";
 
             final List<LineFragment> parsedChanges =
-                            comparisonManager.compareLines(contentBefore, contentAfter, ComparisonPolicy.DEFAULT, indicator);
+                    comparisonManager.compareLines(contentBefore, contentAfter, ComparisonPolicy.DEFAULT, indicator);
 
             final PsiBuilder psiBuilder = new PsiBuilder(project);
 
@@ -56,8 +56,8 @@ public class ModifiedChangeHandler implements BiFunction<Project, Change, Option
                     before.getContent()
             ));
 
-            methodsStorage.storeDeletedMethods(new LinkedList<>(CollectionUtils.subtract(methodsInOldRev, methodsInNewRev)));
-            methodsStorage.storeAddedMethods(new LinkedList<>(CollectionUtils.subtract(methodsInNewRev, methodsInOldRev)));
+            methodsStorage.storeDeletedMethods(new LinkedList<MethodInfo>(CollectionUtils.subtract(methodsInOldRev, methodsInNewRev)));
+            methodsStorage.storeAddedMethods(new LinkedList<MethodInfo>(CollectionUtils.subtract(methodsInNewRev, methodsInOldRev)));
 
             final List<AbstractMap.SimpleEntry<Integer, Integer>> boundariesOfChanges =
                     parsedChanges.stream().map(y ->

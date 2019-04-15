@@ -4,9 +4,9 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.psi.PsiMethod;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Attribute;
-import processing.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import processing.Utils;
 
 import java.util.AbstractMap;
 import java.util.Objects;
@@ -62,6 +62,11 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(methodFullName);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -69,21 +74,28 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
         return methodFullName.equals(that.methodFullName);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(methodFullName);
-    }
-
     public Integer getStartOffset() {
         return startOffset;
+    }
+
+    public void setStartOffset(Integer startOffset) {
+        this.startOffset = startOffset;
     }
 
     public Integer getEndOffset() {
         return endOffset;
     }
 
+    public void setEndOffset(Integer endOffset) {
+        this.endOffset = endOffset;
+    }
+
     public String getMethodFullName() {
         return methodFullName;
+    }
+
+    public void setMethodFullName(String methodFullName) {
+        this.methodFullName = methodFullName;
     }
 
     public void incrementChangesCount() {
@@ -92,18 +104,6 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
 
     public int getChangesCount() {
         return changesCount;
-    }
-
-    public void setStartOffset(Integer startOffset) {
-        this.startOffset = startOffset;
-    }
-
-    public void setEndOffset(Integer endOffset) {
-        this.endOffset = endOffset;
-    }
-
-    public void setMethodFullName(String methodFullName) {
-        this.methodFullName = methodFullName;
     }
 
     public void setChangesCount(int changesCount) {

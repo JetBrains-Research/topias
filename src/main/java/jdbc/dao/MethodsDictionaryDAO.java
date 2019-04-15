@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import processing.Utils;
 import state.MethodInfo;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,29 +25,29 @@ public class MethodsDictionaryDAO {
         final Optional<Connection> connectionOpt = Utils.connect(url);
         final AtomicInteger updatedObjectsCount = new AtomicInteger();
         connectionOpt.ifPresent(x -> {
-                try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
-                    entities.forEach(y -> {
-                        try {
-                            statement.setString(1, y.getFullMethodSignature());
-                            statement.setInt(2, y.getStartOffset());
-                            statement.addBatch();
-                        } catch (SQLException e) {
-                            logger.error("Sql exception occured while trying to prepare insert statements to methodsDictionary table", e);
-                        }
-                    });
-                    updatedObjectsCount.set(
-                            Arrays.stream(statement.executeBatch())
-                                    .reduce((a, b) -> a + b).orElse(0));
-                } catch (SQLException e) {
-                    logger.error("Sql exception occured while trying to execute batch insert to methodsDictionary table", e);
-                }
-            });
+            try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
+                entities.forEach(y -> {
+                    try {
+                        statement.setString(1, y.getFullMethodSignature());
+                        statement.setInt(2, y.getStartOffset());
+                        statement.addBatch();
+                    } catch (SQLException e) {
+                        logger.error("Sql exception occured while trying to prepare insert statements to methodsDictionary table", e);
+                    }
+                });
+                updatedObjectsCount.set(
+                        Arrays.stream(statement.executeBatch())
+                                .reduce((a, b) -> a + b).orElse(0));
+            } catch (SQLException e) {
+                logger.error("Sql exception occured while trying to execute batch insert to methodsDictionary table", e);
+            }
+        });
 
         return updatedObjectsCount.get();
     }
 
     public int addToDictionary(MethodDictionaryEntity entity) {
-        final String sql = "insert into methodsDictionary(fullSignature, startOffset) values(?,?)";
+        final String sql = "insert or ignore into methodsDictionary(fullSignature, startOffset) values(?,?)";
         final Optional<Connection> connectionOpt = Utils.connect(url);
         final AtomicInteger updatedObjectsCount = new AtomicInteger();
         connectionOpt.ifPresent(x -> {
@@ -152,18 +152,18 @@ public class MethodsDictionaryDAO {
     }
 
     public List<MethodChangeLogEntity> buildChangelogs(List<MethodInfo> changes) {
-        final String sql = "select id from methodsDictionary where fullSignature = ?";
+        final String questionMarks = String.join(", ", Collections.nCopies(changes.size(), "?"));
+        final String sql = "select id from methodsDictionary where fullSignature in (" + questionMarks + ")";
 
         final List<MethodChangeLogEntity> entities = new LinkedList<>();
         final Optional<Connection> connectionOpt = Utils.connect(url);
-        final AtomicInteger updatedObjectsCount = new AtomicInteger();
+        final AtomicInteger counter = new AtomicInteger();
         final Iterator<MethodInfo> iter = changes.iterator();
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
                 changes.forEach(y -> {
                     try {
-                        statement.setString(1, y.getMethodFullName());
-                        statement.addBatch();
+                        statement.setString(counter.incrementAndGet(), y.getMethodFullName());
                     } catch (SQLException e) {
                         logger.error("Sql exception occured while trying to prepare update statements for methodsDictionary table", e);
                     }
@@ -172,7 +172,7 @@ public class MethodsDictionaryDAO {
                 while (resultSet.next()) {
                     MethodInfo info = iter.next();
                     entities.add(new MethodChangeLogEntity(
-                            new Date(info.getTimeChangeMade()),
+                            info.getTimeChangeMade(),
                             info.getAuthorInfo(),
                             info.getBranchName(),
                             resultSet.getInt(1)

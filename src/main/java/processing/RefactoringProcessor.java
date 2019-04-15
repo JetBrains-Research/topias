@@ -9,7 +9,6 @@ import state.RefactoringData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 import static org.refactoringminer.api.RefactoringType.*;
@@ -17,11 +16,6 @@ import static org.refactoringminer.api.RefactoringType.*;
 public final class RefactoringProcessor {
 
     private final List<MethodInfo> changedMethods;
-
-    public RefactoringProcessor(List<MethodInfo> changedMethods) {
-        this.changedMethods = changedMethods;
-    }
-
     private final Map<RefactoringType, Function<Refactoring, RefactoringData>> handlers =
             new HashMap<RefactoringType, Function<Refactoring, RefactoringData>>() {{
                 put(EXTRACT_OPERATION, new ExtractOperationHandler());
@@ -32,6 +26,10 @@ public final class RefactoringProcessor {
                 put(EXTRACT_AND_MOVE_OPERATION, new ExtractAndMoveOperationRefactoringHandler());
                 put(INLINE_OPERATION, new InlineOperationRefactoringHandler());
             }};
+
+    public RefactoringProcessor(List<MethodInfo> changedMethods) {
+        this.changedMethods = changedMethods;
+    }
 
     public RefactoringData process(Refactoring refactoring) {
         return handlers.get(refactoring.getRefactoringType()).apply(refactoring);

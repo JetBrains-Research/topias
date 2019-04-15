@@ -10,24 +10,24 @@ import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.openapi.vcs.impl.VcsInitObject;
 import com.intellij.util.messages.MessageBus;
-import git4idea.GitReference;
 import git4idea.history.GitHistoryUtils;
-import git4idea.repo.GitRepository;
-import git4idea.repo.GitRepositoryManager;
-import processing.CommitProcessor;
 import jdbc.DatabaseInitialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import processing.CommitProcessor;
 import processing.Utils;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Objects;
 
 
 public class ProjectOpenListener implements ProjectComponent {
     private final static Logger logger = LoggerFactory.getLogger(ProjectOpenListener.class);
     private final Project project;
+
+    public ProjectOpenListener(Project project) {
+        this.project = project;
+    }
 
     @Override
     public void projectOpened() {
@@ -58,16 +58,14 @@ public class ProjectOpenListener implements ProjectComponent {
                 }
                 final String currentBranchName = Utils.getCurrentBranchName(project);
                 final CommitProcessor commitProcessor = new CommitProcessor(project, currentBranchName);
-                GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit, "--reverse");
+
+                GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
+                        "--since=\"last month\" --reverse");
             } catch (Exception e) {
                 logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
                 e.printStackTrace();
             }
         });
 
-    }
-
-    public ProjectOpenListener(Project project) {
-        this.project = project;
     }
 }
