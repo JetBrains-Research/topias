@@ -3,9 +3,12 @@ package handlers.ide;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
+import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.openapi.vcs.impl.VcsInitObject;
@@ -19,6 +22,7 @@ import processing.Utils;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.concurrent.Future;
 
 
 public class ProjectOpenListener implements ProjectComponent {
@@ -38,10 +42,6 @@ public class ProjectOpenListener implements ProjectComponent {
             DatabaseInitialization.createNewDatabase(project.getBasePath() + "/.idea/state.db");
         }
 
-        // Register file opened listener
-        MessageBus bus = project.getMessageBus();
-        bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileOpenListener());
-
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
 
@@ -58,12 +58,23 @@ public class ProjectOpenListener implements ProjectComponent {
                 }
                 final String currentBranchName = Utils.getCurrentBranchName(project);
                 final CommitProcessor commitProcessor = new CommitProcessor(project, currentBranchName);
+                final Future gitHistoryFuture = ApplicationManager.getApplication().executeOnPooledThread(() ->
+                        {
+                            try {
+                                GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
+                                "--since=\"last month\" --reverse");
+                            } catch (VcsException e) {
+                                logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
+                            }
+                        }
+                );
 
-                GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
-                        "--since=\"last month\" --reverse");
+                MessageBus bus = project.getMessageBus();
+                bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER,
+                        new FileOpenListener(gitHistoryFuture, sqliteFile.getAbsolutePath()));
+
             } catch (Exception e) {
                 logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
-                e.printStackTrace();
             }
         });
 

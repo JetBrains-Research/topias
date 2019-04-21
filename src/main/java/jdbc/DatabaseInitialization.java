@@ -11,11 +11,18 @@ public class DatabaseInitialization {
     public static void createNewDatabase(String path) {
         final String url = "jdbc:sqlite:" + path;
 
-        final String methodsDictionary = "create table methodsDictionary (\n" +
-                "  id integer not null primary key,\n" +
-                "  fullSignature varchar(1024) unique,\n" +
-                "  startOffset integer not null\n" +
+        final String methodsDictionary = "create table methodsDictionary\n" +
+                "(\n" +
+                "  id            integer not null\n" +
+                "    primary key,\n" +
+                "  fullSignature varchar(1024)\n" +
+                "    unique,\n" +
+                "  startOffset   integer not null,\n" +
+                "  fileName varchar(1024) not null\n" +
                 ");";
+
+        final String methodDictInd = "create index fullSignatureInd\n" +
+                "  on methodsDictionary (fullSignature);";
 
         final String methodsChangeLog = "CREATE TABLE methodsChangeLog (\n" +
                 "  dtChanged timestamp not null,\n" +
@@ -37,15 +44,14 @@ public class DatabaseInitialization {
                 ");";
 
         final String statsView = "create view statisticsView as\n" +
-                "select (\n" +
-                "        dtDateTime,\n" +
-                "        discrType,\n" +
-                "        fullSignature,\n" +
-                "        changesCount,\n" +
-                "        startOffset\n" +
-                "         )\n" +
+                "select dtDateTime,\n" +
+                "       discrType,\n" +
+                "       fullSignature,\n" +
+                "       changesCount,\n" +
+                "       fileName,\n" +
+                "       startOffset\n" +
                 "from stats\n" +
-                "       join methodsDictionary on signatureId = id;";
+                "       join methodsDictionary on signatureId = id";
 
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
@@ -54,6 +60,7 @@ public class DatabaseInitialization {
                 System.out.println("A new database has been created.");
                 final Statement statement = conn.createStatement();
                 statement.execute(methodsDictionary);
+                statement.execute(methodDictInd);
                 statement.execute(methodsChangeLog);
                 statement.execute(statsTable);
                 statement.execute(statsView);

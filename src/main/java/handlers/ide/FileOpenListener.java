@@ -1,7 +1,5 @@
 package handlers.ide;
 
-import com.intellij.openapi.application.Application;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.impl.InlayModelImpl;
@@ -10,12 +8,22 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
-import editor.LabelRenderer;
+import jdbc.dao.StatisticsViewDAO;
 import org.jetbrains.annotations.NotNull;
-import org.jfree.data.xy.XYSeries;
 import state.ChangesState;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 public class FileOpenListener implements FileEditorManagerListener {
+    private final Future gitHistoryFuture;
+    private final StatisticsViewDAO dao;
+
+    public FileOpenListener(Future gitHistoryFuture, String dbURL) {
+        this.gitHistoryFuture = gitHistoryFuture;
+        this.dao = new StatisticsViewDAO(dbURL);
+    }
+
     private static int countStartColumn(int lineNumber, Document doc) {
         final String line = doc.getText(new TextRange(doc.getLineStartOffset(lineNumber), doc.getLineEndOffset(lineNumber)));
         int count = 0;
@@ -28,6 +36,14 @@ public class FileOpenListener implements FileEditorManagerListener {
                 return count;
         }
         return count;
+    }
+
+    @Override
+    public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+        final Editor editor = source.getSelectedTextEditor();
+        assert editor != null;
+        final InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
+        inlay.dispose();
     }
 
     @Override
@@ -45,8 +61,13 @@ public class FileOpenListener implements FileEditorManagerListener {
         final Document doc = editor.getDocument();
 
         final InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
-
-
+        try {
+            gitHistoryFuture.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
 /*        final XYSeries series = new XYSeries("Random data");
         series.add(1, 3);
