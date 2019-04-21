@@ -128,9 +128,9 @@ public final class CommitProcessor {
             }
         }
 
-        added.forEach(x -> methodsDictionaryDAO.addToDictionary(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset())));
+        added.forEach(x -> methodsDictionaryDAO.addToDictionary(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
         deleted.forEach(x -> methodsDictionaryDAO.removeFromDictionary(x.getMethodFullName()));
-        data.forEach(x -> methodsDictionaryDAO.updateBySignature(x.getOldMethod().getMethodFullName(), new MethodDictionaryEntity(x.getNewMethod().getMethodFullName(), x.getNewMethod().getStartOffset())));
+        data.forEach(x -> methodsDictionaryDAO.updateBySignature(x.getOldMethod().getMethodFullName(), new MethodDictionaryEntity(x.getNewMethod().getMethodFullName(), x.getNewMethod().getStartOffset(), x.getNewMethod().getFileName())));
 
         methodsStorage.clear();
 

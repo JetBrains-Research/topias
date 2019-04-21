@@ -68,8 +68,7 @@ public final class RefactoringProcessor {
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,
                     endLine,
-                    Utils.calculateSignatureForEcl(ref.getTargetOperationAfterInline()),
-                    methodInfo.getChangesCount()
+                    Utils.calculateSignatureForEcl(ref.getTargetOperationAfterInline())
             ));
         }
     }
@@ -86,13 +85,11 @@ public final class RefactoringProcessor {
 
             final MethodInfo methodInfo = new MethodInfo(startLineBefore,
                     endLine,
-                    Utils.calculateSignatureForEcl(ref.getOriginalOperation()),
-                    0);
+                    Utils.calculateSignatureForEcl(ref.getOriginalOperation()));
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,
                     endLine,
-                    Utils.calculateSignatureForEcl(ref.getMovedOperation()),
-                    methodInfo.getChangesCount()
+                    Utils.calculateSignatureForEcl(ref.getMovedOperation())
             ));
         }
 
@@ -124,13 +121,11 @@ public final class RefactoringProcessor {
             final int endLine = ref.getTargetOperationCodeRangeAfterRename().getEndLine();
             final MethodInfo methodInfo = new MethodInfo(startLineBefore,
                     endLine,
-                    Utils.calculateSignatureForEcl(ref.getOriginalOperation()),
-                    0);
+                    Utils.calculateSignatureForEcl(ref.getOriginalOperation()));
 
             return new RefactoringData(methodInfo, new MethodInfo(startLine,
                     endLine,
-                    Utils.calculateSignatureForEcl(ref.getRenamedOperation()),
-                    methodInfo.getChangesCount()
+                    Utils.calculateSignatureForEcl(ref.getRenamedOperation())
             ));
         }
     }

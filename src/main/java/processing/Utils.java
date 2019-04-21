@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.VcsRoot;
+import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.psi.*;
 import git4idea.GitReference;
@@ -88,5 +89,17 @@ public final class Utils {
             System.out.println(e.getMessage());
         }
         return Optional.empty();
+    }
+
+    public static String getFileName(Change change) {
+        return change.toString().substring(change.toString().indexOf(':') + 2);
+    }
+
+    public static String getOldFileName(Change change) {
+        return change.toString().substring(change.toString().indexOf(':') + 2).split(" -> ")[0];
+    }
+
+    public static String getNewFileName(Change change) {
+        return change.toString().substring(change.toString().indexOf(':') + 2).split(" -> ")[1];
     }
 }

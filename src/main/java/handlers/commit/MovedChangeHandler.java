@@ -9,6 +9,7 @@ import kotlin.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.PsiBuilder;
+import processing.Utils;
 import state.MethodInfo;
 import state.MethodsStorage;
 
@@ -41,8 +42,8 @@ public class MovedChangeHandler implements BiFunction<Project, Change, Optional<
             if (after == null || before == null)
                 return Optional.empty();
 
-            final List<MethodInfo> newRevMethods = mapper.buildMethodInfoSetFromContent(after.getContent());
-            final List<MethodInfo> oldRevMethods = mapper.buildMethodInfoSetFromContent(before.getContent());
+            final List<MethodInfo> newRevMethods = mapper.buildMethodInfoSetFromContent(after.getContent(), Utils.getNewFileName(change));
+            final List<MethodInfo> oldRevMethods = mapper.buildMethodInfoSetFromContent(before.getContent(), Utils.getOldFileName(change));
 
             //saving to add to dictionary
             final List<MethodInfo> addedInNewRevision = newRevMethods.stream().filter(
@@ -62,7 +63,7 @@ public class MovedChangeHandler implements BiFunction<Project, Change, Optional<
             final List<MethodInfo> deletedInNewRevision = oldRevMethods.stream().filter(x -> notContains(newRevMethods, x)).collect(Collectors.toList());
             methodsStorage.storeDeletedMethods(deletedInNewRevision);
 
-            return Optional.of(mapper.buildMethodInfoSetFromContent(after.getContent()));
+            return Optional.of(mapper.buildMethodInfoSetFromContent(after.getContent(), Utils.getNewFileName(change)));
         } catch (VcsException e) {
             logger.error("Vcs exception occured while trying to build PsiTree for moved file", e);
             return Optional.empty();

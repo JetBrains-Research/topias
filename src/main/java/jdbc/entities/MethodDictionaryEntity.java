@@ -4,11 +4,13 @@ public class MethodDictionaryEntity {
     private String fullMethodSignature;
     private int id;
     private int startOffset;
+    private String fileName;
 
-    public MethodDictionaryEntity(String fullMethodSignature, int startOffset) {
+    public MethodDictionaryEntity(String fullMethodSignature, int startOffset, String fileName) {
         this.fullMethodSignature = fullMethodSignature;
         this.id = -1;
         this.startOffset = startOffset;
+        this.fileName = fileName;
     }
 
     public MethodDictionaryEntity(int id, String fullMethodSignature, int startOffset) {
@@ -35,5 +37,13 @@ public class MethodDictionaryEntity {
 
     public void setStartOffset(int startOffset) {
         this.startOffset = startOffset;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

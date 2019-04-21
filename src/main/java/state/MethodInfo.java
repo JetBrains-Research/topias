@@ -18,31 +18,24 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
     private Integer endOffset;
     @Attribute
     private String methodFullName;
-    @Attribute
-    private int changesCount;
+
+    private String fileName;
+
     private long timeChangeMade;
     private String authorInfo;
     private String branchName;
 
-    public MethodInfo(Integer startOffset, Integer endOffset, PsiMethod method) {
+    public MethodInfo(Integer startOffset, Integer endOffset, PsiMethod method, String fileName) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.methodFullName = Utils.calculateSignature(method);
-        this.changesCount = 0;
+        this.fileName = fileName;
     }
 
-    public MethodInfo(int startOffset, int endOffset, String methodFullName, int changesCount) {
+    public MethodInfo(int startOffset, int endOffset, String methodFullName) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.methodFullName = methodFullName;
-        this.changesCount = changesCount;
-    }
-
-    public MethodInfo() {
-        this.startOffset = 0;
-        this.endOffset = 0;
-        this.methodFullName = "";
-        this.changesCount = 0;
     }
 
     public void update(int startOffset, int endOffset) {
@@ -98,18 +91,6 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
         this.methodFullName = methodFullName;
     }
 
-    public void incrementChangesCount() {
-        changesCount++;
-    }
-
-    public int getChangesCount() {
-        return changesCount;
-    }
-
-    public void setChangesCount(int changesCount) {
-        this.changesCount = changesCount;
-    }
-
     @Override
     public int compareTo(@NotNull MethodInfo o) {
         return this.getStartOffset() - o.getStartOffset();
@@ -147,5 +128,13 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
 
     public void setBranchName(String branchName) {
         this.branchName = branchName;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

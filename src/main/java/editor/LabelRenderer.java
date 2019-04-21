@@ -9,6 +9,8 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ValueAxis;
+import jdbc.entities.StatisticsViewEntity;
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartFactory;
@@ -24,15 +26,19 @@ import sun.awt.X11.XToolkit;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LabelRenderer extends HintRenderer {
     private final int lineStartOffset;
     private XYSeries xySeries;
 
-    public LabelRenderer(@Nullable String text, int lineStartOffset, XYSeries xySeries) {
+    public LabelRenderer(@Nullable String text, Pair<StatisticsViewEntity, List<Integer>> methodData) {
         super(text);
-        this.lineStartOffset = lineStartOffset;
-        this.xySeries = xySeries;
+        this.lineStartOffset = methodData.getFirst().getStartOffset();
+        this.xySeries = new XYSeries("");
+        final AtomicInteger index = new AtomicInteger(1);
+        methodData.getSecond().forEach(val -> xySeries.add(index.getAndIncrement(), val));
     }
 
     @Override

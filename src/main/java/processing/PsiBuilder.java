@@ -21,7 +21,7 @@ public final class PsiBuilder {
         this.psiFileFactory = PsiFileFactory.getInstance(project);
     }
 
-    public List<MethodInfo> buildMethodInfoSetFromContent(String content) {
+    public List<MethodInfo> buildMethodInfoSetFromContent(String content, String fileName) {
         final Application app = ApplicationManager.getApplication();
         final List<MethodInfo> infos = new LinkedList<>();
         final Runnable runnable = new Runnable() {
@@ -38,7 +38,7 @@ public final class PsiBuilder {
                             final TextRange range = method.getTextRange();
                             final int start = document.getLineNumber(range.getStartOffset());
                             final int end = document.getLineNumber(range.getEndOffset());
-                            infos.add(new MethodInfo(start, end, method));
+                            infos.add(new MethodInfo(start, end, method, fileName));
                         }
                         super.visitElement(element);
 

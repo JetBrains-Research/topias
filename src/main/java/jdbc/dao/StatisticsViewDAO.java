@@ -4,13 +4,16 @@ import jdbc.entities.StatisticsViewEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.Utils;
+import settings.enums.DiscrType;
 
-import java.sql.*;
-import java.util.Arrays;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class StatisticsViewDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsDictionaryDAO.class);
@@ -20,7 +23,10 @@ public class StatisticsViewDAO {
         this.url = url;
     }
 
-    public List<Integer> selectChangesCountDaily(String fullSigName, Date from, Date to) {
+    public List<Integer> selectChangesCountDaily(String fullSigName, DiscrType period) {
+        final LocalDate to = LocalDate.now();
+        final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
+
         final String sql = "select changesCount from statisticsView where discrType = 1 " +
                 "and fullSignature = ? " +
                 "and dtDateTime between ? and ?";
@@ -30,14 +36,15 @@ public class StatisticsViewDAO {
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
                 statement.setString(1, fullSigName);
-                statement.setDate(2, from);
-                statement.setDate(3, to);
+                statement.setLong(2, from.toEpochDay());
+                statement.setLong(3, to.toEpochDay());
 
                 final ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
                     changesData.add(resultSet.getInt(1));
                 }
             } catch (SQLException e) {
+                e.printStackTrace();
                 logger.error("Sql exception occured while trying to get statistics data", e);
             }
         });
@@ -45,7 +52,10 @@ public class StatisticsViewDAO {
         return changesData;
     }
 
-    public List<StatisticsViewEntity> getStatDataForFile(String fileName, Date from, Date to) {
+    public List<StatisticsViewEntity> getStatDataForFile(String fileName, DiscrType period) {
+        final LocalDate to = LocalDate.now();
+        final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
+
         final String sql = "select fullSignature,\n" +
                 "       sum(changesCount) as changes,\n" +
                 "       fileName,\n" +
@@ -57,8 +67,8 @@ public class StatisticsViewDAO {
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
                 statement.setString(1, fileName);
-                statement.setDate(2, from);
-                statement.setDate(3, to);
+                statement.setLong(2, from.toEpochDay());
+                statement.setLong(3, to.toEpochDay());
 
                 final ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
@@ -70,6 +80,7 @@ public class StatisticsViewDAO {
                     ));
                 }
             } catch (SQLException e) {
+                e.printStackTrace();
                 logger.error("Sql exception occured while trying to statistics data", e);
             }
         });

@@ -13,6 +13,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.PsiBuilder;
+import processing.Utils;
 import state.MethodInfo;
 import state.MethodsStorage;
 
@@ -49,11 +50,11 @@ public class ModifiedChangeHandler implements BiFunction<Project, Change, Option
             final PsiBuilder psiBuilder = new PsiBuilder(project);
 
             final List<MethodInfo> methodsInNewRev = psiBuilder.buildMethodInfoSetFromContent(
-                    after.getContent()
+                    after.getContent(), Utils.getFileName(change)
             );
 
             final Set<MethodInfo> methodsInOldRev = new HashSet<>(psiBuilder.buildMethodInfoSetFromContent(
-                    before.getContent()
+                    before.getContent(), Utils.getFileName(change)
             ));
 
             methodsStorage.storeDeletedMethods(new LinkedList<MethodInfo>(CollectionUtils.subtract(methodsInOldRev, methodsInNewRev)));

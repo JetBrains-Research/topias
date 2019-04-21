@@ -8,9 +8,9 @@ import processing.Utils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MethodsChangelogDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsChangelogDAO.class);
@@ -25,32 +25,39 @@ public class MethodsChangelogDAO {
 
         final String insertQuery = "insert into methodsChangeLog(dtChanged, authorName, branchName, signatureId) values(?,?,?,?)";
 
-        final String upsertStatisticsDaily = "insert into stats\n" +
-                "select *\n" +
-                "from (\n" +
+        final String truncateTempTable = "delete from tempStatsData;";
+
+        final String insertStatDailyInTemp = "insert into tempStatsData\n" +
+                "select * from (\n" +
                 "       select datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day') as dtDateTime,\n" +
-                "              1 as discrType,\n" +
+                "              0 as discrType,\n" +
                 "              signatureId,\n" +
-                "              count(*)                                                       as changes\n" +
+                "              count(*) as changesC,\n" +
+                "              (datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day') || '|' || 0 || '|' || signatureId) as uniqueConstraint\n" +
                 "       from methodsChangeLog\n" +
                 "       where dtChanged = ?\n" +
-                "       group by dtDateTime, signatureId) on conflict (dtDateTime, discrType, signatureId) do update\n" +
-                "set stats.changesCount = stats.changesCount + changes;";
+                "       group by dtDateTime, signatureId);";
 
-        final String upsertStatisticsMonthly = "insert into stats\n" +
-                "select *\n" +
-                "from (\n" +
-                "       select datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of month') as dtDateTime,\n" +
-                "              2 as discrType,\n" +
-                "              signatureId,\n" +
-                "              count(*)                                                       as changes\n" +
-                "       from methodsChangeLog\n" +
-                "       where dtChanged = ? \n" +
-                "       group by dtDateTime, signatureId) on conflict (dtDateTime, discrType, signatureId) do update\n" +
-                "set stats.changesCount = stats.changesCount + changes;";
+        final String upsertStatDaily = "insert into statsData select * from " +
+                "tempStatsData on conflict(uniqueConstraint) do update set changesCount=statsData.changesCount+tempStatsData.changesCount;";
+//
+//        final String insertStatMonthly = "insert into statsData\n" +
+//                "select *\n" +
+//                "from (\n" +
+//                "       select datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of month') as dtDateTime,\n" +
+//                "              1 as discrType,\n" +
+//                "              signatureId,\n" +
+//                "              count(*)                                                       as changesC,\n" +
+//                "              (datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day') || '|' || 1 || '|' || signatureId) as uniqueConstraint\n" +
+//                "       from methodsChangeLog\n" +
+//                "       where dtChanged = ? \n" +
+//                "       group by dtDateTime, signatureId)\n" +
+//                "WHERE true\n" +
+//                "on conflict (uniqueConstraint) do update\n" +
+//                "set changesCount = changesCount + changesC;";
 
         final Optional<Connection> connectionOpt = Utils.connect(url);
-        final AtomicInteger updatedObjectsCount = new AtomicInteger();
+
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement statement = connectionOpt.get().prepareStatement(insertQuery)) {
                 entities.forEach(y -> {
@@ -66,22 +73,33 @@ public class MethodsChangelogDAO {
                 });
                 statement.executeBatch();
             } catch (SQLException e) {
+                e.printStackTrace();
                 logger.error("Sql exception occured while trying to execute batch insert to methodsChangeLog table", e);
             }
 
-            try (PreparedStatement statement = connectionOpt.get().prepareStatement(upsertStatisticsMonthly)) {
+            try (PreparedStatement statement = connectionOpt.get().prepareStatement(insertStatDailyInTemp)) {
                 statement.setLong(1, commitTime);
                 statement.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
 
-            try (PreparedStatement statement = connectionOpt.get().prepareStatement(upsertStatisticsDaily)) {
-                statement.setLong(1, commitTime);
-                statement.execute();
+            try (Statement statement = connectionOpt.get().createStatement()) {
+                statement.executeUpdate(upsertStatDaily);
+                statement.execute(truncateTempTable);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+//
+//            try (PreparedStatement statement = connectionOpt.get().prepareStatement(insertStatMonthly)) {
+//                statement.setLong(1, commitTime);
+//                statement.execute();
+//
+//                statement.execute(upsertStatDaily);
+//                statement.executeUpdate(truncateTempTable);
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
 
         });
     }

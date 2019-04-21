@@ -32,6 +32,7 @@ public class MethodsDictionaryDAO {
                         statement.setInt(2, y.getStartOffset());
                         statement.addBatch();
                     } catch (SQLException e) {
+                        e.printStackTrace();
                         logger.error("Sql exception occured while trying to prepare insert statements to methodsDictionary table", e);
                     }
                 });
@@ -47,22 +48,25 @@ public class MethodsDictionaryDAO {
     }
 
     public int addToDictionary(MethodDictionaryEntity entity) {
-        final String sql = "insert or ignore into methodsDictionary(fullSignature, startOffset) values(?,?)";
+        final String sql = "insert or ignore into methodsDictionary(fullSignature, startOffset, fileName) values(?,?,?)";
         final Optional<Connection> connectionOpt = Utils.connect(url);
         final AtomicInteger updatedObjectsCount = new AtomicInteger();
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
                 statement.setString(1, entity.getFullMethodSignature());
                 statement.setInt(2, entity.getStartOffset());
-                updatedObjectsCount.set(statement.executeUpdate());
+                statement.setString(3, entity.getFileName());
+                statement.executeUpdate();
+
             } catch (SQLException e) {
+                e.printStackTrace();
                 logger.error("Sql exception occured while trying to insert new entry to methodsDictionary table", e);
             }
         });
         return updatedObjectsCount.get();
     }
 
-    public int removeFromDictionary(List<String> names) {
+/*    public int removeFromDictionary(List<String> names) {
         final String sql = "delete from methodsDictionary where fullSignature = ?";
         final Optional<Connection> connectionOpt = Utils.connect(url);
         final AtomicInteger updatedObjectsCount = new AtomicInteger();
@@ -85,7 +89,7 @@ public class MethodsDictionaryDAO {
         });
 
         return updatedObjectsCount.get();
-    }
+    }*/
 
     public int removeFromDictionary(String name) {
         final String sql = "delete from methodsDictionary where fullSignature = ?";
@@ -94,15 +98,16 @@ public class MethodsDictionaryDAO {
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
                 statement.setString(1, name);
-                updatedObjectsCount.set(statement.executeUpdate());
+                statement.executeUpdate();
             } catch (SQLException e) {
+                e.printStackTrace();
                 logger.error("Sql exception occured while trying to delete entry from methodsDictionary table", e);
             }
         });
         return updatedObjectsCount.get();
     }
 
-    public int updateDictionary(List<MethodDictionaryEntity> entities) {
+/*    public int updateDictionary(List<MethodDictionaryEntity> entities) {
         final String sql = "update methodsDictionary set fullSignature = ?, "
                 + "startOffset = ? "
                 + "where id = ?";
@@ -130,7 +135,7 @@ public class MethodsDictionaryDAO {
         });
 
         return updatedObjectsCount.get();
-    }
+    }*/
 
     public int findIdBySignatureName(String fullSignature) {
         final String selectQuery = "SELECT id from methodsDictionary where fullSignature = ?";
@@ -144,6 +149,7 @@ public class MethodsDictionaryDAO {
                     methodId.set(resultSet.getInt(1));
                 }
             } catch (SQLException e) {
+                e.printStackTrace();
                 System.out.println("Exception occured while trying to get method id by signature name");
                 System.out.println(e.getMessage());
             }
@@ -179,14 +185,15 @@ public class MethodsDictionaryDAO {
                     ));
                 }
             } catch (SQLException e) {
-                logger.error("Sql exception occured while trying to execute batch update to methodsDictionary table", e);
+                e.printStackTrace();
+                //logger.error("Sql exception occured while trying to execute batch update to methodsDictionary table", e);
             }
         });
         return entities;
     }
 
     public int updateBySignature(String oldSignature, MethodDictionaryEntity entity) {
-        final String sql = "update methodsDictionary set fullSignature = ?, "
+        final String sql = "update methodsDictionary set fullSignature = ?, fileName = ?, "
                 + "startOffset = ? "
                 + "where fullSignature = ?";
 
@@ -197,9 +204,10 @@ public class MethodsDictionaryDAO {
                 statement.setString(1, entity.getFullMethodSignature());
                 statement.setInt(2, entity.getStartOffset());
                 statement.setString(3, oldSignature);
-                updatedObjectsCount.set(statement.executeUpdate());
+                statement.executeUpdate();
             } catch (SQLException e) {
-                logger.error("Sql exception occured while trying to update methodsDictionary table", e);
+                e.printStackTrace();
+                //logger.error("Sql exception occured while trying to update methodsDictionary table", e);
             }
         });
         return updatedObjectsCount.get();

@@ -7,6 +7,7 @@ import com.intellij.openapi.vcs.changes.ContentRevision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.PsiBuilder;
+import processing.Utils;
 import state.MethodInfo;
 import state.MethodsStorage;
 
@@ -25,7 +26,7 @@ public class DeletedChangeHandler implements BiFunction<Project, Change, Optiona
 
         if (before != null) {
             try {
-                methodsStorage.storeDeletedMethods(mapper.buildMethodInfoSetFromContent(before.getContent()));
+                methodsStorage.storeDeletedMethods(mapper.buildMethodInfoSetFromContent(before.getContent(), Utils.getFileName(change)));
             } catch (VcsException e) {
                 logger.error("Vcs exception occurred while trying to build PsiTree for deleted class", e);
             }

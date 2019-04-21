@@ -8,16 +8,24 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
+import editor.LabelRenderer;
 import jdbc.dao.StatisticsViewDAO;
+import jdbc.entities.StatisticsViewEntity;
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import settings.enums.DiscrType;
 import state.ChangesState;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class FileOpenListener implements FileEditorManagerListener {
     private final Future gitHistoryFuture;
     private final StatisticsViewDAO dao;
+    private final static Logger logger = LoggerFactory.getLogger(FileOpenListener.class);
 
     public FileOpenListener(Future gitHistoryFuture, String dbURL) {
         this.gitHistoryFuture = gitHistoryFuture;
@@ -54,7 +62,7 @@ public class FileOpenListener implements FileEditorManagerListener {
 
         final Editor editor = source.getSelectedTextEditor();
 
-
+        final DiscrType period = DiscrType.WEEK; //todo: get from settings state
         if (editor == null)
             return;
 
@@ -63,25 +71,21 @@ public class FileOpenListener implements FileEditorManagerListener {
         final InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
         try {
             gitHistoryFuture.get();
+            final List<StatisticsViewEntity> entities = dao.getStatDataForFile(file.getPath(), DiscrType.WEEK);
+            entities.stream().map(x -> new Pair<>(x, dao.selectChangesCountDaily(x.getFullSignature(), DiscrType.WEEK)))
+                    .forEach(x -> {
+                        inlay.addBlockElement(doc.getLineStartOffset(x.getFirst().getStartOffset()) + countStartColumn(x.getFirst().getStartOffset(), doc),
+                                false,
+                                true,
+                                0,
+                                new LabelRenderer("Method was changed " + x.getFirst().getChangesCount() + " times for last " + period.getTextValue(),
+                                        x)
+                        );
+                    });
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("Interruped exception has occured", e);
         } catch (ExecutionException e) {
-            e.printStackTrace();
+            logger.error("Execution exception has occured", e);
         }
-
-/*        final XYSeries series = new XYSeries("Random data");
-        series.add(1, 3);
-        series.add(2, 4);
-        series.add(3, 0);
-        series.add(4, 1);
-        series.add(5, 2);
-        series.add(6, 10);
-        series.add(7, 1);
-        inlay.addBlockElement(doc.getLineStartOffset(15),
-                false,
-                true,
-                0,
-                new LabelRenderer("Method was changed " + 5 + " times", countStartColumn(16, doc), series)
-        );*/
     }
 }

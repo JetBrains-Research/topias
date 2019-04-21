@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.3.9'
+    id 'org.jetbrains.intellij' version '0.4.7'
 }
 
 group 'io.github.likeanowl'
@@ -15,7 +15,10 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile files('lib/RefactoringMiner.jar')
-    compileClasspath group:'org.xerial', name:'sqlite-jdbc', version:'3.25.2'
+    // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
+    compileClasspath('org.xerial:sqlite-jdbc:3.27.2'){
+        force = true
+    }
     compile group:'org.apache.commons', name:'commons-collections4', version: '4.3'
     compile group:'org.jfree', name:'jfreechart', version: '1.5.0'
 }

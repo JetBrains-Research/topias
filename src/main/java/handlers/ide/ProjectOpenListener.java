@@ -62,7 +62,7 @@ public class ProjectOpenListener implements ProjectComponent {
                         {
                             try {
                                 GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
-                                "--since=\"last month\" --reverse");
+                                "--reverse", "--since=\"last month\"");
                             } catch (VcsException e) {
                                 logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
                             }

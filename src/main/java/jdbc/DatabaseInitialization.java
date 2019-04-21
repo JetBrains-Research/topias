@@ -11,18 +11,17 @@ public class DatabaseInitialization {
     public static void createNewDatabase(String path) {
         final String url = "jdbc:sqlite:" + path;
 
-        final String methodsDictionary = "create table methodsDictionary\n" +
+        final String methodsDictionary = "create table methodsDictionary \n" +
                 "(\n" +
-                "  id            integer not null\n" +
-                "    primary key,\n" +
-                "  fullSignature varchar(1024)\n" +
-                "    unique,\n" +
-                "  startOffset   integer not null,\n" +
-                "  fileName varchar(1024) not null\n" +
+                "  id integer primary key,\n" +
+                "  fullSignature varchar(1024),\n" +
+                "  startOffset integer not null,\n" +
+                "  fileName varchar(1024) not null,\n" +
+                "  unique (fullSignature, fileName)" +
                 ");";
 
         final String methodDictInd = "create index fullSignatureInd\n" +
-                "  on methodsDictionary (fullSignature);";
+                "  on methodsDictionary(fullSignature);";
 
         final String methodsChangeLog = "CREATE TABLE methodsChangeLog (\n" +
                 "  dtChanged timestamp not null,\n" +
@@ -34,12 +33,23 @@ public class DatabaseInitialization {
                 "    REFERENCES methodsDictionary(id)\n" +
                 ");";
 
-        final String statsTable = "create table stats\n" +
+        final String statsTable = "create table statsData \n" +
                 "(\n" +
                 "  dtDateTime   timestamp not null,\n" +
                 "  discrType    integer   not null,\n" +
                 "  signatureId  integer   not null,\n" +
                 "  changesCount integer   not null,\n" +
+                "  uniqueConstraint varchar(1024) not null,\n" +
+                "  unique (dtDateTime, discrType, signatureId)\n" +
+                ");";
+
+        final String tempStatsTable = "create table tempStatsData \n" +
+                "(\n" +
+                "  dtDateTime   timestamp not null,\n" +
+                "  discrType    integer   not null,\n" +
+                "  signatureId  integer   not null,\n" +
+                "  changesCount integer   not null,\n" +
+                "  uniqueConstraint varchar(1024) not null,\n" +
                 "  unique (dtDateTime, discrType, signatureId)\n" +
                 ");";
 
@@ -50,19 +60,20 @@ public class DatabaseInitialization {
                 "       changesCount,\n" +
                 "       fileName,\n" +
                 "       startOffset\n" +
-                "from stats\n" +
-                "       join methodsDictionary on signatureId = id";
+                "from statsData \n" +
+                "       join methodsDictionary on statsData.signatureId = id;";
 
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
                 final DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName());
+                System.out.println("The driver name is " + meta.getDriverName() + "  " + meta.getDriverVersion());
                 System.out.println("A new database has been created.");
                 final Statement statement = conn.createStatement();
                 statement.execute(methodsDictionary);
                 statement.execute(methodDictInd);
                 statement.execute(methodsChangeLog);
                 statement.execute(statsTable);
+                statement.execute(tempStatsTable);
                 statement.execute(statsView);
             }
 

@@ -5,6 +5,7 @@ import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ContentRevision;
 import processing.PsiBuilder;
+import processing.Utils;
 import state.MethodInfo;
 import state.MethodsStorage;
 
@@ -26,7 +27,7 @@ public class AddedChangeHandler implements BiFunction<Project, Change, Optional<
             if (content == null || content.isEmpty())
                 return Optional.empty();
 
-            final List<MethodInfo> addedMethods = mapper.buildMethodInfoSetFromContent(content);
+            final List<MethodInfo> addedMethods = mapper.buildMethodInfoSetFromContent(content, Utils.getFileName(change));
 
             final MethodsStorage methodsStorage = MethodsStorage.getInstance();
             methodsStorage.storeAddedMethods(addedMethods);
