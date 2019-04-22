@@ -32,14 +32,14 @@ public class MethodsChangelogDAO {
                 "       select datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day') as dtDateTime,\n" +
                 "              0 as discrType,\n" +
                 "              signatureId,\n" +
-                "              count(*) as changesC,\n" +
-                "              (datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day') || '|' || 0 || '|' || signatureId) as uniqueConstraint\n" +
+                "              count(*) as changesC\n" +
                 "       from methodsChangeLog\n" +
                 "       where dtChanged = ?\n" +
-                "       group by dtDateTime, signatureId);";
+                "       group by datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day'), signatureId);";
 
-        final String upsertStatDaily = "insert into statsData select * from " +
-                "tempStatsData on conflict(uniqueConstraint) do update set changesCount=statsData.changesCount+tempStatsData.changesCount;";
+        final String upsertStatDaily = "insert into statsData select " +
+                "dtDateTime, discrType, signatureId, changesC from " +
+                "tempStatsData where true on conflict(dtDateTime, discrType, signatureId) do update set changesCount=changesCount+'changesC';";
 //
 //        final String insertStatMonthly = "insert into statsData\n" +
 //                "select *\n" +

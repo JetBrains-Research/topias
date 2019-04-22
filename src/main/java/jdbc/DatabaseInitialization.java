@@ -39,7 +39,6 @@ public class DatabaseInitialization {
                 "  discrType    integer   not null,\n" +
                 "  signatureId  integer   not null,\n" +
                 "  changesCount integer   not null,\n" +
-                "  uniqueConstraint varchar(1024) not null,\n" +
                 "  unique (dtDateTime, discrType, signatureId)\n" +
                 ");";
 
@@ -48,8 +47,7 @@ public class DatabaseInitialization {
                 "  dtDateTime   timestamp not null,\n" +
                 "  discrType    integer   not null,\n" +
                 "  signatureId  integer   not null,\n" +
-                "  changesCount integer   not null,\n" +
-                "  uniqueConstraint varchar(1024) not null,\n" +
+                "  changesC integer   not null,\n" +
                 "  unique (dtDateTime, discrType, signatureId)\n" +
                 ");";
 
