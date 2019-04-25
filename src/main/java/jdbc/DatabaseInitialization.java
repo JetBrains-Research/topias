@@ -60,6 +60,11 @@ public class DatabaseInitialization {
                 "       startOffset\n" +
                 "from statsData \n" +
                 "       join methodsDictionary on statsData.signatureId = id;";
+        try {
+            DriverManager.registerDriver(new org.sqlite.JDBC());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
