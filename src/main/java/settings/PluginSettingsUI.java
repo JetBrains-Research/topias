@@ -25,12 +25,11 @@ public class PluginSettingsUI {
     private JLabel fontLabel;
     private JLabel showDataLabel;
     private JTextField fontSizeTextField;
-    private final JBCheckBox myOnlyMonospacedCheckBox =
-            new JBCheckBox(ApplicationBundle.message("checkbox.show.only.monospaced.fonts"));
+    private JBCheckBox myOnlyMonospacedCheckBox;
 
     private void createUIComponents() {
         // TODO: place custom component creation code here
         fontComboBox = new FontComboBox();
-        fontSizeTextField  = new JTextField(4);
+        myOnlyMonospacedCheckBox = new JBCheckBox(ApplicationBundle.message("checkbox.show.only.monospaced.fonts"));
     }
 }
