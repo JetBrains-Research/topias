@@ -1,9 +1,9 @@
 <idea-plugin>
     <id>io.github.likeanowl.topias</id>
     <name>Topias</name>
-    <vendor email="svitkovsergey@gmail.com" url="io.github.likeanowl">Contacts</vendor>
+    <vendor email="svitkovsergey@gmail.com">Contacts</vendor>
     <depends>Git4Idea</depends>
-    <description>"Vcs stats visualization frequency blah blah blah plugin"</description>
+    <description>"VCS changes frequency visualization for Java projects"</description>
     <version>0.0.1</version>
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -15,6 +15,7 @@
         <!-- Add your extensions here -->
         <checkinHandlerFactory implementation="handlers.ide.VcsChangesHandlerFactory"/>
         <projectService serviceInterface="state.ChangesState" serviceImplementation="state.ChangesState"/>
+        <applicationService serviceInterface="settings.TopiasSettingsState" serviceImplementation="settings.TopiasSettingsState" />
         <toolWindow id="Topias" anchor="bottom"
                     factoryClass="ui.TopChangedToolWindowFactory"/>
 
@@ -32,7 +33,8 @@
         </component>
         <component>
             <implementation-class>state.ChangesState</implementation-class>
-            <interface-class>state.ChangesState</interface-class>
         </component>
     </project-components>
+    <application-components>
+    </application-components>
 </idea-plugin>

@@ -48,6 +48,11 @@ public class MethodsDictionaryDAO {
     }
 
     public int addToDictionary(MethodDictionaryEntity entity) {
+        try {
+            DriverManager.registerDriver(new org.sqlite.JDBC());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         final String sql = "insert or ignore into methodsDictionary(fullSignature, startOffset, fileName) values(?,?,?)";
         final Optional<Connection> connectionOpt = Utils.connect(url);
         final AtomicInteger updatedObjectsCount = new AtomicInteger();
@@ -92,6 +97,11 @@ public class MethodsDictionaryDAO {
     }*/
 
     public int removeFromDictionary(String name) {
+        try {
+            DriverManager.registerDriver(new org.sqlite.JDBC());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         final String sql = "delete from methodsDictionary where fullSignature = ?";
         final Optional<Connection> connectionOpt = Utils.connect(url);
         final AtomicInteger updatedObjectsCount = new AtomicInteger();
@@ -138,6 +148,11 @@ public class MethodsDictionaryDAO {
     }*/
 
     public int findIdBySignatureName(String fullSignature) {
+        try {
+            DriverManager.registerDriver(new org.sqlite.JDBC());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         final String selectQuery = "SELECT id from methodsDictionary where fullSignature = ?";
         final Optional<Connection> connectionOpt = Utils.connect(url);
         final AtomicInteger methodId = new AtomicInteger(-1);
@@ -158,6 +173,11 @@ public class MethodsDictionaryDAO {
     }
 
     public List<MethodChangeLogEntity> buildChangelogs(List<MethodInfo> changes) {
+        try {
+            DriverManager.registerDriver(new org.sqlite.JDBC());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         final String questionMarks = String.join(", ", Collections.nCopies(changes.size(), "?"));
         final String sql = "select id from methodsDictionary where fullSignature in (" + questionMarks + ")";
 
@@ -193,6 +213,11 @@ public class MethodsDictionaryDAO {
     }
 
     public int updateBySignature(String oldSignature, MethodDictionaryEntity entity) {
+        try {
+            DriverManager.registerDriver(new org.sqlite.JDBC());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         final String sql = "update methodsDictionary set fullSignature = ?, fileName = ?, "
                 + "startOffset = ? "
                 + "where fullSignature = ?";

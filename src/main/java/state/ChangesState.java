@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @State(name = "ChangesState",
-        storages = {@Storage(file = "counter.xml")})
+        storages = {@Storage("counter.xml")})
 public final class ChangesState implements ProjectComponent,
         PersistentStateComponent<ChangesState.InnerState> {
     private static final Logger log = LoggerFactory.getLogger(ChangesState.class);

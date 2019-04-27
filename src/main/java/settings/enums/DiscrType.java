@@ -1,22 +1,32 @@
 package settings.enums;
 
+import com.intellij.util.xmlb.annotations.Attribute;
+
+
 public enum  DiscrType {
-    WEEK(0, "7 days"),
-    MONTH(1, "30 days");
+    WEEK(0, "Week"),
+    MONTH(1, "Month");
 
     DiscrType(int id, String textValue) {
         this.id = id;
         this.textValue = textValue;
     }
 
-    private final int id;
-    private final String textValue;
+    @Attribute
+    public int id;
+    @Attribute
+    public String textValue;
 
     public int getId() {
         return id;
     }
 
     public String getTextValue() {
+        return textValue;
+    }
+
+    @Override
+    public String toString() {
         return textValue;
     }
 }

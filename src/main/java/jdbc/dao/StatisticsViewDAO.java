@@ -6,10 +6,7 @@ import org.slf4j.LoggerFactory;
 import processing.Utils;
 import settings.enums.DiscrType;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,6 +17,11 @@ public class StatisticsViewDAO {
     private final String url;
 
     public StatisticsViewDAO(String url) {
+        try {
+            DriverManager.registerDriver(new org.sqlite.JDBC());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         this.url = url;
     }
 

@@ -49,6 +49,10 @@ public class MethodsStorage {
         this.addedMethods.addAll(addedMethods);
     }
 
+    public void storeAddedMethod(MethodInfo methodInfo) {
+        this.addedMethods.add(methodInfo);
+    }
+
     public void clear() {
         deletedMethods.clear();
         movedMethods.clear();
