@@ -1,6 +1,4 @@
-package jdbc.entities;
-
-import java.sql.Date;
+package db.entities;
 
 public class StatisticsViewEntity {
     private final String fullSignature;

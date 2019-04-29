@@ -9,8 +9,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import editor.LabelRenderer;
-import jdbc.dao.StatisticsViewDAO;
-import jdbc.entities.StatisticsViewEntity;
+import db.dao.StatisticsViewDAO;
+import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -44,14 +44,6 @@ public class FileOpenListener implements FileEditorManagerListener {
                 return count;
         }
         return count;
-    }
-
-    @Override
-    public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-        final Editor editor = source.getSelectedTextEditor();
-        assert editor != null;
-        final InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
-        inlay.dispose();
     }
 
     @Override

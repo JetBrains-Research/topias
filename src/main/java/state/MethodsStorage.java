@@ -8,7 +8,7 @@ import java.util.List;
 public class MethodsStorage {
     private static MethodsStorage instance = null;
     private final List<MethodInfo> deletedMethods;
-    private final List<Pair<MethodInfo, MethodInfo>> movedMethods;
+    private final List<RefactoringData> movedMethods;
     private final List<MethodInfo> addedMethods;
 
     private MethodsStorage() {
@@ -29,7 +29,7 @@ public class MethodsStorage {
         return deletedMethods;
     }
 
-    public List<Pair<MethodInfo, MethodInfo>> getMovedMethods() {
+    public List<RefactoringData> getMovedMethods() {
         return movedMethods;
     }
 
@@ -41,7 +41,7 @@ public class MethodsStorage {
         this.deletedMethods.addAll(deletedMethods);
     }
 
-    public void storeMovedMethods(List<Pair<MethodInfo, MethodInfo>> movedMethods) {
+    public void storeMovedMethods(List<RefactoringData> movedMethods) {
         this.movedMethods.addAll(movedMethods);
     }
 

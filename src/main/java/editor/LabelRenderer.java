@@ -7,9 +7,7 @@ import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.markup.TextAttributes;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ValueAxis;
-import jdbc.entities.StatisticsViewEntity;
+import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +20,6 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import sun.awt.X11.XToolkit;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

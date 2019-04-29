@@ -9,10 +9,10 @@ import handlers.commit.AddedChangeHandler;
 import handlers.commit.DeletedChangeHandler;
 import handlers.commit.ModifiedChangeHandler;
 import handlers.commit.MovedChangeHandler;
-import jdbc.dao.MethodsChangelogDAO;
-import jdbc.dao.MethodsDictionaryDAO;
-import jdbc.entities.MethodChangeLogEntity;
-import jdbc.entities.MethodDictionaryEntity;
+import db.dao.MethodsChangelogDAO;
+import db.dao.MethodsDictionaryDAO;
+import db.entities.MethodChangeLogEntity;
+import db.entities.MethodDictionaryEntity;
 import kotlin.Pair;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -117,17 +117,17 @@ public final class CommitProcessor {
         final MethodsStorage methodsStorage = MethodsStorage.getInstance();
         final List<MethodInfo> deleted = methodsStorage.getDeletedMethods();
         final List<MethodInfo> added = methodsStorage.getAddedMethods();
-        final List<Pair<MethodInfo, MethodInfo>> moved = methodsStorage.getMovedMethods();
-
-        final List<MethodInfo> updateDictionary = new LinkedList<>();
+        final List<RefactoringData> moved = methodsStorage.getMovedMethods();
 
         for (RefactoringData refactoringData : data) {
             if (deleted.contains(refactoringData.getOldMethod()) && added.contains(refactoringData.getNewMethod())) {
                 deleted.remove(refactoringData.getOldMethod());
                 added.remove(refactoringData.getNewMethod());
             }
+            moved.remove(data);
         }
 
+        data.addAll(moved);
         added.forEach(x -> methodsDictionaryDAO.addToDictionary(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
         deleted.forEach(x -> methodsDictionaryDAO.removeFromDictionary(x.getMethodFullName()));
         data.forEach(x -> methodsDictionaryDAO.updateBySignature(x.getOldMethod().getMethodFullName(), new MethodDictionaryEntity(x.getNewMethod().getMethodFullName(), x.getNewMethod().getStartOffset(), x.getNewMethod().getFileName())));

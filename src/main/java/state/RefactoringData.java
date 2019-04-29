@@ -16,4 +16,13 @@ public class RefactoringData {
     public MethodInfo getNewMethod() {
         return newMethod;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final RefactoringData refactoringData = (RefactoringData) o;
+        return oldMethod.equals(refactoringData.oldMethod) && newMethod.equals(refactoringData.newMethod);
+    }
 }

@@ -12,6 +12,7 @@ import processing.PsiBuilder;
 import processing.Utils;
 import state.MethodInfo;
 import state.MethodsStorage;
+import state.RefactoringData;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -52,10 +53,10 @@ public class MovedChangeHandler implements BiFunction<Project, Change, Optional<
             methodsStorage.storeAddedMethods(addedInNewRevision);
 
             //saving to update dictionary
-            final List<Pair<MethodInfo, MethodInfo>> moved = new LinkedList<>();
+            final List<RefactoringData> moved = new LinkedList<>();
             newRevMethods.removeAll(addedInNewRevision);
             newRevMethods.forEach(x -> {
-                moved.add(new Pair<>(x, oldRevMethods.stream().filter(y -> compareMethodSigs(y, x)).findFirst().get()));
+                moved.add(new RefactoringData(x, oldRevMethods.stream().filter(y -> compareMethodSigs(y, x)).findFirst().get()));
             });
             methodsStorage.storeMovedMethods(moved);
 

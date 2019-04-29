@@ -1,6 +1,6 @@
-package jdbc.dao;
+package db.dao;
 
-import jdbc.entities.MethodChangeLogEntity;
+import db.entities.MethodChangeLogEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.Utils;
@@ -23,6 +23,9 @@ public class MethodsChangelogDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        if (entities == null || entities.isEmpty())
+            return;
+
         final long commitTime = entities.get(0).getDateChanged();
 
         final String insertQuery = "insert into methodsChangeLog(dtChanged, authorName, branchName, signatureId) values(?,?,?,?)";
@@ -40,7 +43,7 @@ public class MethodsChangelogDAO {
                 "       group by datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day'), signatureId);";
 
         final String upsertStatDaily = "insert into statsData select " +
-                "dtDateTime, discrType, signatureId, changesC from " +
+                "* from " +
                 "tempStatsData where true on conflict(dtDateTime, discrType, signatureId) do update set changesCount=changesCount+'changesC';";
 //
 //        final String insertStatMonthly = "insert into statsData\n" +

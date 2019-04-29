@@ -1,4 +1,4 @@
-package jdbc.entities;
+package db.entities;
 
 public class MethodDictionaryEntity {
     private String fullMethodSignature;

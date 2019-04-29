@@ -1,6 +1,4 @@
-package jdbc.entities;
-
-import java.sql.Date;
+package db.entities;
 
 public class MethodChangeLogEntity {
     private final long dateChanged;

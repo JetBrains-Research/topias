@@ -3,8 +3,6 @@ package handlers.ide;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
@@ -14,7 +12,7 @@ import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.openapi.vcs.impl.VcsInitObject;
 import com.intellij.util.messages.MessageBus;
 import git4idea.history.GitHistoryUtils;
-import jdbc.DatabaseInitialization;
+import db.DatabaseInitialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.CommitProcessor;
@@ -23,6 +21,8 @@ import processing.Utils;
 import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.Future;
+
+import static java.lang.System.currentTimeMillis;
 
 
 public class ProjectOpenListener implements ProjectComponent {
@@ -61,8 +61,11 @@ public class ProjectOpenListener implements ProjectComponent {
                 final Future gitHistoryFuture = ApplicationManager.getApplication().executeOnPooledThread(() ->
                         {
                             try {
+                                long start = currentTimeMillis();
                                 GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
                                 "--reverse", "--since=\"last month\"");
+                                logger.info("Git history processing finished");
+                                System.out.println("MA BOI TOPSON IS DONE " + (currentTimeMillis() - start) / 1000.0);
                             } catch (VcsException e) {
                                 logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
                             }

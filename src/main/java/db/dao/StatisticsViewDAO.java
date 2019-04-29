@@ -1,6 +1,6 @@
-package jdbc.dao;
+package db.dao;
 
-import jdbc.entities.StatisticsViewEntity;
+import db.entities.StatisticsViewEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.Utils;

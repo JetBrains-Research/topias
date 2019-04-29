@@ -1,13 +1,12 @@
-package jdbc.dao;
+package db.dao;
 
-import jdbc.entities.MethodChangeLogEntity;
-import jdbc.entities.MethodDictionaryEntity;
+import db.entities.MethodChangeLogEntity;
+import db.entities.MethodDictionaryEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.Utils;
 import state.MethodInfo;
 
-import java.sql.Date;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
