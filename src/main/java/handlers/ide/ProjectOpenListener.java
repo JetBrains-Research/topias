@@ -1,8 +1,10 @@
 package handlers.ide;
 
+import com.intellij.execution.ExecutionException;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
@@ -11,12 +13,16 @@ import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.openapi.vcs.impl.VcsInitObject;
 import com.intellij.util.messages.MessageBus;
+import git4idea.GitUtil;
+import git4idea.commands.*;
 import git4idea.history.GitHistoryUtils;
 import db.DatabaseInitialization;
+import git4idea.history.GitLogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.CommitProcessor;
 import processing.Utils;
+import state.ChangesState;
 
 import java.io.File;
 import java.util.Arrays;
@@ -56,8 +62,27 @@ public class ProjectOpenListener implements ProjectComponent {
 
                     return;
                 }
+
                 final String currentBranchName = Utils.getCurrentBranchName(project);
+
+                final GitLineHandler lineHandler = new GitLineHandler(project,
+                        gitRootPath.getPath(),
+                        GitCommand.REV_LIST
+                );
+                String sinceWhat;
+                final ChangesState.InnerState state = ChangesState.getInstance(project).getState();
+                if (state != null && state.persistentState.get(currentBranchName) != null) {
+                    final String hash = state.persistentState.get(currentBranchName);
+                    sinceWhat = hash + "..HEAD";
+                } else {
+                    sinceWhat = "HASH --since=\"last month\"";
+                }
+                lineHandler.addParameters(sinceWhat, "--count");
+
+                final GitCommandResult result = Git.getInstance().runCommand(lineHandler);
+                final String resultAsString = result.getOutputAsJoinedString();
                 final CommitProcessor commitProcessor = new CommitProcessor(project, currentBranchName);
+
                 final Future gitHistoryFuture = ApplicationManager.getApplication().executeOnPooledThread(() ->
                         {
                             try {
@@ -65,7 +90,6 @@ public class ProjectOpenListener implements ProjectComponent {
                                 GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
                                 "--reverse", "--since=\"last month\"");
                                 logger.info("Git history processing finished");
-                                System.out.println("MA BOI TOPSON IS DONE " + (currentTimeMillis() - start) / 1000.0);
                             } catch (VcsException e) {
                                 logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
                             }
