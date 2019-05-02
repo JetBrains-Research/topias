@@ -134,6 +134,7 @@ public class ProjectOpenListener implements ProjectComponent {
                         })
 
                 );
+
                 MessageBus bus = project.getMessageBus();
                 bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER,
                         new FileOpenListener(gitHistoryFuture, sqliteFile.getAbsolutePath()));

@@ -16,7 +16,7 @@ public class ReferenceNavigator {
     }
 
     public void navigateToReference() {
-        FileEditor[] fileEditors = FileEditorManager.getInstance(DataHolder.getInstance().PROJECT).openFile(reference.containingVirtualFile(), true);
+        FileEditor[] fileEditors = FileEditorManager.getInstance(DataHolder.getInstance().PROJECT).openFile(reference.getVirtualFile(), true);
         for (FileEditor fileEditor : fileEditors) {
             if (fileEditor instanceof NavigatableFileEditor)
                 ((NavigatableFileEditor) fileEditor).navigateTo(reference.location());

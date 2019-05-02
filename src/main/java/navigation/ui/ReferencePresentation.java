@@ -14,10 +14,10 @@ public class ReferencePresentation implements Presentable {
     }
 
     public void present(PresentationLocation location) {
-        buildPresentation().present(location);
+        createPresentation().present(location);
     }
 
-    private Presentable buildPresentation() {
+    private Presentable createPresentation() {
         if (references.size() == 0) {
             return new TooltipPresentation("No usages found");
         } else {

@@ -19,14 +19,14 @@ public class Reference {
     }
 
     public Navigatable location() {
-        return new OpenFileDescriptor(DataHolder.getInstance().PROJECT, containingVirtualFile(), psiElement.getTextOffset());
+        return new OpenFileDescriptor(DataHolder.getInstance().PROJECT, getVirtualFile(), psiElement.getTextOffset());
     }
 
-    public VirtualFile containingVirtualFile() {
+    public VirtualFile getVirtualFile() {
         return containingFile().getVirtualFile();
     }
 
-    public PsiMethod containingMethod() {
+    public PsiMethod getPsiMethod() {
         PsiElement parent;
         PsiElement current = psiElement;
         while (true) {
@@ -37,7 +37,7 @@ public class Reference {
         }
     }
 
-    public PsiClass containingClass() {
+    public PsiClass getParentClass() {
         PsiElement parent;
         PsiElement current = psiElement;
         while (true) {
@@ -54,7 +54,7 @@ public class Reference {
 
     public int line() {
         Editor editor = DataHolder.getInstance().EDITOR;
-        FileEditor[] fileEditors = FileEditorManager.getInstance(DataHolder.getInstance().PROJECT).getEditors(containingVirtualFile());
+        FileEditor[] fileEditors = FileEditorManager.getInstance(DataHolder.getInstance().PROJECT).getEditors(getVirtualFile());
         for (FileEditor fileEditor : fileEditors) {
             if (fileEditor instanceof TextEditor)
                 editor = ((TextEditor) fileEditor).getEditor();
@@ -65,7 +65,7 @@ public class Reference {
 
     public int column() {
         Editor editor = DataHolder.getInstance().EDITOR;
-        FileEditor[] fileEditors = FileEditorManager.getInstance(DataHolder.getInstance().PROJECT).getEditors(containingVirtualFile());
+        FileEditor[] fileEditors = FileEditorManager.getInstance(DataHolder.getInstance().PROJECT).getEditors(getVirtualFile());
         for (FileEditor fileEditor : fileEditors) {
             editor = ((TextEditor) fileEditor).getEditor();
         }
@@ -86,10 +86,10 @@ public class Reference {
     }
 
     public Icon icon() {
-        if (containingMethod() != null)
-            return containingMethod().getIcon(0);
-        if (containingClass() != null)
-            return containingClass().getIcon(0);
+        if (getPsiMethod() != null)
+            return getPsiMethod().getIcon(0);
+        if (getParentClass() != null)
+            return getParentClass().getIcon(0);
         if (containingPackage() != null)
             return containingFile().getIcon(0);
         return psiElement.getIcon(0);
@@ -104,8 +104,8 @@ public class Reference {
     //MessageBuilder?!
     public String description() {
         StringBuffer description = new StringBuffer();
-        PsiClass containingClass = containingClass();
-        PsiMethod containingMethod = containingMethod();
+        PsiClass containingClass = getParentClass();
+        PsiMethod containingMethod = getPsiMethod();
         PsiFile containingFile = containingFile();
 
 

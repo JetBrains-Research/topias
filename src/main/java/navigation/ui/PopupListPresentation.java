@@ -24,10 +24,10 @@ public class PopupListPresentation implements Presentable {
     }
 
     public void present(PresentationLocation location) {
-        buildPopup().showInScreenCoordinates(DataHolder.getInstance().EDITOR.getContentComponent(), location);
+        createPopup().showInScreenCoordinates(DataHolder.getInstance().EDITOR.getContentComponent(), location);
     }
 
-    private JBPopup buildPopup() {
+    private JBPopup createPopup() {
         PopupChooserBuilder popupChooserBuilder = new PopupChooserBuilder(createList());
         popupChooserBuilder.setTitle(popupTitle);
         JBPopup popup = popupChooserBuilder.createPopup();

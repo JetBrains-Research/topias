@@ -5,16 +5,15 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.Change.Type;
+import db.dao.MethodsChangelogDAO;
+import db.dao.MethodsDictionaryDAO;
+import db.entities.MethodChangeLogEntity;
+import db.entities.MethodDictionaryEntity;
 import git4idea.GitCommit;
 import handlers.commit.AddedChangeHandler;
 import handlers.commit.DeletedChangeHandler;
 import handlers.commit.ModifiedChangeHandler;
 import handlers.commit.MovedChangeHandler;
-import db.dao.MethodsChangelogDAO;
-import db.dao.MethodsDictionaryDAO;
-import db.entities.MethodChangeLogEntity;
-import db.entities.MethodDictionaryEntity;
-import kotlin.Pair;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.jetbrains.annotations.NotNull;
@@ -136,13 +135,24 @@ public final class CommitProcessor {
         }
 
         data.addAll(moved);
-        added.forEach(x -> methodsDictionaryDAO.addToDictionary(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
+        methodsDictionaryDAO.addToDictionary(added
+                .stream()
+                .map(x -> new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName()))
+                .collect(Collectors.toList()));
+
         deleted.forEach(x -> methodsDictionaryDAO.removeFromDictionary(x.getMethodFullName()));
         data.forEach(x -> methodsDictionaryDAO.updateBySignature(x.getOldMethod().getMethodFullName(), new MethodDictionaryEntity(x.getNewMethod().getMethodFullName(), x.getNewMethod().getStartOffset(), x.getNewMethod().getFileName())));
 
         //Signature position updating
         //methodsStorage.getRecalcMethods().forEach(x -> methodsDictionaryDAO.dumbUpsertOfNotChangedMethodEntries(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
-
+        methodsDictionaryDAO.upsertOfNotChangedMethodEntries(
+                methodsStorage.getRecalcMethods()
+                        .stream()
+                        .map(x -> new MethodDictionaryEntity(x.getMethodFullName(),
+                                x.getStartOffset(),
+                                x.getFileName()))
+                        .collect(Collectors.toList())
+        );
         //Just clearing
         methodsStorage.clear();
 
