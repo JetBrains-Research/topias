@@ -67,6 +67,11 @@ public class MethodsDictionaryDAO {
                 logger.error("Sql exception occured while trying to insert new entry to methodsDictionary table", e);
             }
         });
+        try {
+            connectionOpt.get().close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return updatedObjectsCount.get();
     }
 
@@ -113,6 +118,11 @@ public class MethodsDictionaryDAO {
                 logger.error("Sql exception occured while trying to delete entry from methodsDictionary table", e);
             }
         });
+        try {
+            connectionOpt.get().close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return updatedObjectsCount.get();
     }
 
@@ -210,6 +220,11 @@ public class MethodsDictionaryDAO {
                 //logger.error("Sql exception occured while trying to execute batch update to methodsDictionary table", e);
             }
         });
+        try {
+            connectionOpt.get().close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return entities;
     }
 
@@ -264,6 +279,11 @@ public class MethodsDictionaryDAO {
                 //logger.error("Sql exception occured while trying to update methodsDictionary table", e);
             }
         });
+        try {
+            connectionOpt.get().close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return updatedObjectsCount.get();
     }
 }

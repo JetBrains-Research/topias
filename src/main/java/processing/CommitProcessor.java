@@ -141,7 +141,7 @@ public final class CommitProcessor {
         data.forEach(x -> methodsDictionaryDAO.updateBySignature(x.getOldMethod().getMethodFullName(), new MethodDictionaryEntity(x.getNewMethod().getMethodFullName(), x.getNewMethod().getStartOffset(), x.getNewMethod().getFileName())));
 
         //Signature position updating
-        methodsStorage.getRecalcMethods().forEach(x -> methodsDictionaryDAO.dumbUpsertOfNotChangedMethodEntries(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
+        //methodsStorage.getRecalcMethods().forEach(x -> methodsDictionaryDAO.dumbUpsertOfNotChangedMethodEntries(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
 
         //Just clearing
         methodsStorage.clear();

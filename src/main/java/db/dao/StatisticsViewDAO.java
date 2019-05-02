@@ -51,6 +51,12 @@ public class StatisticsViewDAO {
             }
         });
 
+        try {
+            connectionOpt.get().close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return changesData;
     }
 
@@ -87,6 +93,11 @@ public class StatisticsViewDAO {
                 logger.error("Sql exception occured while trying to statistics data", e);
             }
         });
+        try {
+            connectionOpt.get().close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         return entities;
     }

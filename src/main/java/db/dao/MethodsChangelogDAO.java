@@ -107,5 +107,11 @@ public class MethodsChangelogDAO {
 //            }
 
         });
+
+        try {
+            connectionOpt.get().close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
