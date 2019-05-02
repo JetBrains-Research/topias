@@ -35,10 +35,16 @@ public final class PsiBuilder {
                             final PsiMethod method = (PsiMethod) element;
                             final Document document = psiDocumentManager.getDocument(psiFile);
                             assert document != null;
+                            final PsiIdentifier methodNameIdentifier = method.getNameIdentifier();
+                            int startOffset;
                             final TextRange range = method.getTextRange();
-                            final int start = document.getLineNumber(range.getStartOffset());
+                            if (methodNameIdentifier != null) {
+                                startOffset = document.getLineNumber(methodNameIdentifier.getTextOffset());
+                            } else {
+                                startOffset = document.getLineNumber(range.getStartOffset());
+                            }
                             final int end = document.getLineNumber(range.getEndOffset());
-                            infos.add(new MethodInfo(start, end, method, fileName));
+                            infos.add(new MethodInfo(startOffset, end, method, fileName));
                         }
                         super.visitElement(element);
 

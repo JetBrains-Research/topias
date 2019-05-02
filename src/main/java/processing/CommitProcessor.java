@@ -1,5 +1,6 @@
 package processing;
 
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.Change;
@@ -45,9 +46,14 @@ public final class CommitProcessor {
     private String branchName;
     private String hashValue;
     private boolean foundLastHash = false;
+    private final ProgressIndicator indicator;
+    private int commitCountToProcess;
+    double count = 0.0;
 
-    public CommitProcessor(Project project, String branchName) throws Exception {
+    public CommitProcessor(Project project, String branchName, ProgressIndicator indicator, int commitCountToProcess) throws Exception {
         handlers = new HashMap<>();
+        this.indicator = indicator;
+        this.commitCountToProcess = commitCountToProcess;
         this.project = project;
         GitService gitService = new GitServiceImpl();
         this.repository = gitService.openRepository(project.getBasePath());
@@ -87,6 +93,8 @@ public final class CommitProcessor {
         processNewCommit(commit.getChanges(), commit.getId().asString(), authorName, commitTime);
 
         ChangesState.getInstance(project).getState().persistentState.put(branchName, commit.getId().asString());
+        count++;
+        indicator.setFraction(count / commitCountToProcess);
     }
 
     public void processCommit(@NotNull CheckinProjectPanel panel, String authorData, long commitTime) {
@@ -132,6 +140,10 @@ public final class CommitProcessor {
         deleted.forEach(x -> methodsDictionaryDAO.removeFromDictionary(x.getMethodFullName()));
         data.forEach(x -> methodsDictionaryDAO.updateBySignature(x.getOldMethod().getMethodFullName(), new MethodDictionaryEntity(x.getNewMethod().getMethodFullName(), x.getNewMethod().getStartOffset(), x.getNewMethod().getFileName())));
 
+        //Signature position updating
+        methodsStorage.getRecalcMethods().forEach(x -> methodsDictionaryDAO.dumbUpsertOfNotChangedMethodEntries(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
+
+        //Just clearing
         methodsStorage.clear();
 
         changedMethods.forEach(x -> {

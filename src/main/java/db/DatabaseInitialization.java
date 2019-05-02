@@ -14,7 +14,7 @@ public class DatabaseInitialization {
         final String methodsDictionary = "create table methodsDictionary \n" +
                 "(\n" +
                 "  id integer primary key,\n" +
-                "  fullSignature varchar(1024),\n" +
+                "  fullSignature varchar(1024) unique ,\n" +
                 "  startOffset integer not null,\n" +
                 "  fileName varchar(1024) not null,\n" +
                 "  unique (fullSignature, fileName)" +

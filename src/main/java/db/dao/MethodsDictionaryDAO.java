@@ -158,10 +158,11 @@ public class MethodsDictionaryDAO {
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement pstmt = connectionOpt.get().prepareStatement(selectQuery)) {
                 pstmt.setString(1, fullSignature);
-                final ResultSet resultSet = pstmt.executeQuery();
+                ResultSet resultSet = pstmt.executeQuery();
                 while (resultSet.next()) {
                     methodId.set(resultSet.getInt(1));
                 }
+                resultSet = null;
             } catch (SQLException e) {
                 e.printStackTrace();
                 System.out.println("Exception occured while trying to get method id by signature name");
@@ -193,7 +194,7 @@ public class MethodsDictionaryDAO {
                         logger.error("Sql exception occured while trying to prepare update statements for methodsDictionary table", e);
                     }
                 });
-                final ResultSet resultSet = statement.executeQuery();
+                ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
                     MethodInfo info = iter.next();
                     entities.add(new MethodChangeLogEntity(
@@ -203,6 +204,7 @@ public class MethodsDictionaryDAO {
                             resultSet.getInt(1)
                     ));
                 }
+                resultSet = null;
             } catch (SQLException e) {
                 e.printStackTrace();
                 //logger.error("Sql exception occured while trying to execute batch update to methodsDictionary table", e);
@@ -211,12 +213,40 @@ public class MethodsDictionaryDAO {
         return entities;
     }
 
+    public void dumbUpsertOfNotChangedMethodEntries(MethodDictionaryEntity entity) {
+        try {
+            DriverManager.registerDriver(new org.sqlite.JDBC());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        final String sql = "insert into methodsDictionary(fullSignature, startOffset, fileName)  values (?, ?, ?)\n" +
+                "\n" +
+                "on conflict(fullSignature) do update set startOffset=?";
+
+        final Optional<Connection> connectionOpt = Utils.connect(url);
+        final AtomicInteger updatedObjectsCount = new AtomicInteger();
+        connectionOpt.ifPresent(x -> {
+            try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
+                statement.setString(1, entity.getFullMethodSignature());
+                statement.setInt(2, entity.getStartOffset());
+                statement.setString(3, entity.getFileName());
+                statement.setInt(4, entity.getStartOffset());
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                //logger.error("Sql exception occured while trying to update methodsDictionary table", e);
+            }
+        });
+    }
+
     public int updateBySignature(String oldSignature, MethodDictionaryEntity entity) {
         try {
             DriverManager.registerDriver(new org.sqlite.JDBC());
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         final String sql = "update methodsDictionary set fullSignature = ?, fileName = ?, "
                 + "startOffset = ? "
                 + "where fullSignature = ?";

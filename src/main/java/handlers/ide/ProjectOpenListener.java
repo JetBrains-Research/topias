@@ -4,7 +4,9 @@ import com.intellij.execution.ExecutionException;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
@@ -18,6 +20,7 @@ import git4idea.commands.*;
 import git4idea.history.GitHistoryUtils;
 import db.DatabaseInitialization;
 import git4idea.history.GitLogUtil;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.CommitProcessor;
@@ -25,7 +28,9 @@ import processing.Utils;
 import state.ChangesState;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import static java.lang.System.currentTimeMillis;
@@ -69,33 +74,66 @@ public class ProjectOpenListener implements ProjectComponent {
                         gitRootPath.getPath(),
                         GitCommand.REV_LIST
                 );
-                String sinceWhat;
+
+
+                final List<String> sinceWhat = new ArrayList<>();
                 final ChangesState.InnerState state = ChangesState.getInstance(project).getState();
                 if (state != null && state.persistentState.get(currentBranchName) != null) {
                     final String hash = state.persistentState.get(currentBranchName);
-                    sinceWhat = hash + "..HEAD";
+                    sinceWhat.add(hash + "..HEAD");
+                    sinceWhat.add("--count");
                 } else {
-                    sinceWhat = "HASH --since=\"last month\"";
+                    sinceWhat.add("HEAD");
+                    sinceWhat.add("--count");
+                    sinceWhat.add("--since=\"last month\"");
                 }
-                lineHandler.addParameters(sinceWhat, "--count");
+
+                lineHandler.addParameters(sinceWhat);
 
                 final GitCommandResult result = Git.getInstance().runCommand(lineHandler);
-                final String resultAsString = result.getOutputAsJoinedString();
-                final CommitProcessor commitProcessor = new CommitProcessor(project, currentBranchName);
+                final int commitCountToProcess = Integer.parseInt(result.getOutputAsJoinedString());
 
+                if (commitCountToProcess == 0) {
+                    MessageBus bus = project.getMessageBus();
+                    bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER,
+                            new FileOpenListener(null, sqliteFile.getAbsolutePath()));
+                    return;
+                }
+
+
+                sinceWhat.clear();
+                if (state != null && state.persistentState.get(currentBranchName) != null) {
+                    final String hash = state.persistentState.get(currentBranchName);
+                    sinceWhat.add(hash + "..HEAD");
+                } else {
+                    sinceWhat.add("--since=\"last month\"");
+                }
+                sinceWhat.add("--reverse");
+                String[] paramsArray = new String[sinceWhat.size()];
+                paramsArray = sinceWhat.toArray(paramsArray);
+                final String[] finalParamsArray = paramsArray;
                 final Future gitHistoryFuture = ApplicationManager.getApplication().executeOnPooledThread(() ->
-                        {
-                            try {
-                                long start = currentTimeMillis();
-                                GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
-                                "--reverse", "--since=\"last month\"");
-                                logger.info("Git history processing finished");
-                            } catch (VcsException e) {
-                                logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
-                            }
-                        }
-                );
+                        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Topias", false) {
+                            @Override
+                            public void run(@NotNull ProgressIndicator indicator) {
+                                try {
+                                    final CommitProcessor commitProcessor = new CommitProcessor(project,
+                                            currentBranchName,
+                                            indicator,
+                                            commitCountToProcess);
 
+                                    GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
+                                            finalParamsArray);
+                                    logger.info("Git history processing finished");
+                                } catch (VcsException e) {
+                                    logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        })
+
+                );
                 MessageBus bus = project.getMessageBus();
                 bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER,
                         new FileOpenListener(gitHistoryFuture, sqliteFile.getAbsolutePath()));

@@ -22,7 +22,7 @@ public class StatisticsViewDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        this.url = url;
+        this.url = "jdbc:sqlite:" + url;
     }
 
     public List<Integer> selectChangesCountDaily(String fullSigName, DiscrType period) {
@@ -62,17 +62,17 @@ public class StatisticsViewDAO {
                 "       sum(changesCount) as changes,\n" +
                 "       fileName,\n" +
                 "       startOffset\n" +
-                "from statisticsView where discrType = 1 and fileName = ? and dtDateTime between ? and ? group by discrType, fullSignature;";
+                "from statisticsView where discrType = 0 and fileName = ? and dtDateTime between ? and ? group by discrType, fullSignature;";
 
         final Optional<Connection> connectionOpt = Utils.connect(url);
         final List<StatisticsViewEntity> entities = new LinkedList<>();
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
                 statement.setString(1, fileName);
-                statement.setLong(2, from.toEpochDay());
-                statement.setLong(3, to.toEpochDay());
+                statement.setString(2, from.toString());
+                statement.setString(3, to.toString());
 
-                final ResultSet resultSet = statement.executeQuery();
+                ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
                     entities.add(new StatisticsViewEntity(
                             resultSet.getString(1),
@@ -81,6 +81,7 @@ public class StatisticsViewDAO {
                             resultSet.getInt(4)
                     ));
                 }
+                resultSet = null;
             } catch (SQLException e) {
                 e.printStackTrace();
                 logger.error("Sql exception occured while trying to statistics data", e);

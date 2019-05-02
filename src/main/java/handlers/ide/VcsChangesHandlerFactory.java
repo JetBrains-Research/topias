@@ -55,7 +55,7 @@ public final class VcsChangesHandlerFactory extends CheckinHandlerFactory {
             final String currentBranchName;
             try {
                 currentBranchName = Utils.getCurrentBranchName(project);
-                this.utils = new CommitProcessor(project, currentBranchName);
+               // this.utils = new CommitProcessor(project, currentBranchName);
             } catch (VcsException e) {
                 logger.error("No, just no");
                 e.printStackTrace();

@@ -60,6 +60,7 @@ public class MovedChangeHandler implements BiFunction<Project, Change, Optional<
             });
             methodsStorage.storeMovedMethods(moved);
 
+
             //saving to delete from dictionary or find refactorings
             final List<MethodInfo> deletedInNewRevision = oldRevMethods.stream().filter(x -> notContains(newRevMethods, x)).collect(Collectors.toList());
             methodsStorage.storeDeletedMethods(deletedInNewRevision);

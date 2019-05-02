@@ -62,9 +62,12 @@ public class FileOpenListener implements FileEditorManagerListener {
 
         final InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
         try {
-            gitHistoryFuture.get();
-            final List<StatisticsViewEntity> entities = dao.getStatDataForFile(file.getPath(), DiscrType.WEEK);
-            entities.stream().map(x -> new Pair<>(x, dao.selectChangesCountDaily(x.getFullSignature(), DiscrType.WEEK)))
+            //waiting for computation to complete
+            if (gitHistoryFuture != null)
+                gitHistoryFuture.get();
+
+            final List<StatisticsViewEntity> entities = dao.getStatDataForFile(file.getPath(), DiscrType.MONTH);
+            entities.stream().map(x -> new Pair<>(x, dao.selectChangesCountDaily(x.getFullSignature(), DiscrType.MONTH)))
                     .forEach(x -> {
                         inlay.addBlockElement(doc.getLineStartOffset(x.getFirst().getStartOffset()) + countStartColumn(x.getFirst().getStartOffset(), doc),
                                 false,

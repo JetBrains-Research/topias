@@ -40,10 +40,7 @@ public class LabelRenderer extends HintRenderer {
 
     @Override
     public int calcWidthInPixels(Inlay inlay) {
-        return 100000;
-//            Editor editor = inlay.getEditor();
-//            FontMetrics fontMetrics = getFontMetrics(editor).getMetrics();
-//            return doCalcWidth(super.getText(), fontMetrics) + calcWidthAdjustment(editor, fontMetrics);
+            return 400;
     }
 
     @Override
@@ -106,7 +103,7 @@ final XYPlot xyPlot = chart.getXYPlot();
                 g.setColor(foregroundColor);
                 g.setFont(getFont(editor));
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(false));
-                g2d.setClip(r.x, r.y, 10000, 100);
+                g2d.setClip(r.x, r.y, 200, 30);
                 final FontMetrics metrics = fontMetrics.getMetrics();
                 final int startX = r.x + 7 + fontMetrics.getMetrics().stringWidth(String.format("%"+ lineStartOffset +"s", ""));
                 final int startY = r.y + Math.max(ascent, (r.height + metrics.getAscent() - metrics.getDescent()) / 2) - 1;
@@ -114,7 +111,7 @@ final XYPlot xyPlot = chart.getXYPlot();
                 final int widthAdjustment = calcWidthAdjustment(editor, g.getFontMetrics());
                 if (widthAdjustment == 0) {
                     g.drawString(super.getText(), startX + 3, startY);
-                    g2d.drawImage(bufferedImage, null, startX + 620, startY - 35);
+                    g2d.drawImage(bufferedImage, null, startX + 200, startY - 10);
                 } else {
                     final int adjustmentPosition = this.getWidthAdjustment().getAdjustmentPosition();
                     final String firstPart = this.getText().substring(0, adjustmentPosition);

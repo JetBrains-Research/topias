@@ -57,8 +57,14 @@ public class ModifiedChangeHandler implements BiFunction<Project, Change, Option
                     before.getContent(), Utils.getFileName(change)
             ));
 
-            methodsStorage.storeDeletedMethods(new LinkedList<MethodInfo>(CollectionUtils.subtract(methodsInOldRev, methodsInNewRev)));
-            methodsStorage.storeAddedMethods(new LinkedList<MethodInfo>(CollectionUtils.subtract(methodsInNewRev, methodsInOldRev)));
+            final List<MethodInfo> deleted = new LinkedList<MethodInfo>(CollectionUtils.subtract(methodsInOldRev, methodsInNewRev));
+            final List<MethodInfo> added = new LinkedList<MethodInfo>(CollectionUtils.subtract(methodsInNewRev, methodsInOldRev));
+            methodsStorage.storeDeletedMethods(deleted);
+            methodsStorage.storeAddedMethods(added);
+
+            //For correct displaying we must recalculate methods coordinates
+            final List<MethodInfo> recalcMethods = new LinkedList<>(CollectionUtils.subtract(methodsInNewRev, added));
+            methodsStorage.storeRecalcMethods(recalcMethods);
 
             final List<AbstractMap.SimpleEntry<Integer, Integer>> boundariesOfChanges =
                     parsedChanges.stream().map(y ->

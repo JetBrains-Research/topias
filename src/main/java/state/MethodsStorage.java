@@ -10,11 +10,13 @@ public class MethodsStorage {
     private final List<MethodInfo> deletedMethods;
     private final List<RefactoringData> movedMethods;
     private final List<MethodInfo> addedMethods;
+    private final List<MethodInfo> recalcMethods;
 
     private MethodsStorage() {
         this.deletedMethods = new ArrayList<>();
         this.movedMethods = new ArrayList<>();
         this.addedMethods = new ArrayList<>();
+        this.recalcMethods = new ArrayList<>();
     }
 
     public static MethodsStorage getInstance() {
@@ -37,6 +39,10 @@ public class MethodsStorage {
         return addedMethods;
     }
 
+    public List<MethodInfo> getRecalcMethods() {
+        return recalcMethods;
+    }
+
     public void storeDeletedMethods(List<MethodInfo> deletedMethods) {
         this.deletedMethods.addAll(deletedMethods);
     }
@@ -51,6 +57,10 @@ public class MethodsStorage {
 
     public void storeAddedMethod(MethodInfo methodInfo) {
         this.addedMethods.add(methodInfo);
+    }
+
+    public void storeRecalcMethods(List<MethodInfo> recalcMethods) {
+        this.recalcMethods.addAll(recalcMethods);
     }
 
     public void clear() {
