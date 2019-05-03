@@ -3,6 +3,10 @@ package handlers.ide;
 import com.intellij.execution.ExecutionException;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -15,11 +19,13 @@ import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.openapi.vcs.impl.VcsInitObject;
 import com.intellij.util.messages.MessageBus;
+import editor.DrawingUtils;
 import git4idea.GitUtil;
 import git4idea.commands.*;
 import git4idea.history.GitHistoryUtils;
 import db.DatabaseInitialization;
 import git4idea.history.GitLogUtil;
+import git4idea.repo.GitRepository;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +37,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -56,7 +62,7 @@ public class ProjectOpenListener implements ProjectComponent {
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
 
-                final VcsRoot gitRootPath = Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
+                final VcsRoot  gitRootPath = Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
                         .filter(x -> x.getVcs().getName().equalsIgnoreCase("git"))
                         .findAny().orElse(null);
 
@@ -96,10 +102,10 @@ public class ProjectOpenListener implements ProjectComponent {
                 if (commitCountToProcess == 0) {
                     MessageBus bus = project.getMessageBus();
                     bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER,
-                            new FileOpenListener(null, sqliteFile.getAbsolutePath()));
+                            new FileOpenListener(sqliteFile.getAbsolutePath()));
+                    bus.connect().subscribe(GitRepository.GIT_REPO_CHANGE, new GitRepoChangeListener());
                     return;
                 }
-
 
                 sinceWhat.clear();
                 if (state != null && state.persistentState.get(currentBranchName) != null) {
@@ -108,36 +114,45 @@ public class ProjectOpenListener implements ProjectComponent {
                 } else {
                     sinceWhat.add("--since=\"last month\"");
                 }
+
                 sinceWhat.add("--reverse");
                 String[] paramsArray = new String[sinceWhat.size()];
                 paramsArray = sinceWhat.toArray(paramsArray);
                 final String[] finalParamsArray = paramsArray;
-                final Future gitHistoryFuture = ApplicationManager.getApplication().executeOnPooledThread(() ->
-                        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Topias", false) {
-                            @Override
-                            public void run(@NotNull ProgressIndicator indicator) {
-                                try {
-                                    final CommitProcessor commitProcessor = new CommitProcessor(project,
-                                            currentBranchName,
-                                            indicator,
-                                            commitCountToProcess);
 
-                                    GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
-                                            finalParamsArray);
-                                    logger.info("Git history processing finished");
-                                } catch (VcsException e) {
-                                    logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        })
+                final Task.Backgroundable backgroundable = new Task.Backgroundable(project, "Topias Plugin: Processing Git Commit History", false) {
+                    @Override
+                    public void run(@NotNull ProgressIndicator indicator) {
+                        try {
+                            final CommitProcessor commitProcessor = new CommitProcessor(project,
+                                    currentBranchName,
+                                    indicator,
+                                    commitCountToProcess);
 
-                );
+                            GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
+                                    finalParamsArray);
+                            logger.info("Git history processing finished");
+                        } catch (VcsException e) {
+                            logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
 
-                MessageBus bus = project.getMessageBus();
-                bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER,
-                        new FileOpenListener(gitHistoryFuture, sqliteFile.getAbsolutePath()));
+                    @Override
+                    public void onFinished() {
+                        MessageBus bus = project.getMessageBus();
+                        bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER,
+                                new FileOpenListener(sqliteFile.getAbsolutePath()));
+
+                        System.out.println("Applying results to all opened editors");
+                        final List<Editor> editors = Arrays.asList(EditorFactory.getInstance().getAllEditors());
+                        final DrawingUtils drawingUtils = DrawingUtils.getInstance(sqliteFile.getAbsolutePath());
+                        editors.forEach(drawingUtils::drawInlaysInEditor);
+                        super.onFinished();
+                    }
+                };
+                ProgressManager.getInstance().run(backgroundable);
 
             } catch (Exception e) {
                 logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());

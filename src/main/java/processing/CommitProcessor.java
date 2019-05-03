@@ -94,6 +94,7 @@ public final class CommitProcessor {
         ChangesState.getInstance(project).getState().persistentState.put(branchName, commit.getId().asString());
         count++;
         indicator.setFraction(count / commitCountToProcess);
+        System.out.println("Commit #" + count + " from " + commitCountToProcess + " was processed");
     }
 
     public void processCommit(@NotNull CheckinProjectPanel panel, String authorData, long commitTime) {
