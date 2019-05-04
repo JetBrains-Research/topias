@@ -28,6 +28,6 @@ public class ProjectOpenListener implements ProjectComponent {
         }
         logger.info("DB file is located at {}", sqliteFile.getAbsolutePath());
         logger.info("Starting processing of git history");
-        GitCommitsProcessor.processGitHistory(project, sqliteFile.getPath());
+        GitCommitsProcessor.processGitHistory(project, sqliteFile.getPath(), true);
     }
 }
