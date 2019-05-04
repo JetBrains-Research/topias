@@ -11,7 +11,6 @@ import java.util.Optional;
 
 public class MethodsChangelogDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsChangelogDAO.class);
-    private final String url;
     private final Optional<Connection> connectionOpt;
 
     public MethodsChangelogDAO(String url) {
@@ -20,7 +19,6 @@ public class MethodsChangelogDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        this.url = url;
         this.connectionOpt = Utils.connect(url);
     }
 

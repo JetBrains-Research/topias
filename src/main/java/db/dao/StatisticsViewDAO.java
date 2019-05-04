@@ -18,7 +18,6 @@ import static java.time.temporal.ChronoUnit.DAYS;
 
 public class StatisticsViewDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsDictionaryDAO.class);
-    private final String url;
     private final Optional<Connection> connectionOpt;
 
     public StatisticsViewDAO(String url) {
@@ -27,8 +26,7 @@ public class StatisticsViewDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        this.url = "jdbc:sqlite:" + url;
-        this.connectionOpt = Utils.connect(url);
+        this.connectionOpt = Utils.connect("jdbc:sqlite:" + url);
     }
 
     @Override

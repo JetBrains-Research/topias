@@ -139,7 +139,6 @@ public class GitCommitsProcessor {
                         super.onFinished();
                     }
                 };
-
                 ProgressManager.getInstance().run(backgroundable);
 
             } catch (Exception e) {

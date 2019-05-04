@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MethodsDictionaryDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsDictionaryDAO.class);
-    private final String url;
     private final Optional<Connection> connectionOpt;
 
     public MethodsDictionaryDAO(String url) {
@@ -22,7 +21,6 @@ public class MethodsDictionaryDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        this.url = url;
         connectionOpt = Utils.connect(url);
     }
 
