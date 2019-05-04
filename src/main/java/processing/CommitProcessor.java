@@ -79,15 +79,6 @@ public final class CommitProcessor {
     }
 
     public void processCommit(GitCommit commit) {
-        if (hashValue != null && !hashValue.isEmpty() && commit.getId().asString().equals(hashValue)) {
-            System.out.println("Found last parsed commit");
-            foundLastHash = true;
-            return;
-        }
-
-        if (hashValue != null && !hashValue.isEmpty() && !foundLastHash)
-            return;
-
         final String authorName = commit.getAuthor().getEmail();
         final long commitTime = commit.getCommitTime();
 
@@ -97,10 +88,6 @@ public final class CommitProcessor {
         count++;
         indicator.setFraction(count / commitCountToProcess);
         System.out.println("Commit #" + count + " from " + commitCountToProcess + " was processed");
-    }
-
-    public void processCommit(@NotNull CheckinProjectPanel panel, String authorData, long commitTime) {
-        processNewCommit(panel.getSelectedChanges(), "", authorData, commitTime);
     }
 
     private void processNewCommit(Collection<Change> changes, String commitId, String authorName, long commitTime) {

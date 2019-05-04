@@ -8,13 +8,18 @@ import settings.enums.DiscrType;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
+
 public class StatisticsViewDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsDictionaryDAO.class);
     private final String url;
+    private final Optional<Connection> connectionOpt;
 
     public StatisticsViewDAO(String url) {
         try {
@@ -23,27 +28,44 @@ public class StatisticsViewDAO {
             e.printStackTrace();
         }
         this.url = "jdbc:sqlite:" + url;
+        this.connectionOpt = Utils.connect(url);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        connectionOpt.ifPresent(x -> {
+            try {
+                x.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        super.finalize();
     }
 
     public List<Integer> selectChangesCountDaily(String fullSigName, DiscrType period) {
+        final int days = period.equals(DiscrType.MONTH) ? 30 : 7;
         final LocalDate to = LocalDate.now();
-        final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
+        final LocalDate from = to.minusDays(days);
 
-        final String sql = "select changesCount from statisticsView where discrType = 0 " +
-                "and fullSignature = ? " +
-                "and dtDateTime between ? and ?";
 
-        final Optional<Connection> connectionOpt = Utils.connect(url);
-        final List<Integer> changesData = new LinkedList<>();
+        final String sql = "select dtDateTime, changesCount from statisticsView where\n" +
+                "fullSignature = ? " +
+                "and dtDateTime between ? and ?" +
+                "group by dtDateTime";
+
+        Integer[] changesData = new Integer[days];
+        Arrays.fill(changesData, 0);
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
                 statement.setString(1, fullSigName);
-                statement.setLong(2, from.toEpochDay());
-                statement.setLong(3, to.toEpochDay());
+                statement.setString(2, from.toString());
+                statement.setString(3, to.toString());
 
                 final ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    changesData.add(resultSet.getInt(1));
+                    int pos = (int) DAYS.between(from, LocalDate.parse(resultSet.getString(1).split(" ")[0]));
+                    changesData[pos] += resultSet.getInt(2);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -51,13 +73,7 @@ public class StatisticsViewDAO {
             }
         });
 
-        try {
-            connectionOpt.get().close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return changesData;
+        return Arrays.asList(changesData);
     }
 
     public List<StatisticsViewEntity> getStatDataForFile(String fileName, DiscrType period) {
@@ -70,7 +86,6 @@ public class StatisticsViewDAO {
                 "       startOffset\n" +
                 "from statisticsView where discrType = 0 and fileName = ? and dtDateTime between ? and ? group by discrType, fullSignature;";
 
-        final Optional<Connection> connectionOpt = Utils.connect(url);
         final List<StatisticsViewEntity> entities = new LinkedList<>();
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
@@ -93,11 +108,6 @@ public class StatisticsViewDAO {
                 logger.error("Sql exception occured while trying to statistics data", e);
             }
         });
-        try {
-            connectionOpt.get().close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
         return entities;
     }

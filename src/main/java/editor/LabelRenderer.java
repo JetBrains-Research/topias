@@ -30,9 +30,9 @@ public class LabelRenderer extends HintRenderer {
     private final int lineStartOffset;
     private XYSeries xySeries;
 
-    public LabelRenderer(@Nullable String text, Pair<StatisticsViewEntity, List<Integer>> methodData) {
+    public LabelRenderer(@Nullable String text, Pair<StatisticsViewEntity, List<Integer>> methodData, int lineOffset) {
         super(text);
-        this.lineStartOffset = methodData.getFirst().getStartOffset();
+        this.lineStartOffset = lineOffset;
         this.xySeries = new XYSeries("");
         final AtomicInteger index = new AtomicInteger(1);
         methodData.getSecond().forEach(val -> xySeries.add(index.getAndIncrement(), val));
@@ -40,7 +40,7 @@ public class LabelRenderer extends HintRenderer {
 
     @Override
     public int calcWidthInPixels(Inlay inlay) {
-            return 400;
+        return 1100;
     }
 
     @Override
@@ -70,11 +70,11 @@ public class LabelRenderer extends HintRenderer {
                 false,
                 false
         );
-final XYPlot xyPlot = chart.getXYPlot();
+        final XYPlot xyPlot = chart.getXYPlot();
         chart.getXYPlot().setBackgroundPaint(new Color(255, 255, 255));
         chart.getXYPlot().getRenderer().setSeriesPaint(0, new Color(0, 0, 255));
         final ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new java.awt.Dimension(150, 45));
+        chartPanel.setPreferredSize(new java.awt.Dimension(150, 35));
         chartPanel.getScreenDataArea();
         xyPlot.getDomainAxis().setAxisLineVisible(false);
         xyPlot.getDomainAxis().setTickMarksVisible(false);
@@ -88,8 +88,7 @@ final XYPlot xyPlot = chart.getXYPlot();
         // flat bars look best...
         renderer.setBarPainter(new StandardXYBarPainter());
 
-
-        final BufferedImage bufferedImage = chart.createBufferedImage(150, 45 );
+        final BufferedImage bufferedImage = chart.createBufferedImage(150, 35);
 
 
         if (super.getText() != null && attributes != null) {
@@ -103,15 +102,15 @@ final XYPlot xyPlot = chart.getXYPlot();
                 g.setColor(foregroundColor);
                 g.setFont(getFont(editor));
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(false));
-                g2d.setClip(r.x, r.y, 200, 30);
+                g2d.setClip(r.x, r.y, 500, 40);
                 final FontMetrics metrics = fontMetrics.getMetrics();
-                final int startX = r.x + 7 + fontMetrics.getMetrics().stringWidth(String.format("%"+ lineStartOffset +"s", ""));
+                final int startX = r.x + 7 + fontMetrics.getMetrics().stringWidth(String.format("%" + lineStartOffset + "s", ""));
                 final int startY = r.y + Math.max(ascent, (r.height + metrics.getAscent() - metrics.getDescent()) / 2) - 1;
 
                 final int widthAdjustment = calcWidthAdjustment(editor, g.getFontMetrics());
                 if (widthAdjustment == 0) {
                     g.drawString(super.getText(), startX + 3, startY);
-                    g2d.drawImage(bufferedImage, null, startX + 200, startY - 10);
+                    g2d.drawImage(bufferedImage, null, startX + 300, startY - 25);
                 } else {
                     final int adjustmentPosition = this.getWidthAdjustment().getAdjustmentPosition();
                     final String firstPart = this.getText().substring(0, adjustmentPosition);

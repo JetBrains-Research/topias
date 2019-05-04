@@ -1,5 +1,6 @@
 package editor;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.impl.EditorImpl;
@@ -15,6 +16,7 @@ import settings.TopiasSettingsState;
 import settings.enums.DiscrType;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DrawingUtils {
     private static DrawingUtils instance = null;
@@ -39,21 +41,32 @@ public class DrawingUtils {
         final Document doc = editor.getDocument();
         final InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
         final VirtualFile file = ((EditorImpl) editor).getVirtualFile();
-
+        if (file == null || !file.getPath().substring(file.getPath().lastIndexOf('.') + 1).equals("java"))
+            return;
 
         final List<StatisticsViewEntity> entities = dao.getStatDataForFile(file.getPath(), period);
-        entities.stream().map(x -> new Pair<>(x, dao.selectChangesCountDaily(x.getFullSignature(), period)))
+        final List<Pair<StatisticsViewEntity, List<Integer>>> pairs =
+                entities.stream()
+                        .map(x -> new Pair<>(x, dao.selectChangesCountDaily(x.getFullSignature(), period)))
+                        .collect(Collectors.toList());
+
+        ApplicationManager.getApplication().invokeLater(() -> pairs
                 .forEach(x -> {
                     inlay.addBlockElement(doc.getLineStartOffset(x.getFirst().getStartOffset()) + countStartColumn(x.getFirst().getStartOffset(), doc),
                             false,
                             true,
                             0,
-                            new LabelRenderer("Method was changed " + x.getFirst().getChangesCount() + " times for last " + period.getTextValue(), x)
+                            new LabelRenderer("Method was changed " + x.getFirst().getChangesCount() + " times for last " + period.getTextValue(), x,
+                                    countStartColumn(x.getFirst().getStartOffset(), doc))
                     );
-                });
+                }));
     }
 
     public void cleanInlayInEditor(Editor editor) {
+        final InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
+        final VirtualFile file = ((EditorImpl) editor).getVirtualFile();
+        if (file == null || !file.getPath().substring(file.getPath().lastIndexOf('.') + 1).equals("java"))
+            return;
         ((InlayModelImpl) editor.getInlayModel()).dispose();
     }
 

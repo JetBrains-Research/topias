@@ -12,17 +12,31 @@ import java.util.Optional;
 public class MethodsChangelogDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsChangelogDAO.class);
     private final String url;
+    private final Optional<Connection> connectionOpt;
 
     public MethodsChangelogDAO(String url) {
-        this.url = url;
-    }
-
-    public void insertMethodsChanges(List<MethodChangeLogEntity> entities) {
         try {
             DriverManager.registerDriver(new org.sqlite.JDBC());
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        this.url = url;
+        this.connectionOpt = Utils.connect(url);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        connectionOpt.ifPresent(x -> {
+            try {
+                x.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        super.finalize();
+    }
+
+    public void insertMethodsChanges(List<MethodChangeLogEntity> entities) {
         if (entities == null || entities.isEmpty())
             return;
 
@@ -45,23 +59,6 @@ public class MethodsChangelogDAO {
         final String upsertStatDaily = "insert into statsData select " +
                 "* from " +
                 "tempStatsData where true on conflict(dtDateTime, discrType, signatureId) do update set changesCount=changesCount+'changesC';";
-//
-//        final String insertStatMonthly = "insert into statsData\n" +
-//                "select *\n" +
-//                "from (\n" +
-//                "       select datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of month') as dtDateTime,\n" +
-//                "              1 as discrType,\n" +
-//                "              signatureId,\n" +
-//                "              count(*)                                                       as changesC,\n" +
-//                "              (datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day') || '|' || 1 || '|' || signatureId) as uniqueConstraint\n" +
-//                "       from methodsChangeLog\n" +
-//                "       where dtChanged = ? \n" +
-//                "       group by dtDateTime, signatureId)\n" +
-//                "WHERE true\n" +
-//                "on conflict (uniqueConstraint) do update\n" +
-//                "set changesCount = changesCount + changesC;";
-
-        final Optional<Connection> connectionOpt = Utils.connect(url);
 
         connectionOpt.ifPresent(x -> {
             try (PreparedStatement statement = connectionOpt.get().prepareStatement(insertQuery)) {
@@ -95,23 +92,7 @@ public class MethodsChangelogDAO {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-//
-//            try (PreparedStatement statement = connectionOpt.get().prepareStatement(insertStatMonthly)) {
-//                statement.setLong(1, commitTime);
-//                statement.execute();
-//
-//                statement.execute(upsertStatDaily);
-//                statement.executeUpdate(truncateTempTable);
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
-
         });
 
-        try {
-            connectionOpt.get().close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 }

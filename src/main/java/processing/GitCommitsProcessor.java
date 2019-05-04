@@ -85,6 +85,9 @@ public class GitCommitsProcessor {
                         bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER,
                                 new FileOpenListener(dbFilePath));
                         bus.connect().subscribe(GitRepository.GIT_REPO_CHANGE, new GitRepoChangeListener());
+                        final List<Editor> editors = Arrays.asList(EditorFactory.getInstance().getAllEditors());
+                        final DrawingUtils drawingUtils = DrawingUtils.getInstance(dbFilePath);
+                        editors.forEach(drawingUtils::drawInlaysInEditor);
                     }
                     return;
                 }
