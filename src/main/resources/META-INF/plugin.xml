@@ -13,7 +13,6 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <checkinHandlerFactory implementation="handlers.ide.VcsChangesHandlerFactory"/>
         <projectService serviceInterface="state.ChangesState" serviceImplementation="state.ChangesState"/>
         <applicationService serviceInterface="settings.TopiasSettingsState" serviceImplementation="settings.TopiasSettingsState" />
         <toolWindow id="Topias" anchor="bottom"

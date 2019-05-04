@@ -29,7 +29,7 @@ public class StatisticsViewDAO {
         final LocalDate to = LocalDate.now();
         final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
 
-        final String sql = "select changesCount from statisticsView where discrType = 1 " +
+        final String sql = "select changesCount from statisticsView where discrType = 0 " +
                 "and fullSignature = ? " +
                 "and dtDateTime between ? and ?";
 

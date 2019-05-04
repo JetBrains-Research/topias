@@ -31,7 +31,7 @@ public class DrawingUtils {
 
     public void drawInlaysInEditor(Editor editor) {
         final TopiasSettingsState.SettingsState state = TopiasSettingsState.getInstance().getState();
-        final DiscrType period = state == null? DiscrType.MONTH : state.discrType;
+        final DiscrType period = state == null ? DiscrType.MONTH : state.discrType;
 
         if (editor == null)
             return;
@@ -40,6 +40,7 @@ public class DrawingUtils {
         final InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
         final VirtualFile file = ((EditorImpl) editor).getVirtualFile();
 
+
         final List<StatisticsViewEntity> entities = dao.getStatDataForFile(file.getPath(), period);
         entities.stream().map(x -> new Pair<>(x, dao.selectChangesCountDaily(x.getFullSignature(), period)))
                 .forEach(x -> {
@@ -47,10 +48,13 @@ public class DrawingUtils {
                             false,
                             true,
                             0,
-                            new LabelRenderer("Method was changed " + x.getFirst().getChangesCount() + " times for last " + period.getTextValue(),
-                                    x)
+                            new LabelRenderer("Method was changed " + x.getFirst().getChangesCount() + " times for last " + period.getTextValue(), x)
                     );
                 });
+    }
+
+    public void cleanInlayInEditor(Editor editor) {
+        ((InlayModelImpl) editor.getInlayModel()).dispose();
     }
 
     private static int countStartColumn(int lineNumber, Document doc) {
