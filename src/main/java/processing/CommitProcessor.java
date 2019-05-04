@@ -34,6 +34,8 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import static processing.Utils.buildPathForSystem;
+
 public final class CommitProcessor {
     private final static Logger logger = LoggerFactory.getLogger(CommitProcessor.class);
     private final Map<Type, BiFunction<Project, Change, Optional<List<MethodInfo>>>> handlers;
@@ -62,8 +64,8 @@ public final class CommitProcessor {
                 .persistentState
                 .get(branchName);
 
-        this.methodsChangelogDAO = new MethodsChangelogDAO("jdbc:sqlite:" + project.getBasePath() + "/.idea/state.db");
-        this.methodsDictionaryDAO = new MethodsDictionaryDAO("jdbc:sqlite:" + project.getBasePath() + "/.idea/state.db");
+        this.methodsChangelogDAO = new MethodsChangelogDAO("jdbc:sqlite:" + buildPathForSystem(project));
+        this.methodsDictionaryDAO = new MethodsDictionaryDAO("jdbc:sqlite:" + buildPathForSystem(project));
 
         handlers.put(Type.DELETED, new DeletedChangeHandler());
         handlers.put(Type.MODIFICATION, new ModifiedChangeHandler());
