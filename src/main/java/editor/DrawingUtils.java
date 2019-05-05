@@ -31,7 +31,7 @@ public class DrawingUtils {
     }
 
     private DrawingUtils(String url) {
-        this.dao = new StatisticsViewDAO();
+        this.dao = new StatisticsViewDAO(url);
     }
 
     public void drawInlaysInEditor(Editor editor) {

@@ -19,8 +19,8 @@ public class MethodsDictionaryDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsDictionaryDAO.class);
     private final Connection connection;
 
-    public MethodsDictionaryDAO() {
-        this.connection = DatabaseInitialization.getConnection();
+    public MethodsDictionaryDAO(String url) {
+        this.connection = DatabaseInitialization.getConnection(url);
     }
 
     public int addToDictionary(List<MethodDictionaryEntity> entities) {
@@ -39,6 +39,7 @@ public class MethodsDictionaryDAO {
                 }
             });
             statement.executeBatch();
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             logger.error("Sql exception occured while trying to insert new entry to methodsDictionary table", e);
@@ -54,6 +55,7 @@ public class MethodsDictionaryDAO {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, name);
             statement.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             logger.error("Sql exception occured while trying to delete entry from methodsDictionary table", e);
@@ -73,6 +75,7 @@ public class MethodsDictionaryDAO {
                 methodId.set(resultSet.getInt(1));
             }
             resultSet = null;
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("Exception occured while trying to get method id by signature name");
@@ -156,6 +159,7 @@ public class MethodsDictionaryDAO {
                 }
             });
             statement.executeBatch();
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -178,6 +182,7 @@ public class MethodsDictionaryDAO {
                 }
             });
             statement.executeBatch();
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             //logger.error("Sql exception occured while trying to update methodsDictionary table", e);

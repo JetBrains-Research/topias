@@ -68,6 +68,7 @@ public class DatabaseInitialization {
         }
         try {
             connection = DriverManager.getConnection(url);
+            connection.setAutoCommit(false);
             final DatabaseMetaData meta = connection.getMetaData();
             System.out.println("The driver name is " + meta.getDriverName() + "  " + meta.getDriverVersion());
             System.out.println("A new database has been created.");
@@ -78,12 +79,23 @@ public class DatabaseInitialization {
             statement.execute(statsTable);
             statement.execute(tempStatsTable);
             statement.execute(statsView);
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public static Connection getConnection() {
+    public static Connection getConnection(String path) {
+        final String url = "jdbc:sqlite:" + path;
+        if (connection == null) {
+            try {
+                DriverManager.registerDriver(new org.sqlite.JDBC());
+                connection = DriverManager.getConnection(url);
+                connection.setAutoCommit(false);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
         return connection;
     }
 }

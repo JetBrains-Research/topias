@@ -4,7 +4,6 @@ import db.DatabaseInitialization;
 import db.entities.StatisticsViewEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import processing.Utils;
 import settings.enums.DiscrType;
 
 import java.sql.*;
@@ -20,17 +19,17 @@ public class StatisticsViewDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsDictionaryDAO.class);
     private final Connection connection;
 
-    public StatisticsViewDAO() {
-        this.connection = DatabaseInitialization.getConnection();
+    public StatisticsViewDAO(String url) {
+        this.connection = DatabaseInitialization.getConnection(url);
     }
 
     public List<Integer> selectChangesCountDaily(String fullSigName, DiscrType period) {
         final int days = period.equals(DiscrType.MONTH) ? 30 : 7;
-        final LocalDate to = LocalDate.now();
+        final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(days);
 
 
-        final String sql = "select dtDateTime, changesCount from statisticsView where\n" +
+        final String sql = "select dtDateTime, sum(changesCount) from statisticsView where\n" +
                 "fullSignature = ? " +
                 "and dtDateTime between ? and ?" +
                 "group by dtDateTime";
@@ -58,14 +57,14 @@ public class StatisticsViewDAO {
     }
 
     public List<StatisticsViewEntity> getStatDataForFile(String fileName, DiscrType period) {
-        final LocalDate to = LocalDate.now();
+        final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
 
         final String sql = "select fullSignature,\n" +
-                "       sum(changesCount) as changes,\n" +
+                "       sum(changesCount) as changesC,\n" +
                 "       fileName,\n" +
                 "       startOffset\n" +
-                "from statisticsView where discrType = 0 and fileName = ? and dtDateTime between ? and ? group by discrType, fullSignature;";
+                "from statisticsView where discrType = 0 and fileName = ? and dtDateTime between ? and ? group by fullSignature;";
 
         final List<StatisticsViewEntity> entities = new LinkedList<>();
             try (PreparedStatement statement = connection.prepareStatement(sql)) {

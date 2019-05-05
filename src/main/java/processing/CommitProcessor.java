@@ -34,6 +34,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static java.lang.System.currentTimeMillis;
+import static processing.Utils.buildPathForSystem;
 
 public final class CommitProcessor {
     private final static Logger logger = LoggerFactory.getLogger(CommitProcessor.class);
@@ -63,18 +64,13 @@ public final class CommitProcessor {
                 .persistentState
                 .get(branchName);
 
-        this.methodsChangelogDAO = new MethodsChangelogDAO();
-        this.methodsDictionaryDAO = new MethodsDictionaryDAO();
+        this.methodsChangelogDAO = new MethodsChangelogDAO(buildPathForSystem(project));
+        this.methodsDictionaryDAO = new MethodsDictionaryDAO(buildPathForSystem(project));
 
         handlers.put(Type.DELETED, new DeletedChangeHandler());
         handlers.put(Type.MODIFICATION, new ModifiedChangeHandler());
         handlers.put(Type.MOVED, new MovedChangeHandler());
         handlers.put(Type.NEW, new AddedChangeHandler());
-    }
-
-    private static String methodNameWithoutPackage(MethodInfo info) {
-        final String[] splitted = info.getMethodFullName().split("\\.");
-        return splitted[splitted.length - 1];
     }
 
     public void processCommit(GitCommit commit) {

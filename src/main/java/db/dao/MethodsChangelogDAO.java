@@ -15,8 +15,8 @@ public class MethodsChangelogDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsChangelogDAO.class);
     private final Connection connection;
 
-    public MethodsChangelogDAO() {
-        this.connection = DatabaseInitialization.getConnection();
+    public MethodsChangelogDAO(String url) {
+        this.connection = DatabaseInitialization.getConnection(url);
     }
 
     public void insertMethodsChanges(List<MethodChangeLogEntity> entities) {
@@ -37,7 +37,7 @@ public class MethodsChangelogDAO {
                 "              count(*) as changesC\n" +
                 "       from methodsChangeLog\n" +
                 "       where dtChanged = ?\n" +
-                "       group by datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day'), signatureId);";
+                "       group by signatureId, dtDateTime);";
 
         final String upsertStatDaily = "insert into statsData select " +
                 "* from " +
@@ -71,6 +71,7 @@ public class MethodsChangelogDAO {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(upsertStatDaily);
             statement.execute(truncateTempTable);
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }

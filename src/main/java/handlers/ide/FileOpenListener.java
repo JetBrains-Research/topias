@@ -20,12 +20,6 @@ public class FileOpenListener implements FileEditorManagerListener {
     }
 
     @Override
-    public void selectionChanged(@NotNull FileEditorManagerEvent event) {
-        System.out.println("Old " + event.getOldFile().getName());
-        System.out.println("New " + event.getNewFile().getName());
-    }
-
-    @Override
     public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
         final Editor editor = source.getSelectedTextEditor();
         System.out.println("fileOpened method triggered");
