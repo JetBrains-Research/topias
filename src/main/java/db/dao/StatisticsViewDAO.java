@@ -62,8 +62,7 @@ public class StatisticsViewDAO {
 
         final String sql = "select fullSignature,\n" +
                 "       sum(changesCount) as changesC,\n" +
-                "       fileName,\n" +
-                "       startOffset\n" +
+                "       fileName\n" +
                 "from statisticsView where discrType = 0 and fileName = ? and dtDateTime between ? and ? group by fullSignature;";
 
         final List<StatisticsViewEntity> entities = new LinkedList<>();
@@ -77,8 +76,7 @@ public class StatisticsViewDAO {
                     entities.add(new StatisticsViewEntity(
                             resultSet.getString(1),
                             resultSet.getInt(2),
-                            resultSet.getString(3),
-                            resultSet.getInt(4)
+                            resultSet.getString(3)
                     ));
                 }
                 resultSet = null;

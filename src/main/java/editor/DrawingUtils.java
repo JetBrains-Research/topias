@@ -8,15 +8,16 @@ import com.intellij.openapi.editor.impl.InlayModelImpl;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.xdebugger.impl.XDebuggerInlayUtil;
 import db.dao.StatisticsViewDAO;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import processing.PsiBuilder;
 import settings.TopiasSettingsState;
 import settings.enums.DiscrType;
+import state.MethodInfo;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,9 +48,20 @@ public class DrawingUtils {
         if (file == null || !file.getPath().substring(file.getPath().lastIndexOf('.') + 1).equals("java"))
             return;
 
+
+        final List<MethodInfo> methodsInFile =
+                new PsiBuilder(editor.getProject()).buildMethodInfoSetFromContent(doc.getText(), file.getName());
         final List<StatisticsViewEntity> entities = dao.getStatDataForFile(file.getPath(), period);
+
+
+        entities.forEach(x -> {
+            methodsInFile.stream().filter(y -> y.getMethodFullName().equals(x.getFullSignature())).
+                    findFirst().ifPresent(z -> x.setStartOffset(z.getStartOffset()));
+        });
+
         final List<Pair<StatisticsViewEntity, List<Integer>>> pairs =
                 entities.stream()
+                        .filter(x -> x.getStartOffset() != 0)
                         .map(x -> new Pair<>(x, dao.selectChangesCountDaily(x.getFullSignature(), period)))
                         .collect(Collectors.toList());
 
@@ -80,6 +92,7 @@ public class DrawingUtils {
     public static void clearBlockInlays(@NotNull Editor editor) {
 
     }
+
     private static int countStartColumn(int lineNumber, Document doc) {
         final String line = doc.getText(new TextRange(doc.getLineStartOffset(lineNumber), doc.getLineEndOffset(lineNumber)));
         int count = 0;

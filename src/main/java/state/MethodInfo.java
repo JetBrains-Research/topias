@@ -51,7 +51,14 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
 
     @Nullable
     public MethodInfo ifWithin(AbstractMap.SimpleEntry<Integer, Integer> diapason) {
-        return startOffset <= diapason.getKey() && endOffset >= diapason.getValue() ? this : null;
+        return ifWithin(startOffset, endOffset, diapason.getKey(), diapason.getValue()) ? this : null;
+    }
+
+    private boolean ifWithin(int methodStart, int methodEnd, int rangeStart, int rangeEnd) {
+        return rangeStart <= methodEnd & rangeStart >= methodStart ||
+                rangeEnd >= methodStart & rangeEnd <= methodEnd ||
+                rangeStart <= methodStart & rangeEnd >= methodEnd ||
+                rangeStart >= methodStart & rangeEnd <= methodEnd;
     }
 
     @Override
