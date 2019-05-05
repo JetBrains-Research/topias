@@ -1,37 +1,22 @@
 package db.dao;
 
+import db.DatabaseInitialization;
 import db.entities.MethodChangeLogEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import processing.Utils;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
-import java.util.Optional;
 
 public class MethodsChangelogDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsChangelogDAO.class);
-    private final Optional<Connection> connectionOpt;
+    private final Connection connection;
 
-    public MethodsChangelogDAO(String url) {
-        try {
-            DriverManager.registerDriver(new org.sqlite.JDBC());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        this.connectionOpt = Utils.connect(url);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        connectionOpt.ifPresent(x -> {
-            try {
-                x.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        });
-        super.finalize();
+    public MethodsChangelogDAO() {
+        this.connection = DatabaseInitialization.getConnection();
     }
 
     public void insertMethodsChanges(List<MethodChangeLogEntity> entities) {
@@ -58,39 +43,37 @@ public class MethodsChangelogDAO {
                 "* from " +
                 "tempStatsData where true on conflict(dtDateTime, discrType, signatureId) do update set changesCount=changesCount+'changesC';";
 
-        connectionOpt.ifPresent(x -> {
-            try (PreparedStatement statement = connectionOpt.get().prepareStatement(insertQuery)) {
-                entities.forEach(y -> {
-                    try {
-                        statement.setLong(1, y.getDateChanged());
-                        statement.setString(2, y.getAuthorName());
-                        statement.setString(3, y.getBranchName());
-                        statement.setInt(4, y.getSignatureId());
-                        statement.addBatch();
-                    } catch (SQLException e) {
-                        logger.error("Sql exception occured while trying to prepare insert statements to methodsChangeLog table", e);
-                    }
-                });
-                statement.executeBatch();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                logger.error("Sql exception occured while trying to execute batch insert to methodsChangeLog table", e);
-            }
+        try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
+            entities.forEach(y -> {
+                try {
+                    statement.setLong(1, y.getDateChanged());
+                    statement.setString(2, y.getAuthorName());
+                    statement.setString(3, y.getBranchName());
+                    statement.setInt(4, y.getSignatureId());
+                    statement.addBatch();
+                } catch (SQLException e) {
+                    logger.error("Sql exception occured while trying to prepare insert statements to methodsChangeLog table", e);
+                }
+            });
+            statement.executeBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("Sql exception occured while trying to execute batch insert to methodsChangeLog table", e);
+        }
 
-            try (PreparedStatement statement = connectionOpt.get().prepareStatement(insertStatDailyInTemp)) {
-                statement.setLong(1, commitTime);
-                statement.execute();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        try (PreparedStatement statement = connection.prepareStatement(insertStatDailyInTemp)) {
+            statement.setLong(1, commitTime);
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-            try (Statement statement = connectionOpt.get().createStatement()) {
-                statement.executeUpdate(upsertStatDaily);
-                statement.execute(truncateTempTable);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        });
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(upsertStatDaily);
+            statement.execute(truncateTempTable);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 }

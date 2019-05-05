@@ -2,7 +2,6 @@ package processing;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.Change.Type;
 import db.dao.MethodsChangelogDAO;
@@ -14,9 +13,9 @@ import handlers.commit.AddedChangeHandler;
 import handlers.commit.DeletedChangeHandler;
 import handlers.commit.ModifiedChangeHandler;
 import handlers.commit.MovedChangeHandler;
+import kotlin.Pair;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.jetbrains.annotations.NotNull;
 import org.refactoringminer.api.GitHistoryRefactoringMiner;
 import org.refactoringminer.api.GitService;
 import org.refactoringminer.api.Refactoring;
@@ -34,7 +33,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static processing.Utils.buildPathForSystem;
+import static java.lang.System.currentTimeMillis;
 
 public final class CommitProcessor {
     private final static Logger logger = LoggerFactory.getLogger(CommitProcessor.class);
@@ -64,8 +63,8 @@ public final class CommitProcessor {
                 .persistentState
                 .get(branchName);
 
-        this.methodsChangelogDAO = new MethodsChangelogDAO("jdbc:sqlite:" + buildPathForSystem(project));
-        this.methodsDictionaryDAO = new MethodsDictionaryDAO("jdbc:sqlite:" + buildPathForSystem(project));
+        this.methodsChangelogDAO = new MethodsChangelogDAO();
+        this.methodsDictionaryDAO = new MethodsDictionaryDAO();
 
         handlers.put(Type.DELETED, new DeletedChangeHandler());
         handlers.put(Type.MODIFICATION, new ModifiedChangeHandler());
@@ -81,13 +80,15 @@ public final class CommitProcessor {
     public void processCommit(GitCommit commit) {
         final String authorName = commit.getAuthor().getEmail();
         final long commitTime = commit.getCommitTime();
+        final long start = currentTimeMillis();
 
         processNewCommit(commit.getChanges(), commit.getId().asString(), authorName, commitTime);
 
         ChangesState.getInstance(project).getState().persistentState.put(branchName, commit.getId().asString());
         count++;
         indicator.setFraction(count / commitCountToProcess);
-        System.out.println("Commit #" + count + " from " + commitCountToProcess + " was processed");
+        System.out.println("Commit #" + count + " with hash: " + commit.getId().asString() + " from " + commitCountToProcess + " was processed for "
+                + (currentTimeMillis() - start) / 1000.0 + " seconds!");
     }
 
     private void processNewCommit(Collection<Change> changes, String commitId, String authorName, long commitTime) {
@@ -102,6 +103,7 @@ public final class CommitProcessor {
                 .flatMap(x -> x.get().stream())
                 .collect(Collectors.toList());
 
+        long start = currentTimeMillis();
         final RefactoringProcessor processor = new RefactoringProcessor(changedMethods);
         final List<RefactoringData> data = new LinkedList<>();
         miner.churnAtCommit(repository, commitId, new RefactoringHandler() {
@@ -110,6 +112,7 @@ public final class CommitProcessor {
                 data.addAll(refactorings.stream().map(processor::process).collect(Collectors.toCollection(LinkedList::new)));
             }
         });
+        System.out.println("Refactorings were processed for " + (currentTimeMillis() - start) / 1000.0 + " secs!");
 
         final MethodsStorage methodsStorage = MethodsStorage.getInstance();
         final List<MethodInfo> deleted = methodsStorage.getDeletedMethods();
@@ -131,10 +134,18 @@ public final class CommitProcessor {
                 .collect(Collectors.toList()));
 
         deleted.forEach(x -> methodsDictionaryDAO.removeFromDictionary(x.getMethodFullName()));
-        data.forEach(x -> methodsDictionaryDAO.updateBySignature(x.getOldMethod().getMethodFullName(), new MethodDictionaryEntity(x.getNewMethod().getMethodFullName(), x.getNewMethod().getStartOffset(), x.getNewMethod().getFileName())));
+
+        methodsDictionaryDAO.updateBySignature(data.stream().map(x -> new Pair<>(
+                x.getOldMethod().getMethodFullName(),
+                new MethodDictionaryEntity(x.getNewMethod().getMethodFullName(),
+                        x.getNewMethod().getStartOffset(),
+                        x.getNewMethod().getFileName())
+        )).collect(Collectors.toList()));
 
         //Signature position updating
         //methodsStorage.getRecalcMethods().forEach(x -> methodsDictionaryDAO.dumbUpsertOfNotChangedMethodEntries(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
+
+        start = currentTimeMillis();
         methodsDictionaryDAO.upsertOfNotChangedMethodEntries(
                 methodsStorage.getRecalcMethods()
                         .stream()
@@ -143,6 +154,7 @@ public final class CommitProcessor {
                                 x.getFileName()))
                         .collect(Collectors.toList())
         );
+        System.out.println("Update of methods offsets took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
         //Just clearing
         methodsStorage.clear();
 
@@ -152,7 +164,11 @@ public final class CommitProcessor {
             x.setBranchName(branchName);
         });
 
+        start = currentTimeMillis();
         final List<MethodChangeLogEntity> entities = methodsDictionaryDAO.buildChangelogs(changedMethods);
+        System.out.println("Changelog build took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
+        start = currentTimeMillis();
         methodsChangelogDAO.insertMethodsChanges(entities);
+        System.out.println("Stats upserting took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
     }
 }

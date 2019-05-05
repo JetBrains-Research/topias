@@ -7,6 +7,7 @@ import java.sql.*;
 
 public class DatabaseInitialization {
     private final static Logger logger = LoggerFactory.getLogger(DatabaseInitialization.class);
+    private static Connection connection = null;
 
     public static void createNewDatabase(String path) {
         final String url = "jdbc:sqlite:" + path;
@@ -65,23 +66,24 @@ public class DatabaseInitialization {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        try (Connection conn = DriverManager.getConnection(url)) {
-            if (conn != null) {
-                final DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName() + "  " + meta.getDriverVersion());
-                System.out.println("A new database has been created.");
-                final Statement statement = conn.createStatement();
-                statement.execute(methodsDictionary);
-                statement.execute(methodDictInd);
-                statement.execute(methodsChangeLog);
-                statement.execute(statsTable);
-                statement.execute(tempStatsTable);
-                statement.execute(statsView);
-            }
-
+        try {
+            connection = DriverManager.getConnection(url);
+            final DatabaseMetaData meta = connection.getMetaData();
+            System.out.println("The driver name is " + meta.getDriverName() + "  " + meta.getDriverVersion());
+            System.out.println("A new database has been created.");
+            final Statement statement = connection.createStatement();
+            statement.execute(methodsDictionary);
+            statement.execute(methodDictInd);
+            statement.execute(methodsChangeLog);
+            statement.execute(statsTable);
+            statement.execute(tempStatsTable);
+            statement.execute(statsView);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
+    }
+
+    public static Connection getConnection() {
+        return connection;
     }
 }

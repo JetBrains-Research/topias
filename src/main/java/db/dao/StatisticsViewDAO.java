@@ -1,5 +1,6 @@
 package db.dao;
 
+import db.DatabaseInitialization;
 import db.entities.StatisticsViewEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,34 +12,16 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
 
 public class StatisticsViewDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsDictionaryDAO.class);
-    private final Optional<Connection> connectionOpt;
+    private final Connection connection;
 
-    public StatisticsViewDAO(String url) {
-        try {
-            DriverManager.registerDriver(new org.sqlite.JDBC());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        this.connectionOpt = Utils.connect("jdbc:sqlite:" + url);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        connectionOpt.ifPresent(x -> {
-            try {
-                x.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        });
-        super.finalize();
+    public StatisticsViewDAO() {
+        this.connection = DatabaseInitialization.getConnection();
     }
 
     public List<Integer> selectChangesCountDaily(String fullSigName, DiscrType period) {
@@ -54,8 +37,8 @@ public class StatisticsViewDAO {
 
         Integer[] changesData = new Integer[days];
         Arrays.fill(changesData, 0);
-        connectionOpt.ifPresent(x -> {
-            try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setString(1, fullSigName);
                 statement.setString(2, from.toString());
                 statement.setString(3, to.toString());
@@ -69,7 +52,7 @@ public class StatisticsViewDAO {
                 e.printStackTrace();
                 logger.error("Sql exception occured while trying to get statistics data", e);
             }
-        });
+
 
         return Arrays.asList(changesData);
     }
@@ -85,8 +68,7 @@ public class StatisticsViewDAO {
                 "from statisticsView where discrType = 0 and fileName = ? and dtDateTime between ? and ? group by discrType, fullSignature;";
 
         final List<StatisticsViewEntity> entities = new LinkedList<>();
-        connectionOpt.ifPresent(x -> {
-            try (PreparedStatement statement = connectionOpt.get().prepareStatement(sql)) {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setString(1, fileName);
                 statement.setString(2, from.toString());
                 statement.setString(3, to.toString());
@@ -105,7 +87,6 @@ public class StatisticsViewDAO {
                 e.printStackTrace();
                 logger.error("Sql exception occured while trying to statistics data", e);
             }
-        });
 
         return entities;
     }
