@@ -12,7 +12,8 @@ public class TopChangedToolWindowFactory implements ToolWindowFactory {
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         System.out.println("createToolWindowContent");
         ContentManager contentManager = toolWindow.getContentManager();
-        Content content = contentManager.getFactory().createContent(new TopChangedMethodsListPanel(true, true), null, false);
+        Content content = contentManager.getFactory().createContent(new TopChangedMethodsListPanel(true, true, project), null, false);
         contentManager.addContent(content);
     }
+
 }

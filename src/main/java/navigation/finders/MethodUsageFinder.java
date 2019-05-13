@@ -2,6 +2,7 @@ package navigation.finders;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiParameter;
@@ -83,7 +84,9 @@ public class MethodUsageFinder extends AbstractUsageFinder {
     }
 
     protected ReferenceCollection findCurrentElementUsages() {
+//        JavaPsiFacade.getInstance().findClass().findMethodsByName()
         MethodReferencesSearch.SearchParameters searchParameters = new MethodReferencesSearch.SearchParameters((PsiMethod) this.psiElement, searchScope, false);
+//        MethodReferencesSearch.search()
         return new ReferenceCollection(MethodReferencesSearch.INSTANCE.createQuery(searchParameters).findAll());
     }
 }

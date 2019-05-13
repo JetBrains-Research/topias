@@ -9,7 +9,7 @@
     </properties>
     <border type="none" title="Most changed methods for last month"/>
     <children>
-      <component id="3de5e" class="javax.swing.JList" binding="dataList" custom-create="true">
+      <component id="3de5e" class="com.intellij.ui.components.JBList" binding="list">
         <constraints border-constraint="Center"/>
         <properties/>
       </component>

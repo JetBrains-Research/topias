@@ -13,9 +13,11 @@ import javax.swing.*;
 
 public class Reference {
     private PsiElement psiElement;
+    private int count;
 
-    public Reference(PsiReference reference) {
+    public Reference(PsiReference reference, int count) {
         this.psiElement = reference.getElement();
+        this.count = count;
     }
 
     public Navigatable location() {
@@ -121,9 +123,9 @@ public class Reference {
             description.append(": ");
 
         try {
-            int lineNumber = line();
-            int columnNumber = column();
-            description.append("Line ").append(lineNumber).append(", Column ").append(columnNumber);
+            description.append(count).append(" time(s)");
+            //int columnNumber = column();
+            //description.append("Column ").append(columnNumber);
         } catch (Exception e) {
             e.printStackTrace();
         }

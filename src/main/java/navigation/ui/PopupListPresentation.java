@@ -2,6 +2,7 @@ package navigation.ui;
 
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.PopupChooserBuilder;
+import com.intellij.ui.components.JBList;
 import navigation.ReferenceNavigator;
 import navigation.wrappers.DataHolder;
 import navigation.wrappers.Reference;
@@ -39,7 +40,7 @@ public class PopupListPresentation implements Presentable {
     }
 
     private JList createList() {
-        final JList list = new JList(collection.toArray());
+        final JBList list = new JBList<>(collection.toArray());
         list.setCellRenderer(new ReferenceListCellRenderer());
         list.setSelectedIndex(collection.size() > 0 ? 0 : -1);
         list.addKeyListener(new KeyAdapter() {

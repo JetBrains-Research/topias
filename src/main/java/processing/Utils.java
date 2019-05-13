@@ -1,5 +1,6 @@
 package processing;
 
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsException;
@@ -7,18 +8,23 @@ import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.searches.MethodReferencesSearch;
+import db.dao.StatisticsViewDAO;
+import db.entities.StatisticsViewEntity;
 import git4idea.GitReference;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryManager;
 import gr.uom.java.xmi.UMLOperation;
+import navigation.wrappers.Reference;
+import settings.TopiasSettingsState;
+import settings.enums.DiscrType;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public final class Utils {
 
@@ -113,5 +119,13 @@ public final class Utils {
             pathBuilder.append("\\.idea\\state.db");
         }
         return pathBuilder.toString();
+    }
+
+    public static String trimClassName(String fullMethodSignature) {
+        return fullMethodSignature.substring(0, fullMethodSignature.lastIndexOf('.'));
+    }
+
+    public static String trimMethodName(String fullMethodName) {
+        return fullMethodName.substring(fullMethodName.lastIndexOf('.') + 1, fullMethodName.lastIndexOf('('));
     }
 }

@@ -11,7 +11,7 @@ public class ReferenceCollection extends AbstractCollection<Reference> {
 
     public ReferenceCollection(Collection<PsiReference> psiReferences) {
         for (PsiReference reference : psiReferences) {
-            references.add(new Reference(reference));
+            references.add(new Reference(reference, 0));
         }
     }
 

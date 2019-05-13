@@ -22,7 +22,7 @@ public class PluginSettingsConfigurable implements Configurable {
     @Nullable
     @Override
     public JComponent createComponent() {
-        return new PluginSettingsUI().getSettingsPanel();
+        return pluginSettingsUI.getSettingsPanel();
     }
 
     @Override
