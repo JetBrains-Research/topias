@@ -16,7 +16,7 @@ public class Reference {
     private int count;
 
     public Reference(PsiReference reference, int count) {
-        this.psiElement = reference.getElement();
+        this.psiElement = reference.resolve();
         this.count = count;
     }
 

@@ -32,7 +32,7 @@ public class MySideBar {
         list.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (list.getSelectedIndex() != -1) {
-                    new ReferenceNavigator(((Reference) list.getSelectedValue())).navigateToReference();
+                    new ReferenceNavigator(list.getSelectedValue()).navigateToReference();
                 }
             }
         });
