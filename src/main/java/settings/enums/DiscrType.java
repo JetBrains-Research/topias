@@ -4,8 +4,8 @@ import com.intellij.util.xmlb.annotations.Attribute;
 
 
 public enum  DiscrType {
-    WEEK(0, "Week"),
-    MONTH(1, "Month");
+    WEEK(0, "7 days"),
+    MONTH(1, "30 days");
 
     DiscrType(int id, String textValue) {
         this.id = id;

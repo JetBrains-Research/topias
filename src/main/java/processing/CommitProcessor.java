@@ -161,6 +161,12 @@ public final class CommitProcessor {
         });
 
         start = currentTimeMillis();
+        //if method existed and was modified but not listed in dictionary
+        methodsDictionaryDAO.addToDictionary(changedMethods
+                .stream()
+                .map(x -> new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName()))
+                .collect(Collectors.toList()));
+
         final List<MethodChangeLogEntity> entities = methodsDictionaryDAO.buildChangelogs(changedMethods);
         System.out.println("Changelog build took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
         start = currentTimeMillis();

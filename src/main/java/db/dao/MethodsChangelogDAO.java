@@ -29,19 +29,21 @@ public class MethodsChangelogDAO {
 
         final String truncateTempTable = "delete from tempStatsData;";
 
-        final String insertStatDailyInTemp = "insert into tempStatsData\n" +
-                "select * from (\n" +
+        final String insertStatDailyInTemp = "insert into statsData\n" +
+                "select dtDateTime, discrType, signatureId, changesC from (\n" +
                 "       select datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day') as dtDateTime,\n" +
                 "              0 as discrType,\n" +
                 "              signatureId,\n" +
                 "              count(*) as changesC\n" +
                 "       from methodsChangeLog\n" +
                 "       where dtChanged = ?\n" +
-                "       group by signatureId, dtDateTime);";
+                "       group by signatureId)" +
+                " where true \n" +
+                "on conflict (dtDateTime, discrType, signatureId) do update set changesCount=changesCount+1";
 
         final String upsertStatDaily = "insert into statsData select " +
                 "* from " +
-                "tempStatsData where true on conflict(dtDateTime, discrType, signatureId) do update set changesCount=changesCount+'changesC';";
+                "tempStatsData where true on conflict(dtDateTime, discrType, signatureId) do update set changesCount=changesCount + changesC;";
 
         try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
             entities.forEach(y -> {
@@ -69,7 +71,7 @@ public class MethodsChangelogDAO {
         }
 
         try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate(upsertStatDaily);
+//            statement.execute(upsertStatDaily);
             statement.execute(truncateTempTable);
             connection.commit();
         } catch (SQLException e) {

@@ -1,6 +1,5 @@
 package handlers.ide;
 
-import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import git4idea.repo.GitRepository;
