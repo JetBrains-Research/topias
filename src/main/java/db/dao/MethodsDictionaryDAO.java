@@ -74,12 +74,9 @@ public class MethodsDictionaryDAO {
             while (resultSet.next()) {
                 methodId.set(resultSet.getInt(1));
             }
-            resultSet = null;
             connection.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Exception occured while trying to get method id by signature name");
-            System.out.println(e.getMessage());
+            logger.error("Exception occured while trying to get method id by signature name", e);
         }
 
         return methodId.get();

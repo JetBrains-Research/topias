@@ -131,7 +131,7 @@ public class GitCommitsProcessor {
                             MessageBus bus = project.getMessageBus();
                             bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileOpenListener(dbFilePath));
                             bus.connect().subscribe(GitRepository.GIT_REPO_CHANGE, new GitRepoChangeListener());
-                            System.out.println("Applying results to all opened editors");
+                            logger.info("Applying results to all opened editors");
                         } else {
                             editors.forEach(drawingUtils::cleanInlayInEditor);
                         }

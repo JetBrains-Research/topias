@@ -17,6 +17,7 @@ intellij {
     plugins 'git4idea'
     pluginName 'topias'
     downloadSources true
+    updateSinceUntilBuild false
 }
 
 dependencies {
@@ -30,8 +31,8 @@ dependencies {
     }
 }
 
-patchPluginXml {
-    changeNotes """
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>"""
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }

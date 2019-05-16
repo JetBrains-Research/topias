@@ -104,7 +104,7 @@ public final class CommitProcessor {
                 data.addAll(refactorings.stream().map(processor::process).collect(Collectors.toCollection(LinkedList::new)));
             }
         });
-        System.out.println("Refactorings were processed for " + (currentTimeMillis() - start) / 1000.0 + " secs!");
+        logger.info("Refactorings were processed for " + (currentTimeMillis() - start) / 1000.0 + " secs!");
 
         final MethodsStorage methodsStorage = MethodsStorage.getInstance();
         final List<MethodInfo> deleted = methodsStorage.getDeletedMethods();
@@ -146,7 +146,7 @@ public final class CommitProcessor {
                                 x.getFileName()))
                         .collect(Collectors.toList())
         );
-        System.out.println("Update of methods offsets took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
+        logger.info("Update of methods offsets took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
         //Just clearing
         methodsStorage.clear();
 
@@ -164,9 +164,9 @@ public final class CommitProcessor {
                 .collect(Collectors.toList()));
 
         final List<MethodChangeLogEntity> entities = methodsDictionaryDAO.buildChangelogs(changedMethods);
-        System.out.println("Changelog build took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
+        logger.info("Changelog build took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
         start = currentTimeMillis();
         methodsChangelogDAO.insertMethodsChanges(entities);
-        System.out.println("Stats upserting took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
+        logger.info("Stats upserting took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
     }
 }

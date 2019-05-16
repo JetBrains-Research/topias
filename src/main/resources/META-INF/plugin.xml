@@ -3,8 +3,10 @@
     <name>Topias</name>
     <vendor email="svitkovsergey@gmail.com">Contacts</vendor>
     <depends>Git4Idea</depends>
-    <description>"VCS changes frequency visualization for Java projects"</description>
+    <description>Plugin for VCS (Git) changes frequency visualization in Java projects</description>
     <version>0.0.1</version>
+    <idea-version since-build="183"/>
+    <change-notes>"initial release of the plugin, so no much notes"</change-notes>
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <!-- uncomment to enable plugin in all products

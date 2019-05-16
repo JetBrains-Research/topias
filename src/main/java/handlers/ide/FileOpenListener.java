@@ -15,17 +15,14 @@ public class FileOpenListener implements FileEditorManagerListener {
     private final String dbURL;
 
     public FileOpenListener(String dbURL) {
-        System.out.println("FILE OPEN LISTENER CREATED");
+        logger.info("FILE OPEN LISTENER CREATED");
         this.dbURL = dbURL;
     }
 
     @Override
     public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
         final Editor editor = source.getSelectedTextEditor();
-        System.out.println("fileOpened method triggered");
         DrawingUtils.getInstance(dbURL).cleanInlayInEditor(editor);
-
-        System.out.println("Invoked augmentation of editor (processing must be finished)");
         DrawingUtils.getInstance(dbURL).drawInlaysInEditor(editor);
     }
 }

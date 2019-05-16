@@ -89,15 +89,6 @@ public final class Utils {
                 .findFirst().orElse("master");
     }
 
-    public static Optional<Connection> connect(String url) {
-        try {
-            return Optional.of(DriverManager.getConnection(url));
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return Optional.empty();
-    }
-
     public static String getFileName(Change change) {
         return change.toString().substring(change.toString().indexOf(':') + 2);
     }

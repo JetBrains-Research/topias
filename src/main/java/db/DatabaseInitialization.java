@@ -70,8 +70,8 @@ public class DatabaseInitialization {
             connection = DriverManager.getConnection(url);
             connection.setAutoCommit(false);
             final DatabaseMetaData meta = connection.getMetaData();
-            System.out.println("The driver name is " + meta.getDriverName() + "  " + meta.getDriverVersion());
-            System.out.println("A new database has been created.");
+            logger.info("The driver name is " + meta.getDriverName() + "  " + meta.getDriverVersion());
+            logger.info("A new database has been created.");
             final Statement statement = connection.createStatement();
             statement.execute(methodsDictionary);
             statement.execute(methodDictInd);
