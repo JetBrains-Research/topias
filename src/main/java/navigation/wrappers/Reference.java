@@ -8,6 +8,7 @@ import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
+import processing.Utils;
 
 import javax.swing.*;
 
@@ -29,14 +30,15 @@ public class Reference {
     }
 
     public PsiMethod getPsiMethod() {
-        PsiElement parent;
-        PsiElement current = psiElement;
-        while (true) {
-            parent = current.getParent();
-            if (parent instanceof PsiFile) return null;
-            if (parent instanceof PsiMethod) return (PsiMethod) parent;
-            current = parent;
-        }
+        return (PsiMethod) psiElement;
+//        PsiElement parent;
+//        PsiElement current = psiElement;
+//        while (true) {
+//            parent = current.getParent();
+//            if (parent instanceof PsiFile) return null;
+//            if (parent instanceof PsiMethod) return (PsiMethod) parent;
+//            current = parent;
+//        }
     }
 
     public PsiClass getParentClass() {
@@ -105,19 +107,19 @@ public class Reference {
 
     //MessageBuilder?!
     public String description() {
-        StringBuffer description = new StringBuffer();
+        StringBuilder description = new StringBuilder();
         PsiClass containingClass = getParentClass();
         PsiMethod containingMethod = getPsiMethod();
         PsiFile containingFile = containingFile();
 
+        description.append(Utils.calculateSignature(getPsiMethod()));
+//        if (containingClass != null && !"".equals(containingClass.getName()))
+//            description.append(getContainingClassName(containingClass));
+//        else
+//            description.append(containingFile.getName());
 
-        if (containingClass != null && !"".equals(containingClass.getName()))
-            description.append(getContainingClassName(containingClass));
-        else
-            description.append(containingFile.getName());
-
-        if (containingMethod != null)
-            description.append(".").append(containingMethod.getName());
+//        if (containingMethod != null)
+//            description.append(".").append(containingMethod.getName());
 
         if ((containingClass != null && !"".equals(containingClass.getName())) || !"".equals(containingFile.getName()) || (containingMethod != null && !containingMethod.getName().equals("")))
             description.append(": ");
@@ -130,10 +132,10 @@ public class Reference {
             e.printStackTrace();
         }
 
-        String inPackage = containingPackage();
-        if (inPackage != null && !inPackage.equals("")) {
-            description.append(" (in ").append(inPackage).append(")");
-        }
+//        String inPackage = containingPackage();
+//        if (inPackage != null && !inPackage.equals("")) {
+//            description.append(" (in ").append(inPackage).append(")");
+//        }
 
         return description.toString();
     }

@@ -76,19 +76,15 @@ public final class CommitProcessor {
     public void processCommit(GitCommit commit) {
         final String authorName = commit.getAuthor().getEmail();
         final long commitTime = commit.getCommitTime();
-        final long start = currentTimeMillis();
 
         processNewCommit(commit.getChanges(), commit.getId().asString(), authorName, commitTime);
 
         ChangesState.getInstance(project).getState().persistentState.put(branchName, commit.getId().asString());
         count++;
         indicator.setFraction(count / commitCountToProcess);
-        System.out.println("Commit #" + count + " with hash: " + commit.getId().asString() + " from " + commitCountToProcess + " was processed for "
-                + (currentTimeMillis() - start) / 1000.0 + " seconds!");
     }
 
     private void processNewCommit(Collection<Change> changes, String commitId, String authorName, long commitTime) {
-        //@TODO: filter only java files
         final List<Change> javaChanges = changes.stream()
                 .filter(x -> x.toString().substring(x.toString().lastIndexOf('.') + 1).equalsIgnoreCase("java"))
                 .collect(Collectors.toList());

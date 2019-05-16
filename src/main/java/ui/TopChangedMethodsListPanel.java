@@ -53,7 +53,7 @@ public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
 
             final List<Pair<PsiReference, Integer>> psiReferences = methodCountPairs.stream()
                     .map(x -> new Pair<>(
-                            MethodReferencesSearch.search(x.getFirst(), GlobalSearchScope.projectScope(project), false).findFirst(),
+                            MethodReferencesSearch.search(x.getFirst(), GlobalSearchScope.allScope(project), false).findFirst(),
                             x.getSecond()
                     ))
                     .filter(x -> x.getFirst() != null)

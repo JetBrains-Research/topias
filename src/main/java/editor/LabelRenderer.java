@@ -40,12 +40,12 @@ public class LabelRenderer extends HintRenderer {
 
     @Override
     public int calcWidthInPixels(Inlay inlay) {
-        return 700;
+        return 10000;
     }
 
     @Override
     public int calcHeightInPixels(@NotNull Inlay inlay) {
-        return 55;
+        return 70;
     }
 
     @Override
@@ -74,13 +74,13 @@ public class LabelRenderer extends HintRenderer {
         chart.getXYPlot().setBackgroundPaint(new Color(255, 255, 255));
         chart.getXYPlot().getRenderer().setSeriesPaint(0, new Color(0, 0, 255));
         final ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new java.awt.Dimension(150, 45));
+        chartPanel.setPreferredSize(new java.awt.Dimension(250, 65));
         final Font font = new Font("Dialog", Font.PLAIN, 7);
         xyPlot.getDomainAxis().setTickLabelFont(font);
         xyPlot.getRangeAxis().setTickLabelFont(font);
         xyPlot.getDomainAxis().setLabelFont(font);
         xyPlot.getRangeAxis().setLabelFont(font);
-        xyPlot.getDomainAxis().setRange(1, 31);
+        xyPlot.getDomainAxis().setRange(0, 30);
 //        xyPlot.getDomainAxis().setAxisLineVisible(false);
 //        xyPlot.getDomainAxis().setTickMarksVisible(false);
 //        xyPlot.getRangeAxis().setAxisLineVisible(false);
@@ -93,7 +93,7 @@ public class LabelRenderer extends HintRenderer {
         // flat bars look best...
         renderer.setBarPainter(new StandardXYBarPainter());
 
-        final BufferedImage bufferedImage = chart.createBufferedImage(150, 45);
+        final BufferedImage bufferedImage = chart.createBufferedImage(250, 65);
 
 
         if (super.getText() != null && attributes != null) {
@@ -115,7 +115,7 @@ public class LabelRenderer extends HintRenderer {
                 final int widthAdjustment = calcWidthAdjustment(editor, g.getFontMetrics());
                 if (widthAdjustment == 0) {
                     g.drawString(super.getText(), startX + 3, startY);
-                    g2d.drawImage(bufferedImage, null, startX + 310, startY - 25);
+                    g2d.drawImage(bufferedImage, null, startX + 700, startY - 10);
                 } else {
                     final int adjustmentPosition = this.getWidthAdjustment().getAdjustmentPosition();
                     final String firstPart = this.getText().substring(0, adjustmentPosition);

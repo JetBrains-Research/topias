@@ -71,7 +71,7 @@ public class DrawingUtils {
                             false,
                             true,
                             0,
-                            new LabelRenderer("Method was changed " + x.getFirst().getChangesCount() + " times for last " + period.getTextValue(), x,
+                            new LabelRenderer("Method was changed " + x.getFirst().getChangesCount() + " time(s) for last " + period.getTextValue(), x,
                                     countStartColumn(x.getFirst().getStartOffset(), doc))
                     );
                 }));

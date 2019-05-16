@@ -7,7 +7,7 @@
     <properties>
       <enabled value="true"/>
     </properties>
-    <border type="none" title="Most changed methods for last month"/>
+    <border type="none" title="Most changed methods for last 30 days"/>
     <children>
       <component id="3de5e" class="com.intellij.ui.components.JBList" binding="list">
         <constraints border-constraint="Center"/>

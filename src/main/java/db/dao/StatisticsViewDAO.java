@@ -65,7 +65,7 @@ public class StatisticsViewDAO {
         final String sql = "select fullSignature,\n" +
                 "       sum(changesCount) as changesC,\n" +
                 "       fileName\n" +
-                "from statisticsView where dtDateTime between ? and ? group by fullSignature order by changesC desc limit 10;";
+                "from statisticsView where dtDateTime between ? and ? group by fullSignature order by changesC desc limit 13;";
 
         final List<StatisticsViewEntity> entities = new LinkedList<>();
 
