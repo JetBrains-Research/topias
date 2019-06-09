@@ -30,14 +30,15 @@ public class MethodsChangelogDAO {
         final String truncateTempTable = "delete from tempStatsData;";
 
         final String insertStatDailyInTemp = "insert into statsData\n" +
-                "select dtDateTime, discrType, signatureId, changesC from (\n" +
+                "select dtDateTime, discrType, signatureId, branchName, changesC from (\n" +
                 "       select datetime(ROUND(dtChanged / 1000), 'unixepoch', 'start of day') as dtDateTime,\n" +
                 "              0 as discrType,\n" +
                 "              signatureId,\n" +
+                "              branchName,\n" +
                 "              count(*) as changesC\n" +
                 "       from methodsChangeLog\n" +
                 "       where dtChanged = ?\n" +
-                "       group by signatureId)" +
+                "       group by signatureId, branchName)" +
                 " where true \n" +
                 "on conflict (dtDateTime, discrType, signatureId) do update set changesCount=changesCount+1";
 

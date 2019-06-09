@@ -34,7 +34,7 @@ public class DrawingUtils {
         this.dao = new StatisticsViewDAO(url);
     }
 
-    public void drawInlaysInEditor(Editor editor) {
+    public void drawInlaysInEditor(Editor editor, String branchName) {
         final TopiasSettingsState.InnerState state = TopiasSettingsState.getInstance(editor.getProject()).getState();
         final DiscrType period = state == null ? DiscrType.MONTH : DiscrType.getById(state.discrTypeId);
 
@@ -50,7 +50,7 @@ public class DrawingUtils {
 
         final List<MethodInfo> methodsInFile =
                 new PsiBuilder(editor.getProject()).buildMethodInfoSetFromContent(doc.getText(), file.getName());
-        final List<StatisticsViewEntity> entities = dao.getStatDataForFile(file.getPath(), period);
+        final List<StatisticsViewEntity> entities = dao.getStatDataForFile(file.getPath(), period, branchName);
 
 
         entities.forEach(x -> {
@@ -61,7 +61,7 @@ public class DrawingUtils {
         final List<Pair<StatisticsViewEntity, List<Integer>>> pairs =
                 entities.stream()
                         .filter(x -> x.getStartOffset() != 0)
-                        .map(x -> new Pair<>(x, dao.selectChangesCountDaily(x.getFullSignature(), period)))
+                        .map(x -> new Pair<>(x, dao.selectChangesCountDaily(x.getFullSignature(), period, branchName)))
                         .collect(Collectors.toList());
 
         ApplicationManager.getApplication().invokeLater(() -> pairs

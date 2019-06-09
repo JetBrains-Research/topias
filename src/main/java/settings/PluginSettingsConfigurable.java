@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vcs.VcsException;
 import editor.DrawingUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static processing.Utils.buildPathForSystem;
+import static processing.Utils.getCurrentBranchName;
 
 public class PluginSettingsConfigurable implements Configurable {
 
@@ -68,7 +70,14 @@ public class PluginSettingsConfigurable implements Configurable {
         final List<Editor> editors = Arrays.asList(EditorFactory.getInstance().getAllEditors());
         final DrawingUtils drawingUtils = DrawingUtils.getInstance(buildPathForSystem(project));
         editors.forEach(drawingUtils::cleanInlayInEditor);
-        editors.forEach(drawingUtils::drawInlaysInEditor);
+        String branchName;
+        try {
+            branchName = getCurrentBranchName(project);
+        } catch (VcsException e) {
+            branchName = "master";
+        }
+        final String finalBranchName = branchName;
+        editors.forEach(x -> drawingUtils.drawInlaysInEditor(x, finalBranchName));
     }
 
     @Override

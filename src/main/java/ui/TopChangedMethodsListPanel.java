@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.vcs.VcsException;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import db.dao.StatisticsViewDAO;
@@ -36,7 +37,13 @@ public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
             final StatisticsViewDAO dao = new StatisticsViewDAO(buildPathForSystem(project));
             final TopiasSettingsState.InnerState settingsState = TopiasSettingsState.getInstance(project).getState();
             final DiscrType period = settingsState != null ? DiscrType.getById(settingsState.discrTypeId) : DiscrType.MONTH;
-            final List<StatisticsViewEntity> entities = dao.getMostChangedMethods(period);
+            String branchName;
+            try {
+                branchName = getCurrentBranchName(project);
+            } catch (VcsException e) {
+                branchName = "master";
+            }
+            final List<StatisticsViewEntity> entities = dao.getMostChangedMethods(period, branchName);
             final JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
 
             final List<Pair<PsiMethod, Integer>> methodCountPairs = entities.stream().map(x -> {

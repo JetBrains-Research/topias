@@ -26,7 +26,7 @@ public class StatisticsViewDAO {
         this.connection = DatabaseInitialization.getConnection(url);
     }
 
-    public List<Integer> selectChangesCountDaily(String fullSigName, DiscrType period) {
+    public List<Integer> selectChangesCountDaily(String fullSigName, DiscrType period, String branchName) {
         final int days = period.equals(DiscrType.MONTH) ? 30 : 7;
         final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(days);
@@ -35,6 +35,7 @@ public class StatisticsViewDAO {
         final String sql = "select dtDateTime, sum(changesCount) from statisticsView where\n" +
                 "fullSignature = ? " +
                 "and dtDateTime between ? and ?" +
+                "and branchName = ?" +
                 "group by dtDateTime";
 
         Integer[] changesData = new Integer[days];
@@ -44,6 +45,7 @@ public class StatisticsViewDAO {
             statement.setString(1, fullSigName);
             statement.setString(2, from.toString());
             statement.setString(3, to.toString());
+            statement.setString(4, branchName);
 
             final ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -59,19 +61,20 @@ public class StatisticsViewDAO {
         return Arrays.asList(changesData);
     }
 
-    public List<StatisticsViewEntity> getMostChangedMethods(DiscrType period) {
+    public List<StatisticsViewEntity> getMostChangedMethods(DiscrType period, String branchName) {
         final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
         final String sql = "select fullSignature,\n" +
                 "       sum(changesCount) as changesC,\n" +
                 "       fileName\n" +
-                "from statisticsView where dtDateTime between ? and ? group by fullSignature order by changesC desc limit 10;";
+                "from statisticsView where dtDateTime between ? and ? and branchName = ? group by fullSignature order by changesC desc limit 10;";
 
         final List<StatisticsViewEntity> entities = new LinkedList<>();
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, from.toString());
             statement.setString(2, to.toString());
+            statement.setString(3, branchName);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -88,21 +91,22 @@ public class StatisticsViewDAO {
         return entities;
     }
 
-    public List<StatisticsViewEntity> getStatDataForFile(String fileName, DiscrType period) {
+    public List<StatisticsViewEntity> getStatDataForFile(String fileName, DiscrType period, String branchName) {
         final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
 
         final String sql = "select fullSignature,\n" +
                 "       sum(changesCount) as changesC,\n" +
                 "       fileName\n" +
-                "from statisticsView where discrType = 0 and fileName = ? and dtDateTime between ? and ? group by fullSignature;";
+                "from statisticsView where discrType = 0 and branchName = ? and fileName = ? and dtDateTime between ? and ? group by fullSignature;";
 
         final List<StatisticsViewEntity> entities = new LinkedList<>();
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, fileName);
-            statement.setString(2, from.toString());
-            statement.setString(3, to.toString());
+            statement.setString(1, branchName);
+            statement.setString(2, fileName);
+            statement.setString(3, from.toString());
+            statement.setString(4, to.toString());
 
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {

@@ -39,6 +39,7 @@ public class DatabaseInitialization {
                 "  dtDateTime   timestamp not null,\n" +
                 "  discrType    integer   not null,\n" +
                 "  signatureId  integer   not null,\n" +
+                "  branchName varchar(512) not null,\n" +
                 "  changesCount integer   not null,\n" +
                 "  unique (dtDateTime, discrType, signatureId)\n" +
                 ");";
@@ -48,6 +49,7 @@ public class DatabaseInitialization {
                 "  dtDateTime   timestamp not null,\n" +
                 "  discrType    integer   not null,\n" +
                 "  signatureId  integer   not null,\n" +
+                "  branchName varchar(512) not null,\n" +
                 "  changesC integer   not null,\n" +
                 "  unique (dtDateTime, discrType, signatureId)\n" +
                 ");";
@@ -58,6 +60,7 @@ public class DatabaseInitialization {
                 "       fullSignature,\n" +
                 "       changesCount,\n" +
                 "       fileName,\n" +
+                "       branchName,\n" +
                 "       startOffset\n" +
                 "from statsData \n" +
                 "       join methodsDictionary on statsData.signatureId = id;";
