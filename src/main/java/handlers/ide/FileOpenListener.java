@@ -24,5 +24,6 @@ public class FileOpenListener implements FileEditorManagerListener {
         final Editor editor = source.getSelectedTextEditor();
         DrawingUtils.getInstance(dbURL).cleanInlayInEditor(editor);
         DrawingUtils.getInstance(dbURL).drawInlaysInEditor(editor);
+
     }
 }
