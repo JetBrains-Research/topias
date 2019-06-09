@@ -28,7 +28,7 @@ public class StatisticsViewDAO {
 
     public List<Integer> selectChangesCountDaily(String fullSigName, DiscrType period) {
         final int days = period.equals(DiscrType.MONTH) ? 30 : 7;
-        final LocalDate to = LocalDate.now();
+        final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(days);
 
 
@@ -60,7 +60,7 @@ public class StatisticsViewDAO {
     }
 
     public List<StatisticsViewEntity> getMostChangedMethods(DiscrType period) {
-        final LocalDate to = LocalDate.now();
+        final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
         final String sql = "select fullSignature,\n" +
                 "       sum(changesCount) as changesC,\n" +
@@ -89,7 +89,7 @@ public class StatisticsViewDAO {
     }
 
     public List<StatisticsViewEntity> getStatDataForFile(String fileName, DiscrType period) {
-        final LocalDate to = LocalDate.now();
+        final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
 
         final String sql = "select fullSignature,\n" +

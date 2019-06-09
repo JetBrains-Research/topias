@@ -63,6 +63,7 @@ public class LabelRenderer extends HintRenderer {
         final TextAttributes attributes = getTextAttributes(editor);
         final XYSeriesCollection data = new XYSeriesCollection(xySeries);
 
+
         final JFreeChart chart = ChartFactory.createHistogram(
                 null,
                 null,
