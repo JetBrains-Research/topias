@@ -1,10 +1,12 @@
 <idea-plugin>
     <id>io.github.likeanowl.topias</id>
     <name>Topias</name>
-    <vendor email="svitkovsergey@gmail.com" url="io.github.likeanowl">Contacts</vendor>
+    <vendor email="svitkovsergey@gmail.com">Contacts</vendor>
     <depends>Git4Idea</depends>
-    <description>"Vcs stats visualization frequency blah blah blah plugin"</description>
+    <description>Plugin for VCS (Git) changes frequency visualization in Java projects</description>
     <version>0.0.1</version>
+    <idea-version since-build="183.2940.10"/>
+    <change-notes>"initial release of the plugin, so no much notes"</change-notes>
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <!-- uncomment to enable plugin in all products
@@ -13,8 +15,12 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <checkinHandlerFactory implementation="handlers.ide.VcsChangesHandlerFactory"/>
         <projectService serviceInterface="state.ChangesState" serviceImplementation="state.ChangesState"/>
+
+        <projectService serviceInterface="settings.TopiasSettingsState" serviceImplementation="settings.TopiasSettingsState" />
+        <toolWindow id="Topias" anchor="bottom"
+                    factoryClass="ui.TopChangedToolWindowFactory"/>
+
         <!--<codeInsight.parameterNameHints language="JAVA" implementationClass="editor.StatisticsHintsProvider"/>-->
         <!--<editor.linePainter implementation="editor.EditorLP"/>-->
         <projectConfigurable groupId="tools" displayName="Topias Plugin" id="settings.PluginSettingsConfigurable" instance="settings.PluginSettingsConfigurable" />
@@ -29,7 +35,12 @@
         </component>
         <component>
             <implementation-class>state.ChangesState</implementation-class>
-            <interface-class>state.ChangesState</interface-class>
+        </component>
+        <component>
+            <implementation-class>settings.TopiasSettingsState</implementation-class>
+
         </component>
     </project-components>
+    <application-components>
+    </application-components>
 </idea-plugin>

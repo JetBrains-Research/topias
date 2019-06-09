@@ -22,7 +22,7 @@ public class ReferencePresentation implements Presentable {
             return new TooltipPresentation("No usages found");
         } else {
             String popupTitle = "Choose usage of '" + ((PsiNamedElement) psiElement).getName() + "': (Found " + references.size() + ")";
-            return new PopupListPresentation(references, popupTitle);
+            return new PopupListPresentation(references, popupTitle, psiElement.getProject());
         }
     }
 }

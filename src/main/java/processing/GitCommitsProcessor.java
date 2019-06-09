@@ -119,7 +119,7 @@ public class GitCommitsProcessor {
                                     finalParamsArray);
                             logger.info("Git history processing finished");
                         } catch (VcsException e) {
-                            logger.debug("Exception has occured, stacktrace: {}", (Object) e.getStackTrace());
+                            logger.error("Exception has occured, stacktrace:", e);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

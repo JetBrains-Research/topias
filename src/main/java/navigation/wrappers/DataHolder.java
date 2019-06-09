@@ -32,12 +32,12 @@ public class DataHolder {
     }
 
     public void initDataHolder(DataContext dataContext) {
-        PROJECT = (Project) dataContext.getData(DataKeys.PROJECT);
-        EDITOR = (Editor) dataContext.getData(DataKeys.EDITOR);
-        MODULE = (Module) dataContext.getData(DataKeys.MODULE);
-        PSI_ELEMENT = (PsiElement) dataContext.getData(DataKeys.PSI_ELEMENT);
-        NAVIGATABLE = (Navigatable) dataContext.getData(DataKeys.NAVIGATABLE);
-        VIRTUAL_FILE = (VirtualFile) dataContext.getData(DataKeys.VIRTUAL_FILE);
-        PSI_FILE = (PsiFile) dataContext.getData(DataKeys.PSI_FILE);
+        PROJECT = dataContext.getData(DataKeys.PROJECT);
+        EDITOR = dataContext.getData(DataKeys.EDITOR);
+        MODULE = dataContext.getData(DataKeys.MODULE);
+        PSI_ELEMENT = dataContext.getData(DataKeys.PSI_ELEMENT);
+        NAVIGATABLE = dataContext.getData(DataKeys.NAVIGATABLE);
+        VIRTUAL_FILE = dataContext.getData(DataKeys.VIRTUAL_FILE);
+        PSI_FILE = dataContext.getData(DataKeys.PSI_FILE);
     }
 }

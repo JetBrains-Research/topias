@@ -1,5 +1,6 @@
 package navigation.ui;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.PopupChooserBuilder;
 import com.intellij.ui.components.JBList;
@@ -18,10 +19,12 @@ import java.util.Collection;
 public class PopupListPresentation implements Presentable {
     private Collection collection;
     private String popupTitle;
+    private Project project;
 
-    public PopupListPresentation(Collection collection, String popupTitle) {
+    public PopupListPresentation(Collection collection, String popupTitle, Project project) {
         this.collection = collection;
         this.popupTitle = popupTitle;
+        this.project = project;
     }
 
     public void present(PresentationLocation location) {
@@ -47,7 +50,7 @@ public class PopupListPresentation implements Presentable {
             public void keyPressed(KeyEvent keyEvent) {
                 if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER) {
                     if (list.getSelectedIndex() != -1) {
-                        new ReferenceNavigator(((Reference) list.getSelectedValue())).navigateToReference();
+                        new ReferenceNavigator(((Reference) list.getSelectedValue())).navigateToReference(project);
                     }
                 }
             }
@@ -55,7 +58,7 @@ public class PopupListPresentation implements Presentable {
         list.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (list.getSelectedIndex() != -1) {
-                    new ReferenceNavigator(((Reference) list.getSelectedValue())).navigateToReference();
+                    new ReferenceNavigator(((Reference) list.getSelectedValue())).navigateToReference(project);
                 }
             }
         });

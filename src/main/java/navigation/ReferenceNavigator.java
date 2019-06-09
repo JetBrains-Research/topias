@@ -1,12 +1,16 @@
 package navigation;
 
+import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.NavigatableFileEditor;
 import com.intellij.openapi.fileEditor.TextEditor;
+import com.intellij.openapi.project.Project;
 import navigation.wrappers.DataHolder;
 import navigation.wrappers.Reference;
+
+import java.util.Arrays;
 
 public class ReferenceNavigator {
     private Reference reference;
@@ -15,8 +19,8 @@ public class ReferenceNavigator {
         this.reference = reference;
     }
 
-    public void navigateToReference() {
-        FileEditor[] fileEditors = FileEditorManager.getInstance(DataHolder.getInstance().PROJECT).openFile(reference.getVirtualFile(), true);
+    public void navigateToReference(Project project) {
+        FileEditor[] fileEditors = FileEditorManager.getInstance(project).openFile(reference.getVirtualFile(), true);
         for (FileEditor fileEditor : fileEditors) {
             if (fileEditor instanceof NavigatableFileEditor)
                 ((NavigatableFileEditor) fileEditor).navigateTo(reference.location());
