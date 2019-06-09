@@ -3,10 +3,10 @@
     <name>Topias</name>
     <vendor email="svitkovsergey@gmail.com">Contacts</vendor>
     <depends>Git4Idea</depends>
-    <description>Plugin for VCS (Git) changes frequency visualization in Java projects</description>
-    <version>0.0.1</version>
+    <description>Plugin for VCS (Git) changes frequency visualization in Java projects. In case of any issues, please create an issue in plugin's GitHub repository: https://github.com/ml-in-programming/topias</description>
+    <version>1.0.1</version>
     <idea-version since-build="183.2940.10"/>
-    <change-notes>"initial release of the plugin, so no much notes"</change-notes>
+    <change-notes>"initial release of the plugin, may be buggy. For troubleshooting please create issue in https://github.com/ml-in-programming/topias"</change-notes>
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <!-- uncomment to enable plugin in all products
