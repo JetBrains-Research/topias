@@ -13,11 +13,11 @@ import processing.Utils;
 import javax.swing.*;
 
 public class Reference {
-    private PsiElement psiElement;
+    private PsiMethod psiElement;
     private int count;
 
-    public Reference(PsiReference reference, int count) {
-        this.psiElement = reference.resolve();
+    public Reference(PsiMethod reference, int count) {
+        this.psiElement = reference;
         this.count = count;
     }
 
@@ -30,7 +30,12 @@ public class Reference {
     }
 
     public PsiMethod getPsiMethod() {
-        return (PsiMethod) psiElement;
+        return psiElement;
+//        if (psiElement instanceof PsiMethod)
+//            return (PsiMethod) psiElement;
+//
+//
+//        return psiElement instanceof PsiMethod ? (PsiMethod) psiElement : null;
 //        PsiElement parent;
 //        PsiElement current = psiElement;
 //        while (true) {
@@ -111,6 +116,8 @@ public class Reference {
         PsiClass containingClass = getParentClass();
         PsiMethod containingMethod = getPsiMethod();
         PsiFile containingFile = containingFile();
+
+        if (getPsiMethod() != null)
 
         description.append(Utils.calculateSignature(getPsiMethod()));
 //        if (containingClass != null && !"".equals(containingClass.getName()))

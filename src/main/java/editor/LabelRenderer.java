@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.openapi.util.Key;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,7 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -40,12 +42,13 @@ public class LabelRenderer extends HintRenderer {
 
     @Override
     public int calcWidthInPixels(Inlay inlay) {
-        return 700;
+        final CustomFontMetrics metrics = getMetrics(inlay.getEditor());
+        return metrics.getSymbolWidth() * 35 * 3;
     }
 
     @Override
     public int calcHeightInPixels(@NotNull Inlay inlay) {
-        return 55;
+        return inlay.getEditor().getLineHeight() * 3;
     }
 
     @Override
@@ -58,7 +61,6 @@ public class LabelRenderer extends HintRenderer {
         final int descent = impl.getDescent();
         final Graphics2D g2d = (Graphics2D) g;
         final TextAttributes attributes = getTextAttributes(editor);
-
         final XYSeriesCollection data = new XYSeriesCollection(xySeries);
         final JFreeChart chart = ChartFactory.createHistogram(
                 null,
@@ -70,35 +72,33 @@ public class LabelRenderer extends HintRenderer {
                 false,
                 false
         );
+        final CustomFontMetrics fontMetrics = getMetrics(editor);
         final XYPlot xyPlot = chart.getXYPlot();
-        chart.getXYPlot().setBackgroundPaint(new Color(255, 255, 255));
+        chart.getXYPlot().setBackgroundPaint(attributes.getBackgroundColor());
         chart.getXYPlot().getRenderer().setSeriesPaint(0, new Color(0, 0, 255));
         final ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new java.awt.Dimension(150, 45));
-        final Font font = new Font("Dialog", Font.PLAIN, 7);
+        //let our histogram be like 3/5 of caption text length
+        final int chartWidth = fontMetrics.getSymbolWidth() * 21;
+        // 1.5 of char height
+        final int chartHeight = (int) (fontMetrics.getLineHeight() * 4.5);
+        chartPanel.setPreferredSize(new java.awt.Dimension(chartWidth, chartHeight));
+        final Font font = new Font("Dialog", Font.PLAIN, (int) (fontMetrics.getFont().getSize() * 0.7));
+
         xyPlot.getDomainAxis().setTickLabelFont(font);
         xyPlot.getRangeAxis().setTickLabelFont(font);
         xyPlot.getDomainAxis().setLabelFont(font);
         xyPlot.getRangeAxis().setLabelFont(font);
-        xyPlot.getDomainAxis().setRange(1, 30);
-//        xyPlot.getDomainAxis().setAxisLineVisible(false);
-//        xyPlot.getDomainAxis().setTickMarksVisible(false);
-//        xyPlot.getRangeAxis().setAxisLineVisible(false);
-//        xyPlot.getRangeAxis().setTickMarksVisible(false);
-//        xyPlot.getRangeAxis().setVisible(false);
-//        xyPlot.getDomainAxis().setVisible(false);
+        xyPlot.getDomainAxis().setRange(0, 30);
 
         XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
         renderer.setDrawBarOutline(false);
         // flat bars look best...
         renderer.setBarPainter(new StandardXYBarPainter());
 
-        final BufferedImage bufferedImage = chart.createBufferedImage(150, 45);
+        final BufferedImage bufferedImage = chart.createBufferedImage(chartWidth, chartHeight);
 
 
         if (super.getText() != null && attributes != null) {
-            MyFontMetrics fontMetrics = getFontMetrics(editor);
-            final int gap = r.height < fontMetrics.getLineHeight() + 2 ? 1 : 2;
             final Color foregroundColor = attributes.getForegroundColor();
             if (foregroundColor != null) {
                 final Object savedHint = g2d.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING);
@@ -107,15 +107,15 @@ public class LabelRenderer extends HintRenderer {
                 g.setColor(foregroundColor);
                 g.setFont(getFont(editor));
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(false));
-                g2d.setClip(r.x, r.y, 500, 65);
+                g2d.setClip(r.x, r.y, chartWidth * 3, chartHeight * 2);
                 final FontMetrics metrics = fontMetrics.getMetrics();
                 final int startX = r.x + 7 + fontMetrics.getMetrics().stringWidth(String.format("%" + lineStartOffset + "s", ""));
                 final int startY = r.y + Math.max(ascent, (r.height + metrics.getAscent() - metrics.getDescent()) / 2) - 1;
 
                 final int widthAdjustment = calcWidthAdjustment(editor, g.getFontMetrics());
                 if (widthAdjustment == 0) {
-                    g.drawString(super.getText(), startX + 3, startY);
-                    g2d.drawImage(bufferedImage, null, startX + 310, startY - 25);
+                    g.drawString(super.getText(), startX + 4, startY - 4);
+                    g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 35, startY - (int) (chartHeight * 0.7));
                 } else {
                     final int adjustmentPosition = this.getWidthAdjustment().getAdjustmentPosition();
                     final String firstPart = this.getText().substring(0, adjustmentPosition);
@@ -137,6 +137,21 @@ public class LabelRenderer extends HintRenderer {
                 .stringWidth(super.getWidthAdjustment().getEditorTextToMatch());
         return Math.max(0, editorTextWidth + doCalcWidth(super.getWidthAdjustment().getHintTextToMatch(), fontMetrics)
                 - doCalcWidth(super.getText(), fontMetrics));
+    }
+
+    protected CustomFontMetrics getMetrics(Editor editor) {
+        Key<CustomFontMetrics> LABEL_FONT_METRICS = new Key<>("ParameterHintFontMetrics");
+        final String familyName = UIManager.getFont("Label.font").getFamily();
+        final int size = Math.max(1, editor.getColorsScheme().getEditorFontSize() - 1);
+        CustomFontMetrics metrics = editor.getUserData(LABEL_FONT_METRICS);
+        if (metrics != null && !metrics.isActual(editor, familyName, size)) {
+            metrics = null;
+        }
+        if (metrics == null) {
+            metrics = new CustomFontMetrics(editor, familyName, size);
+            editor.putUserData(LABEL_FONT_METRICS, metrics);
+        }
+        return metrics;
     }
 
     private Font getFont(@NotNull Editor editor) {

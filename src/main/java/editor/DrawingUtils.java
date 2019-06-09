@@ -71,7 +71,7 @@ public class DrawingUtils {
                             false,
                             true,
                             0,
-                            new LabelRenderer("Method was changed " + x.getFirst().getChangesCount() + " time(s) for last " + period.getTextValue(), x,
+                            new LabelRenderer("Changed " + x.getFirst().getChangesCount() + " time(s) for last " + period.getTextValue(), x,
                                     countStartColumn(x.getFirst().getStartOffset(), doc))
                     );
                 }));
@@ -87,10 +87,6 @@ public class DrawingUtils {
 
         inlay.getBlockElementsInRange(0, editor.getDocument().getTextLength(), LabelRenderer.class)
                 .forEach(Disposer::dispose);
-    }
-
-    public static void clearBlockInlays(@NotNull Editor editor) {
-
     }
 
     private static int countStartColumn(int lineNumber, Document doc) {

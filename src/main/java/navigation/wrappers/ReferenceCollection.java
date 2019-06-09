@@ -1,5 +1,6 @@
 package navigation.wrappers;
 
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiReference;
 import com.intellij.util.containers.ArrayListSet;
 
@@ -7,11 +8,11 @@ import java.util.*;
 
 public class ReferenceCollection extends AbstractCollection<Reference> {
     private Set<Reference> references = new ArrayListSet<Reference>();
-    public static ReferenceCollection EMPTY = new ReferenceCollection(new ArrayList<PsiReference>());
+    public static ReferenceCollection EMPTY = new ReferenceCollection(new ArrayList<>());
 
     public ReferenceCollection(Collection<PsiReference> psiReferences) {
         for (PsiReference reference : psiReferences) {
-            references.add(new Reference(reference, 0));
+            references.add(new Reference((PsiMethod) reference.resolve(), 0));
         }
     }
 

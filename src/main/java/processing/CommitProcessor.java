@@ -73,13 +73,15 @@ public final class CommitProcessor {
         handlers.put(Type.NEW, new AddedChangeHandler());
     }
 
-    public void processCommit(GitCommit commit) {
+    void processCommit(GitCommit commit) {
         final String authorName = commit.getAuthor().getEmail();
         final long commitTime = commit.getCommitTime();
 
-        processNewCommit(commit.getChanges(), commit.getId().asString(), authorName, commitTime);
+        processNewCommit(commit.getChanges(),
+                commit.getId().asString(), authorName, commitTime);
 
-        ChangesState.getInstance(project).getState().persistentState.put(branchName, commit.getId().asString());
+        ChangesState.getInstance(project).getState().
+                persistentState.put(branchName, commit.getId().asString());
         count++;
         indicator.setFraction(count / commitCountToProcess);
     }

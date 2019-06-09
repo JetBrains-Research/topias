@@ -6,10 +6,7 @@ import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.MethodReferencesSearch;
 import db.dao.StatisticsViewDAO;
@@ -51,17 +48,20 @@ public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
                 return null;
             }).filter(x -> x != null && x.getFirst() != null).collect(Collectors.toList());
 
-            final List<Pair<PsiReference, Integer>> psiReferences = methodCountPairs.stream()
-                    .map(x -> new Pair<>(
-                            MethodReferencesSearch.search(x.getFirst(), GlobalSearchScope.allScope(project), false).findFirst(),
-                            x.getSecond()
-                    ))
-                    .filter(x -> x.getFirst() != null)
-                    .collect(Collectors.toList());
+//            final List<Pair<PsiReference, Integer>> psiReferences = methodCountPairs.stream()
+//                    .map(x -> new Pair<>(
+//                            MethodReferencesSearch.search(x.getFirst(), GlobalSearchScope.allScope(project), false).findFirst(),
+//                            x.getSecond()
+//                    ))
+//                    .filter(x -> x.getFirst() != null)
+//                    .collect(Collectors.toList());
+
+//            final List<PsiElement> elements = psiReferences.stream().map(x -> x.getFirst().resolve()).collect(Collectors.toList());
 
             final DataContext context = DataManager.getInstance().getDataContext(this);
             DataHolder.getInstance().initDataHolder(DataManager.getInstance().getDataContext(this));
-            final List<Reference> references = psiReferences.stream().filter(Objects::nonNull).map(x -> new Reference(x.getFirst(), x.getSecond())).collect(Collectors.toList());
+            final List<Reference> references = methodCountPairs.stream().filter(Objects::nonNull).map(x -> new Reference(x.getFirst(), x.getSecond())).collect(Collectors.toList());
+//            final List<Reference> references = psiReferences.stream().filter(Objects::nonNull).map(x -> new Reference(x.getFirst(), x.getSecond())).collect(Collectors.toList());
             sideBar.updateListItems(references);
             setContent(sideBar.getPanel());
         });
