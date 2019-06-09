@@ -2,24 +2,19 @@ package ui;
 
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.DataContext;
-import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.searches.MethodReferencesSearch;
 import db.dao.StatisticsViewDAO;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
 import navigation.wrappers.DataHolder;
 import navigation.wrappers.Reference;
-import processing.Utils;
 import settings.TopiasSettingsState;
 import settings.enums.DiscrType;
 
-import javax.swing.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -27,13 +22,20 @@ import java.util.stream.Collectors;
 import static processing.Utils.*;
 
 public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
-    private final MySideBar sideBar = new MySideBar();
+    private final MySideBar sideBar;
+    private static TopChangedMethodsListPanel instance = null;
 
     public TopChangedMethodsListPanel(boolean vertical, boolean borderless, Project project) {
         super(false, true);
+        sideBar = new MySideBar(project);
+        refresh(project);
+    }
+
+    private void refresh(Project project) {
         DumbService.getInstance(project).runWhenSmart(() -> {
             final StatisticsViewDAO dao = new StatisticsViewDAO(buildPathForSystem(project));
-            final DiscrType period = TopiasSettingsState.getInstance().getState() != null ? TopiasSettingsState.getInstance().getState().discrType : DiscrType.MONTH;
+            final TopiasSettingsState.InnerState settingsState = TopiasSettingsState.getInstance(project).getState();
+            final DiscrType period = settingsState != null ? DiscrType.getById(settingsState.discrTypeId) : DiscrType.MONTH;
             final List<StatisticsViewEntity> entities = dao.getMostChangedMethods(period);
             final JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
 
@@ -64,8 +66,15 @@ public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
 //            final List<Reference> references = psiReferences.stream().filter(Objects::nonNull).map(x -> new Reference(x.getFirst(), x.getSecond())).collect(Collectors.toList());
             sideBar.updateListItems(references);
             setContent(sideBar.getPanel());
+            instance = this;
         });
     }
 
+    public static void refreshList(Project project) {
+        if (instance == null) {
+            instance = new TopChangedMethodsListPanel(false, false, project);
+        } else
+            instance.refresh(project);
+    }
 
 }

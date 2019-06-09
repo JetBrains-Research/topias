@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.ChangesState;
+import ui.TopChangedMethodsListPanel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,6 +88,7 @@ public class GitCommitsProcessor {
                         bus.connect().subscribe(GitRepository.GIT_REPO_CHANGE, new GitRepoChangeListener());
                         final List<Editor> editors = Arrays.asList(EditorFactory.getInstance().getAllEditors());
                         final DrawingUtils drawingUtils = DrawingUtils.getInstance(dbFilePath);
+                        editors.forEach(drawingUtils::cleanInlayInEditor);
                         editors.forEach(drawingUtils::drawInlaysInEditor);
                     }
                     return;
@@ -136,6 +138,7 @@ public class GitCommitsProcessor {
                             editors.forEach(drawingUtils::cleanInlayInEditor);
                         }
                         editors.forEach(drawingUtils::drawInlaysInEditor);
+                        TopChangedMethodsListPanel.refreshList(project);
                         super.onFinished();
                     }
                 };

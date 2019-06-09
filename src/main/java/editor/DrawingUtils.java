@@ -11,7 +11,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import db.dao.StatisticsViewDAO;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.PsiBuilder;
@@ -36,8 +35,8 @@ public class DrawingUtils {
     }
 
     public void drawInlaysInEditor(Editor editor) {
-        final TopiasSettingsState.SettingsState state = TopiasSettingsState.getInstance().getState();
-        final DiscrType period = state == null ? DiscrType.MONTH : state.discrType;
+        final TopiasSettingsState.InnerState state = TopiasSettingsState.getInstance(editor.getProject()).getState();
+        final DiscrType period = state == null ? DiscrType.MONTH : DiscrType.getById(state.discrTypeId);
 
         if (editor == null)
             return;

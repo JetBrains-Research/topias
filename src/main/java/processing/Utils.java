@@ -1,6 +1,5 @@
 package processing;
 
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsException;
@@ -8,23 +7,12 @@ import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.psi.*;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.searches.MethodReferencesSearch;
-import db.dao.StatisticsViewDAO;
-import db.entities.StatisticsViewEntity;
 import git4idea.GitReference;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryManager;
 import gr.uom.java.xmi.UMLOperation;
-import navigation.wrappers.Reference;
-import settings.TopiasSettingsState;
-import settings.enums.DiscrType;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public final class Utils {
 

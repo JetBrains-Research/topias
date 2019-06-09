@@ -1,47 +1,54 @@
 package settings;
 
-import com.intellij.openapi.components.*;
-import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import settings.enums.DiscrType;
 
 @State(name = "TopiasSettingsState",
-        storages = {@Storage("topias_settings.xml")})
-public class TopiasSettingsState implements PersistentStateComponent<TopiasSettingsState.SettingsState> {
-    private SettingsState innerState = new SettingsState();
-    private final static Logger logger = LoggerFactory.getLogger(TopiasSettingsState.class);
+        storages = {@Storage("settings_state.xml")})
+public final class TopiasSettingsState implements ProjectComponent,
+        PersistentStateComponent<TopiasSettingsState.InnerState> {
+    private static final Logger log = LoggerFactory.getLogger(TopiasSettingsState.class);
+    private InnerState innerState = new InnerState();
 
-    @Override
-    public void loadState(@NotNull SettingsState state) {
-        XmlSerializerUtil.copyBean(state, this);
+    public static TopiasSettingsState getInstance(Project project) {
+        return project.getComponent(TopiasSettingsState.class);
     }
 
     @Nullable
     @Override
-    public SettingsState getState() {
+    public InnerState getState() {
         return innerState;
     }
 
     @Override
+    public void loadState(@NotNull InnerState state) {
+        this.innerState = state;
+    }
+
+    @Override
     public void noStateLoaded() {
-        logger.warn("No state was loaded");
+        log.debug("No state was loaded");
+        System.out.println("No state was loaded");
     }
 
-    public static TopiasSettingsState getInstance() {
-        return ServiceManager.getService(TopiasSettingsState.class);
-    }
+    public static class InnerState {
+        @NotNull
+        public Boolean showHistograms;
 
-    public static class SettingsState {
-        public DiscrType discrType;
+        @NotNull
+        public Integer discrTypeId;
 
-        public boolean showHistograms;
-
-        SettingsState() {
-            discrType = DiscrType.MONTH;
+        InnerState() {
             showHistograms = true;
+            discrTypeId = 1;
         }
     }
 }
+

@@ -1,12 +1,16 @@
 package ui;
 
-import com.intellij.psi.PsiReference;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBList;
 import navigation.ReferenceNavigator;
 import navigation.ui.ReferenceListCellRenderer;
 import navigation.wrappers.Reference;
+import settings.TopiasSettingsState;
+import settings.enums.DiscrType;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -16,8 +20,10 @@ import java.util.List;
 public class MySideBar {
     private JBList<Reference> list;
     private JPanel panel;
+    private Project project;
 
-    public MySideBar() {
+    public MySideBar(Project project) {
+        this.project = project;
         list.setCellRenderer(new ReferenceListCellRenderer());
         list.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent keyEvent) {
@@ -36,6 +42,9 @@ public class MySideBar {
                 }
             }
         });
+        final TopiasSettingsState state = TopiasSettingsState.getInstance(project);
+        final String title = "Most changed methods for last " + DiscrType.getById(state.getState().discrTypeId).textValue;
+        ((TitledBorder) panel.getBorder()).setTitle(title);
     }
 
     public JPanel getPanel() {
@@ -66,5 +75,8 @@ public class MySideBar {
                 }
             }
         });
+        final TopiasSettingsState state = TopiasSettingsState.getInstance(project);
+        final String title = "Most changed methods for last " + DiscrType.getById(state.getState().discrTypeId).textValue;
+        ((TitledBorder) panel.getBorder()).setTitle(title);
     }
 }

@@ -1,15 +1,10 @@
 package settings;
 
-import com.intellij.openapi.ui.ComboBox;
-import com.intellij.ui.CollectionComboBoxModel;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBCheckBox;
-import com.intellij.ui.components.JBPanel;
 import settings.enums.DiscrType;
 
 import javax.swing.*;
-import javax.swing.event.ListDataListener;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PluginSettingsUI {
 
@@ -17,12 +12,15 @@ public class PluginSettingsUI {
         return settingsPanel;
     }
 
-    public PluginSettingsUI() {
-        final TopiasSettingsState.SettingsState state = TopiasSettingsState.getInstance().getState();
+    public PluginSettingsUI(Project project) {
+        TopiasSettingsState.InnerState state = TopiasSettingsState.getInstance(project).getState();
+        if (state == null)
+            state = new TopiasSettingsState.InnerState();
+
         final DiscrType[] elems = {DiscrType.MONTH, DiscrType.WEEK};
         dateComboBox.setModel(new DefaultComboBoxModel<>(elems));
-        dateComboBox.setSelectedItem(state.discrType);
-        graphicsCheckBox = new JBCheckBox(null, state.showHistograms);
+        dateComboBox.setSelectedItem(DiscrType.getById(state.discrTypeId));
+        graphicsCheckBox.setSelected(state.showHistograms);
     }
 
     private JPanel settingsPanel;
@@ -37,7 +35,7 @@ public class PluginSettingsUI {
     }
 
     public boolean isHistogramsEnabled() {
-        return graphicsCheckBox.isEnabled();
+        return graphicsCheckBox.isSelected();
     }
 
     public void setDiscrType(DiscrType discrType) {
@@ -45,6 +43,6 @@ public class PluginSettingsUI {
     }
 
     public void setHistogramsEnabled(boolean showHistograms) {
-        this.graphicsCheckBox.setEnabled(showHistograms);
+        this.graphicsCheckBox.setSelected(showHistograms);
     }
 }

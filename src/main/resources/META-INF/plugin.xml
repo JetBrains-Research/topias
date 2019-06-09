@@ -16,7 +16,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <projectService serviceInterface="state.ChangesState" serviceImplementation="state.ChangesState"/>
-        <applicationService serviceInterface="settings.TopiasSettingsState" serviceImplementation="settings.TopiasSettingsState" />
+
+        <projectService serviceInterface="settings.TopiasSettingsState" serviceImplementation="settings.TopiasSettingsState" />
         <toolWindow id="Topias" anchor="bottom"
                     factoryClass="ui.TopChangedToolWindowFactory"/>
 
@@ -34,6 +35,10 @@
         </component>
         <component>
             <implementation-class>state.ChangesState</implementation-class>
+        </component>
+        <component>
+            <implementation-class>settings.TopiasSettingsState</implementation-class>
+
         </component>
     </project-components>
     <application-components>
