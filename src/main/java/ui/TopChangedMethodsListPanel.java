@@ -13,6 +13,7 @@ import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
 import navigation.wrappers.DataHolder;
 import navigation.wrappers.Reference;
+import processing.SystemUtils;
 import settings.TopiasSettingsState;
 import settings.enums.DiscrType;
 
@@ -34,7 +35,7 @@ public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
 
     private void refresh(Project project) {
         DumbService.getInstance(project).runWhenSmart(() -> {
-            final StatisticsViewDAO dao = new StatisticsViewDAO(buildPathForSystem(project));
+            final StatisticsViewDAO dao = new StatisticsViewDAO(SystemUtils.buildPathForSystem(project));
             final TopiasSettingsState.InnerState settingsState = TopiasSettingsState.getInstance(project).getState();
             final DiscrType period = settingsState != null ? DiscrType.getById(settingsState.discrTypeId) : DiscrType.MONTH;
             String branchName;

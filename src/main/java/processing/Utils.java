@@ -89,17 +89,6 @@ public final class Utils {
         return change.toString().substring(change.toString().indexOf(':') + 2).split(" -> ")[1];
     }
 
-    public static String buildPathForSystem(Project project) {
-        final StringBuilder pathBuilder = new StringBuilder().append(project.getBasePath());
-        final String os = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-        if (os.contains("mac") || os.contains("darwin") || os.contains("nux")) {
-            pathBuilder.append("/.idea/state.db");
-        } else if (os.contains("win")) {
-            pathBuilder.append("\\.idea\\state.db");
-        }
-        return pathBuilder.toString();
-    }
-
     public static String trimClassName(String fullMethodSignature) {
         return fullMethodSignature.substring(0, fullMethodSignature.lastIndexOf('.'));
     }

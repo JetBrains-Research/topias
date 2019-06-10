@@ -17,7 +17,7 @@ import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
 
-import static processing.Utils.buildPathForSystem;
+import static processing.SystemUtils.buildPathForSystem;
 import static processing.Utils.getCurrentBranchName;
 
 public class PluginSettingsConfigurable implements Configurable {

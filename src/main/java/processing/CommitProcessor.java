@@ -34,7 +34,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static java.lang.System.currentTimeMillis;
-import static processing.Utils.buildPathForSystem;
+import static processing.SystemUtils.buildPathForSystem;
 
 public final class CommitProcessor {
     private final static Logger logger = LoggerFactory.getLogger(CommitProcessor.class);
