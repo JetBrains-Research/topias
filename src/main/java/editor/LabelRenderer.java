@@ -31,6 +31,7 @@ import settings.TopiasSettingsState;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -104,7 +105,12 @@ public class LabelRenderer extends HintRenderer {
 
 
             ((NumberAxis) xyPlot.getRangeAxis()).setTickUnit(new NumberTickUnit(upperBound));
-            ((NumberAxis) xyPlot.getDomainAxis()).setTickUnit(new NumberTickUnit(period));
+
+            if (period == 7) {
+                final NumberAxis domainNumberAxis = (NumberAxis) xyPlot.getDomainAxis();
+                domainNumberAxis.setTickUnit(new NumberTickUnit(period));
+            }
+
             xyPlot.getRangeAxis().setRange(new Range(0, upperBound), false, false);
             xyPlot.getRangeAxis().setUpperMargin(0.3);
             xyPlot.getRangeAxis().setUpperBound(upperBound);
@@ -112,9 +118,7 @@ public class LabelRenderer extends HintRenderer {
             xyPlot.getRangeAxis().setTickLabelFont(font);
             xyPlot.getDomainAxis().setLabelFont(font);
             xyPlot.getRangeAxis().setLabelFont(font);
-            xyPlot.getDomainAxis().setUpperMargin(0.1f);
-            ((XYBarRenderer) xyPlot.getRenderer()).setMargin(0.2);
-            xyPlot.getDomainAxis().setRange(new Range(0, period), false, false);
+            xyPlot.getDomainAxis().setRange(new Range(0, period));
 
 
             XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
@@ -145,7 +149,7 @@ public class LabelRenderer extends HintRenderer {
                 if (widthAdjustment == 0) {
                     g.drawString(super.getText(), startX + 4, startY - 4);
                     if (showHistograms)
-                        g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 35, startY -
+                        g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 37, startY -
                                 (int) (fontMetrics.getLineHeight() * 4.5 * 0.6));
 
                 } else {
