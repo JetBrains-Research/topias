@@ -88,7 +88,6 @@ public class GitCommitsProcessor {
                         bus.connect().subscribe(GitRepository.GIT_REPO_CHANGE, new GitRepoChangeListener());
                         final List<Editor> editors = Arrays.asList(EditorFactory.getInstance().getAllEditors());
                         final DrawingUtils drawingUtils = DrawingUtils.getInstance(dbFilePath);
-                        editors.forEach(drawingUtils::cleanInlayInEditor);
                         editors.forEach(x -> drawingUtils.drawInlaysInEditor(x, currentBranchName));
                     }
                     return;
@@ -136,9 +135,9 @@ public class GitCommitsProcessor {
                             logger.info("Applying results to all opened editors");
                         } else {
                             editors.forEach(drawingUtils::cleanInlayInEditor);
+                            TopChangedMethodsListPanel.refreshList(project);
                         }
                         editors.forEach(x -> drawingUtils.drawInlaysInEditor(x, currentBranchName));
-                        TopChangedMethodsListPanel.refreshList(project);
                         super.onFinished();
                     }
                 };
