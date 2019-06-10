@@ -20,6 +20,7 @@ import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.TickUnitSource;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.Range;
@@ -88,11 +89,13 @@ public class LabelRenderer extends HintRenderer {
             );
 
             final XYPlot xyPlot = chart.getXYPlot();
+
             chart.getXYPlot().setBackgroundPaint(attributes.getBackgroundColor());
             chart.getXYPlot().getRenderer().setSeriesPaint(0, new Color(0, 0, 255));
             final ChartPanel chartPanel = new ChartPanel(chart);
             //let our histogram be like 3/5 of caption text length
             final int multiplier = period == 7 ? 14 : 21;
+            final double maxBarWidth = 1.0 / (period + 1.0);
             final int chartWidth = fontMetrics.getSymbolWidth() * multiplier;
             // 1.5 of char height
             final int chartHeight = (int) (fontMetrics.getLineHeight() * 4.5);
@@ -101,21 +104,24 @@ public class LabelRenderer extends HintRenderer {
 
 
             ((NumberAxis) xyPlot.getRangeAxis()).setTickUnit(new NumberTickUnit(upperBound));
-
-            xyPlot.getRangeAxis().setRange(new Range(0, upperBound), true, false);
+            ((NumberAxis) xyPlot.getDomainAxis()).setTickUnit(new NumberTickUnit(period));
+            xyPlot.getRangeAxis().setRange(new Range(0, upperBound), false, false);
             xyPlot.getRangeAxis().setUpperMargin(0.3);
             xyPlot.getRangeAxis().setUpperBound(upperBound);
             xyPlot.getDomainAxis().setTickLabelFont(font);
             xyPlot.getRangeAxis().setTickLabelFont(font);
             xyPlot.getDomainAxis().setLabelFont(font);
             xyPlot.getRangeAxis().setLabelFont(font);
-            xyPlot.getDomainAxis().setRange(0, period);
+            xyPlot.getDomainAxis().setUpperMargin(0.1f);
+            ((XYBarRenderer) xyPlot.getRenderer()).setMargin(0.2);
+            xyPlot.getDomainAxis().setRange(new Range(0, period), false, false);
 
 
             XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
             renderer.setDrawBarOutline(false);
             // flat bars look best...
             renderer.setBarPainter(new StandardXYBarPainter());
+            renderer.setShadowVisible(false);
 
             bufferedImage = chart.createBufferedImage(chartWidth, chartHeight);
 
