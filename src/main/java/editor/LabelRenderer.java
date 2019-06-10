@@ -73,6 +73,7 @@ public class LabelRenderer extends HintRenderer {
         BufferedImage bufferedImage = null;
         final CustomFontMetrics fontMetrics = getMetrics(editor);
         final boolean showHistograms = TopiasSettingsState.getInstance(editor.getProject()).getState().showHistograms;
+        final int period = TopiasSettingsState.getInstance(editor.getProject()).getState().discrTypeId == 0 ? 7 : 30;
         if (showHistograms) {
             final XYSeriesCollection data = new XYSeriesCollection(xySeries);
             final JFreeChart chart = ChartFactory.createHistogram(
@@ -91,7 +92,8 @@ public class LabelRenderer extends HintRenderer {
             chart.getXYPlot().getRenderer().setSeriesPaint(0, new Color(0, 0, 255));
             final ChartPanel chartPanel = new ChartPanel(chart);
             //let our histogram be like 3/5 of caption text length
-            final int chartWidth = fontMetrics.getSymbolWidth() * 21;
+            final int multiplier = period == 7 ? 14 : 21;
+            final int chartWidth = fontMetrics.getSymbolWidth() * multiplier;
             // 1.5 of char height
             final int chartHeight = (int) (fontMetrics.getLineHeight() * 4.5);
             chartPanel.setPreferredSize(new java.awt.Dimension(chartWidth, chartHeight));
@@ -107,7 +109,7 @@ public class LabelRenderer extends HintRenderer {
             xyPlot.getRangeAxis().setTickLabelFont(font);
             xyPlot.getDomainAxis().setLabelFont(font);
             xyPlot.getRangeAxis().setLabelFont(font);
-            xyPlot.getDomainAxis().setRange(0, 30);
+            xyPlot.getDomainAxis().setRange(0, period);
 
 
             XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
