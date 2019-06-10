@@ -58,6 +58,7 @@ public class LabelRenderer extends HintRenderer {
 
     @Override
     public int calcHeightInPixels(@NotNull Inlay inlay) {
+        System.out.println("Just commit example");
         return inlay.getEditor().getLineHeight() * 3;
     }
 
