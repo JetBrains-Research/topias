@@ -9,7 +9,7 @@ import processing.GitCommitsProcessor;
 
 import java.io.File;
 
-import static processing.Utils.buildPathForSystem;
+import static processing.Utils.buildDBUrlForSystem;
 
 
 public class ProjectOpenListener implements ProjectComponent {
@@ -24,9 +24,9 @@ public class ProjectOpenListener implements ProjectComponent {
     public void projectOpened() {
         logger.info("Project {} opened", project.getName());
 
-        final File sqliteFile = new File(buildPathForSystem(project));
+        final File sqliteFile = new File(buildDBUrlForSystem(project));
         if (!sqliteFile.exists()) {
-            DatabaseInitialization.createNewDatabase(buildPathForSystem(project));
+            DatabaseInitialization.createNewDatabase(buildDBUrlForSystem(project));
         }
         logger.info("DB file is located at {}", sqliteFile.getAbsolutePath());
         logger.info("Starting processing of git history");

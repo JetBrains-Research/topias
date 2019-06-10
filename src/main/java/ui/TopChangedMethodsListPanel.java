@@ -34,7 +34,7 @@ public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
 
     private void refresh(Project project) {
         DumbService.getInstance(project).runWhenSmart(() -> {
-            final StatisticsViewDAO dao = new StatisticsViewDAO(buildPathForSystem(project));
+            final StatisticsViewDAO dao = new StatisticsViewDAO(buildDBUrlForSystem(project));
             final TopiasSettingsState.InnerState settingsState = TopiasSettingsState.getInstance(project).getState();
             final DiscrType period = settingsState != null ? DiscrType.getById(settingsState.discrTypeId) : DiscrType.MONTH;
             String branchName;

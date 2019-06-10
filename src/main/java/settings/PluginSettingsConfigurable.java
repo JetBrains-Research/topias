@@ -17,7 +17,7 @@ import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
 
-import static processing.Utils.buildPathForSystem;
+import static processing.Utils.buildDBUrlForSystem;
 import static processing.Utils.getCurrentBranchName;
 
 public class PluginSettingsConfigurable implements Configurable {
@@ -68,7 +68,7 @@ public class PluginSettingsConfigurable implements Configurable {
         settingsState.discrTypeId = pluginSettingsUI.getDiscrType().getId();
         TopChangedMethodsListPanel.refreshList(project);
         final List<Editor> editors = Arrays.asList(EditorFactory.getInstance().getAllEditors());
-        final DrawingUtils drawingUtils = DrawingUtils.getInstance(buildPathForSystem(project));
+        final DrawingUtils drawingUtils = DrawingUtils.getInstance(buildDBUrlForSystem(project));
         editors.forEach(drawingUtils::cleanInlayInEditor);
         String branchName;
         try {

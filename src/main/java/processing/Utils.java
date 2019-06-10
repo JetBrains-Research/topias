@@ -97,7 +97,7 @@ public final class Utils {
         return fullMethodName.substring(fullMethodName.lastIndexOf('.') + 1, fullMethodName.lastIndexOf('('));
     }
 
-    public static String buildPathForSystem(Project project) {
+    public static String buildDBUrlForSystem(Project project) {
         final StringBuilder pathBuilder = new StringBuilder().append(project.getBasePath());
         final String os = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
         if (os.contains("mac") || os.contains("darwin") || os.contains("nux")) {

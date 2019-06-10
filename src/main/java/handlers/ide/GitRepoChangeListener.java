@@ -7,13 +7,13 @@ import git4idea.repo.GitRepositoryChangeListener;
 import org.jetbrains.annotations.NotNull;
 import processing.GitCommitsProcessor;
 
-import static processing.Utils.buildPathForSystem;
+import static processing.Utils.buildDBUrlForSystem;
 
 public class GitRepoChangeListener implements GitRepositoryChangeListener {
     @Override
     public void repositoryChanged(@NotNull GitRepository repository) {
         final Project project = repository.getProject();
         ProgressManager.getInstance().getProgressIndicator().isRunning();
-        GitCommitsProcessor.processGitHistory(project, buildPathForSystem(project), false);
+        GitCommitsProcessor.processGitHistory(project, buildDBUrlForSystem(project), false);
     }
 }
