@@ -9,7 +9,7 @@ import processing.GitCommitsProcessor;
 
 import java.io.File;
 
-import static processing.SystemUtils.buildPathForSystem;
+import static processing.Utils.buildPathForSystem;
 
 
 public class ProjectOpenListener implements ProjectComponent {

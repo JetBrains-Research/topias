@@ -7,7 +7,7 @@ import git4idea.repo.GitRepositoryChangeListener;
 import org.jetbrains.annotations.NotNull;
 import processing.GitCommitsProcessor;
 
-import static processing.SystemUtils.buildPathForSystem;
+import static processing.Utils.buildPathForSystem;
 
 public class GitRepoChangeListener implements GitRepositoryChangeListener {
     @Override
