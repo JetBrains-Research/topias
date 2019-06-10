@@ -5,6 +5,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.fileEditor.TextEditor;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
@@ -15,14 +16,16 @@ import javax.swing.*;
 public class Reference {
     private PsiMethod psiElement;
     private int count;
+    private Project project;
 
     public Reference(PsiMethod reference, int count) {
         this.psiElement = reference;
         this.count = count;
+        this.project = psiElement.getProject();
     }
 
     public Navigatable location() {
-        return new OpenFileDescriptor(DataHolder.getInstance().PROJECT, getVirtualFile(), psiElement.getTextOffset());
+        return new OpenFileDescriptor(project, getVirtualFile(), psiElement.getTextOffset());
     }
 
     public VirtualFile getVirtualFile() {
@@ -31,19 +34,6 @@ public class Reference {
 
     public PsiMethod getPsiMethod() {
         return psiElement;
-//        if (psiElement instanceof PsiMethod)
-//            return (PsiMethod) psiElement;
-//
-//
-//        return psiElement instanceof PsiMethod ? (PsiMethod) psiElement : null;
-//        PsiElement parent;
-//        PsiElement current = psiElement;
-//        while (true) {
-//            parent = current.getParent();
-//            if (parent instanceof PsiFile) return null;
-//            if (parent instanceof PsiMethod) return (PsiMethod) parent;
-//            current = parent;
-//        }
     }
 
     public PsiClass getParentClass() {

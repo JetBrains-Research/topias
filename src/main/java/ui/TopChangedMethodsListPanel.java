@@ -69,7 +69,7 @@ public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
 
             final DataContext context = DataManager.getInstance().getDataContext(this);
             DataHolder.getInstance().initDataHolder(DataManager.getInstance().getDataContext(this));
-            final List<Reference> references = methodCountPairs.stream().filter(Objects::nonNull).map(x -> new Reference(x.getFirst(), x.getSecond())).collect(Collectors.toList());
+            final List<Reference> references = methodCountPairs.stream().filter(Objects::nonNull).limit(10).map(x -> new Reference(x.getFirst(), x.getSecond())).collect(Collectors.toList());
 //            final List<Reference> references = psiReferences.stream().filter(Objects::nonNull).map(x -> new Reference(x.getFirst(), x.getSecond())).collect(Collectors.toList());
             sideBar.updateListItems(references);
             setContent(sideBar.getPanel());
