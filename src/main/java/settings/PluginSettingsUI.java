@@ -1,14 +1,26 @@
 package settings;
 
+import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.JavaSdk;
+import com.intellij.openapi.ui.ComponentWithBrowseButton;
+import com.intellij.openapi.ui.TextComponentAccessor;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import org.jetbrains.annotations.Nullable;
 import settings.enums.DiscrType;
 
 import javax.swing.*;
 import java.awt.*;
+
+import static com.intellij.openapi.util.io.FileUtil.toSystemIndependentName;
 
 public class PluginSettingsUI {
 
@@ -25,6 +37,10 @@ public class PluginSettingsUI {
         dateComboBox.setModel(new DefaultComboBoxModel<>(elems));
         dateComboBox.setSelectedItem(DiscrType.getById(state.discrTypeId));
         graphicsCheckBox.setSelected(state.showHistograms);
+        String repoPath = "";
+        FileChooserDescriptor descriptor = JavaSdk.getInstance().getHomeChooserDescriptor();
+        BrowseFolderListener listener = new BrowseFolderListener("Select JDK Home", gitRepoRootPath, descriptor, repoPath);
+        gitRepoRootPath.addActionListener(listener);
     }
 
     private JPanel settingsPanel;
@@ -32,6 +48,9 @@ public class PluginSettingsUI {
     private JCheckBox graphicsCheckBox;
     private JLabel graphicsLabel;
     private JLabel showDataLabel;
+    private TextFieldWithBrowseButton gitRepoRootPath;
+    private JLabel repoPathLabel;
+    private JLabel refreshLabel;
 
 
     public DiscrType getDiscrType() {
@@ -93,5 +112,29 @@ public class PluginSettingsUI {
      */
     public JComponent $$$getRootComponent$$$() {
         return settingsPanel;
+    }
+
+    private static class BrowseFolderListener extends ComponentWithBrowseButton.BrowseFolderActionListener<JTextField> {
+        private final String myDefaultPath;
+
+        BrowseFolderListener(@Nullable String title,
+                             ComponentWithBrowseButton<JTextField> textField,
+                             FileChooserDescriptor fileChooserDescriptor,
+                             @Nullable String defaultPath) {
+            super(title, null, textField, null, fileChooserDescriptor, TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT);
+            myDefaultPath = defaultPath;
+        }
+
+        @Nullable
+        @Override
+        protected VirtualFile getInitialFile() {
+            String dir = super.getComponentText();
+            if (!dir.isEmpty()) {
+                return super.getInitialFile();
+            }
+
+            LocalFileSystem fileSystem = LocalFileSystem.getInstance();
+            return fileSystem.findFileByPath(toSystemIndependentName(myDefaultPath == null ? PathManager.getHomePath() : myDefaultPath));
+        }
     }
 }

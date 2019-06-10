@@ -50,7 +50,7 @@ public class GitCommitsProcessor {
                 if (gitRootPath == null || gitRootPath.getPath() == null) {
                     logger.warn("VCS root not found for project {}", project.getName());
                     ApplicationManager.getApplication().invokeLater(() ->
-                            Messages.showWarningDialog("Git VCS Root unfortunately not found!", "Topias"));
+                            Messages.showWarningDialog("Git root was not found!\nTry to set it manually in settings", "Topias"));
 
                     return;
                 }
