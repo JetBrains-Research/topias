@@ -190,6 +190,7 @@ public class MethodsDictionaryDAO {
                 + "where fullSignature = ?";
 
         final Iterator<Pair<String, MethodDictionaryEntity>> iter = sigEntPairs.iterator();
+
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             while (iter.hasNext()) {
                 try {
