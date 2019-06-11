@@ -46,4 +46,13 @@ public class MethodDictionaryEntity {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+
+    @Override
+    public String toString() {
+        return "MethodDictionaryEntity{" +
+                "fullMethodSignature='" + fullMethodSignature + '\'' +
+                ", id=" + id +
+                ", fileName='" + fileName + '\'' +
+                '}';
+    }
 }

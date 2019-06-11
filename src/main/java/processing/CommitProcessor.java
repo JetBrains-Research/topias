@@ -103,7 +103,8 @@ public final class CommitProcessor {
         miner.churnAtCommit(repository, commitId, new RefactoringHandler() {
             @Override
             public void handle(RevCommit commitData, List<Refactoring> refactorings) {
-                data.addAll(refactorings.stream().map(processor::process).collect(Collectors.toCollection(LinkedList::new)));
+                data.addAll(refactorings.stream().map(processor::process).filter(Objects::nonNull)
+                        .collect(Collectors.toCollection(LinkedList::new)));
             }
         });
         logger.info("Refactorings were processed for " + (currentTimeMillis() - start) / 1000.0 + " secs!");
@@ -113,11 +114,14 @@ public final class CommitProcessor {
         final List<MethodInfo> added = methodsStorage.getAddedMethods();
         final List<RefactoringData> moved = methodsStorage.getMovedMethods();
 
+        moved.forEach(x -> {
+                added.remove(x.getNewMethod());
+                deleted.remove(x.getOldMethod());
+        });
+
         for (RefactoringData refactoringData : data) {
-            if (deleted.contains(refactoringData.getOldMethod()) && added.contains(refactoringData.getNewMethod())) {
-                deleted.remove(refactoringData.getOldMethod());
-                added.remove(refactoringData.getNewMethod());
-            }
+            deleted.remove(refactoringData.getOldMethod());
+            added.remove(refactoringData.getNewMethod());
             moved.remove(data);
         }
 

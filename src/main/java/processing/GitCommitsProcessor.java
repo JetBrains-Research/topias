@@ -7,6 +7,7 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
@@ -43,7 +44,6 @@ public class GitCommitsProcessor {
 
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
-
                 final VcsRoot gitRootPath = Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
                         .filter(x -> x.getVcs().getName().equalsIgnoreCase("git"))
                         .findAny().orElse(null);
@@ -129,17 +129,19 @@ public class GitCommitsProcessor {
                     public void onFinished() {
                         final List<Editor> editors = Arrays.asList(EditorFactory.getInstance().getAllEditors());
                         final DrawingUtils drawingUtils = DrawingUtils.getInstance(dbFilePath);
-                        if (isFirstTime) {
-                            MessageBus bus = project.getMessageBus();
-                            bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileOpenListener(dbFilePath));
-                            bus.connect().subscribe(GitRepository.GIT_REPO_CHANGE, new GitRepoChangeListener());
-                            logger.info("Applying results to all opened editors");
-                        } else {
-                            editors.forEach(drawingUtils::cleanInlayInEditor);
-                            TopChangedMethodsListPanel.refreshList(project);
+                        if (!project.isDisposed()) {
+                            if (isFirstTime) {
+                                MessageBus bus = project.getMessageBus();
+                                bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileOpenListener(dbFilePath));
+                                bus.connect().subscribe(GitRepository.GIT_REPO_CHANGE, new GitRepoChangeListener());
+                                logger.info("Applying results to all opened editors");
+                            } else {
+                                editors.forEach(drawingUtils::cleanInlayInEditor);
+                                TopChangedMethodsListPanel.refreshList(project);
+                            }
+                            editors.forEach(x -> drawingUtils.drawInlaysInEditor(x, currentBranchName));
+                            super.onFinished();
                         }
-                        editors.forEach(x -> drawingUtils.drawInlaysInEditor(x, currentBranchName));
-                        super.onFinished();
                     }
                 };
                 ProgressManager.getInstance().run(backgroundable);

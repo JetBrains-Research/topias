@@ -1,6 +1,7 @@
 package handlers.ide;
 
 import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import db.DatabaseInitialization;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ public class ProjectOpenListener implements ProjectComponent {
         }
         logger.info("DB file is located at {}", sqliteFile.getAbsolutePath());
         logger.info("Starting processing of git history");
-        GitCommitsProcessor.processGitHistory(project, sqliteFile.getPath(), true);
+        final DumbService dumbService = DumbService.getInstance(project);
+        dumbService.runWhenSmart(() -> GitCommitsProcessor.processGitHistory(project, sqliteFile.getPath(), true));
     }
 }

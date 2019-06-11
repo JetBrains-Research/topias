@@ -36,7 +36,7 @@ public final class RefactoringProcessor {
     }
 
     public RefactoringData process(Refactoring refactoring) {
-        return handlers.get(refactoring.getRefactoringType()).apply(refactoring);
+        return handlers.getOrDefault(refactoring.getRefactoringType(), x -> null).apply(refactoring);
     }
 
 //    private class ExtractAndMoveOperationRefactoringHandler implements Function<Refactoring, RefactoringData> {

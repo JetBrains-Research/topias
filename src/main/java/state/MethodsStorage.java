@@ -3,6 +3,7 @@ package state;
 import kotlin.Pair;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MethodsStorage {
@@ -13,10 +14,10 @@ public class MethodsStorage {
     private final List<MethodInfo> recalcMethods;
 
     private MethodsStorage() {
-        this.deletedMethods = new ArrayList<>();
-        this.movedMethods = new ArrayList<>();
-        this.addedMethods = new ArrayList<>();
-        this.recalcMethods = new ArrayList<>();
+        this.deletedMethods = new LinkedList<>();
+        this.movedMethods = new LinkedList<>();
+        this.addedMethods = new LinkedList<>();
+        this.recalcMethods = new LinkedList<>();
     }
 
     public static MethodsStorage getInstance() {

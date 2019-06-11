@@ -16,7 +16,6 @@ public class DatabaseInitialization {
                 "(\n" +
                 "  id integer primary key,\n" +
                 "  fullSignature varchar(1024) unique ,\n" +
-                "  startOffset integer not null,\n" +
                 "  fileName varchar(1024) not null,\n" +
                 "  unique (fullSignature, fileName)" +
                 ");";
@@ -60,8 +59,7 @@ public class DatabaseInitialization {
                 "       fullSignature,\n" +
                 "       changesCount,\n" +
                 "       fileName,\n" +
-                "       branchName,\n" +
-                "       startOffset\n" +
+                "       branchName\n" +
                 "from statsData \n" +
                 "       join methodsDictionary on statsData.signatureId = id;";
         try {
