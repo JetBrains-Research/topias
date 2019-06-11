@@ -26,7 +26,6 @@ public class Reference {
 
     public Navigatable location() {
         return new OpenFileDescriptor(project, getVirtualFile(), psiElement.getTextOffset());
-
     }
 
     public VirtualFile getVirtualFile() {
