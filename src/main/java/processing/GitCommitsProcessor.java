@@ -40,6 +40,7 @@ public class GitCommitsProcessor {
     public static void processGitHistory(Project project, String dbFilePath, boolean isFirstTime) {
 
         final ProjectLevelVcsManagerImpl instance = (ProjectLevelVcsManagerImpl) ProjectLevelVcsManager.getInstance(project);
+
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
 

@@ -136,11 +136,8 @@ public final class CommitProcessor {
                         x.getNewMethod().getFileName())
         )).collect(Collectors.toList()));
 
-        //Signature position updating
-        //methodsStorage.getRecalcMethods().forEach(x -> methodsDictionaryDAO.dumbUpsertOfNotChangedMethodEntries(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
 
-        start = currentTimeMillis();
-        methodsDictionaryDAO.upsertOfNotChangedMethodEntries(
+        methodsDictionaryDAO.addToDictionary(
                 methodsStorage.getRecalcMethods()
                         .stream()
                         .map(x -> new MethodDictionaryEntity(x.getMethodFullName(),
@@ -148,7 +145,19 @@ public final class CommitProcessor {
                                 x.getFileName()))
                         .collect(Collectors.toList())
         );
-        logger.info("Update of methods offsets took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
+        //Signature position updating
+        //methodsStorage.getRecalcMethods().forEach(x -> methodsDictionaryDAO.dumbUpsertOfNotChangedMethodEntries(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
+
+//        start = currentTimeMillis();
+//        methodsDictionaryDAO.upsertOfNotChangedMethodEntries(
+//                methodsStorage.getRecalcMethods()
+//                        .stream()
+//                        .map(x -> new MethodDictionaryEntity(x.getMethodFullName(),
+//                                x.getStartOffset(),
+//                                x.getFileName()))
+//                        .collect(Collectors.toList())
+//        );
+//        logger.info("Update of methods offsets took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
         //Just clearing
         methodsStorage.clear();
 
