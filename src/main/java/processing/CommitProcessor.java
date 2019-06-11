@@ -77,7 +77,6 @@ public final class CommitProcessor {
         ChangesState.getInstance(project).getState().
                 persistentState.put(branchName, commit.getId().asString());
         count++;
-        System.out.println(count + " out of " + commitCountToProcess);
         indicator.setFraction(count / commitCountToProcess);
     }
 
@@ -144,19 +143,6 @@ public final class CommitProcessor {
                                 x.getFileName()))
                         .collect(Collectors.toList())
         );
-        //Signature position updating
-        //methodsStorage.getRecalcMethods().forEach(x -> methodsDictionaryDAO.dumbUpsertOfNotChangedMethodEntries(new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName())));
-
-//        start = currentTimeMillis();
-//        methodsDictionaryDAO.upsertOfNotChangedMethodEntries(
-//                methodsStorage.getRecalcMethods()
-//                        .stream()
-//                        .map(x -> new MethodDictionaryEntity(x.getMethodFullName(),
-//                                x.getStartOffset(),
-//                                x.getFileName()))
-//                        .collect(Collectors.toList())
-//        );
-//        logger.info("Update of methods offsets took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
         //Just clearing
         methodsStorage.clear();
 
@@ -178,7 +164,6 @@ public final class CommitProcessor {
         start = currentTimeMillis();
         methodsChangelogDAO.insertMethodsChanges(entities);
         logger.info("Stats upserting took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
-        System.out.println("Commit with id " + commitId + " was processed");
     }
 
     @Override
