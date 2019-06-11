@@ -68,4 +68,10 @@ public class PopupListPresentation implements Presentable {
 
         return list;
     }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        this.project = null;
+    }
 }

@@ -1,5 +1,6 @@
 package ui;
 
+import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBList;
 import navigation.ReferenceNavigator;
@@ -18,7 +19,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
-public class MySideBar {
+public class MySideBar implements ProjectComponent {
     private JBList<Reference> list;
     private JPanel panel;
     private Project project;

@@ -6,7 +6,9 @@ import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.messages.MessageBus;
 import editor.DrawingUtils;
+import git4idea.repo.GitRepository;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,5 +37,10 @@ public class FileOpenListener implements FileEditorManagerListener {
         final String finalBranchName = branchName;
         DrawingUtils.getInstance(dbURL).drawInlaysInEditor(editor, branchName);
 
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
     }
 }

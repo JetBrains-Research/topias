@@ -20,13 +20,13 @@ import static java.time.temporal.ChronoUnit.DAYS;
 
 public class StatisticsViewDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsDictionaryDAO.class);
-    private final Connection connection;
+    private Connection connection;
 
     public StatisticsViewDAO(String url) {
         this.connection = DatabaseInitialization.getConnection(url);
     }
 
-    public List<Integer> selectChangesCountDaily(String fullSigName, DiscrType period, String branchName) {
+    public synchronized List<Integer> selectChangesCountDaily(String fullSigName, DiscrType period, String branchName) {
         final int days = period.equals(DiscrType.MONTH) ? 30 : 7;
         final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(days);
@@ -61,7 +61,7 @@ public class StatisticsViewDAO {
         return Arrays.asList(changesData);
     }
 
-    public List<StatisticsViewEntity> getMostChangedMethods(DiscrType period, String branchName) {
+    public synchronized List<StatisticsViewEntity> getMostChangedMethods(DiscrType period, String branchName) {
         final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
         final String sql = "select fullSignature,\n" +
@@ -91,7 +91,7 @@ public class StatisticsViewDAO {
         return entities;
     }
 
-    public List<StatisticsViewEntity> getStatDataForFile(String fileName, DiscrType period, String branchName) {
+    public synchronized List<StatisticsViewEntity> getStatDataForFile(String fileName, DiscrType period, String branchName) {
         final LocalDate to = LocalDate.now().plusDays(1);
         final LocalDate from = to.minusDays(period.equals(DiscrType.WEEK) ? 7 : 30);
 
@@ -123,5 +123,11 @@ public class StatisticsViewDAO {
         }
 
         return entities;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        connection = null;
     }
 }

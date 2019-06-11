@@ -16,4 +16,10 @@ public class GitRepoChangeListener implements GitRepositoryChangeListener {
         ProgressManager.getInstance().getProgressIndicator().isRunning();
         GitCommitsProcessor.processGitHistory(project, buildDBUrlForSystem(project), false);
     }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+
+    }
 }

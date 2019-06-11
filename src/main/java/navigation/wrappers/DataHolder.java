@@ -14,7 +14,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 
 public class DataHolder {
-    public Project PROJECT;
     public Editor EDITOR;
     public Module MODULE;
     public PsiElement PSI_ELEMENT;
@@ -32,7 +31,6 @@ public class DataHolder {
     }
 
     public void initDataHolder(DataContext dataContext) {
-        PROJECT = dataContext.getData(DataKeys.PROJECT);
         EDITOR = dataContext.getData(DataKeys.EDITOR);
         MODULE = dataContext.getData(DataKeys.MODULE);
         PSI_ELEMENT = dataContext.getData(DataKeys.PSI_ELEMENT);

@@ -1,11 +1,12 @@
 package db;
 
+import com.intellij.openapi.components.ProjectComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 
-public class DatabaseInitialization {
+public class DatabaseInitialization implements ProjectComponent {
     private final static Logger logger = LoggerFactory.getLogger(DatabaseInitialization.class);
     private static Connection connection = null;
 
@@ -98,5 +99,12 @@ public class DatabaseInitialization {
             }
         }
         return connection;
+    }
+
+    public static void closeConnection() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+            connection = null;
+        }
     }
 }

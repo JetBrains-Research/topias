@@ -7,14 +7,14 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsException;
-import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl;
 import com.intellij.openapi.vcs.impl.VcsInitObject;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBus;
 import editor.DrawingUtils;
 import git4idea.commands.Git;
@@ -28,38 +28,50 @@ import handlers.ide.GitRepoChangeListener;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import settings.TopiasSettingsState;
 import state.ChangesState;
 import ui.TopChangedMethodsListPanel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class GitCommitsProcessor {
     private final static Logger logger = LoggerFactory.getLogger(GitCommitsProcessor.class);
 
-    public static void processGitHistory(Project project, String dbFilePath, boolean isFirstTime) {
+    public static synchronized void processGitHistory(Project project, String dbFilePath, boolean isFirstTime) {
 
         final ProjectLevelVcsManagerImpl instance = (ProjectLevelVcsManagerImpl) ProjectLevelVcsManager.getInstance(project);
-
+        final TopiasSettingsState.InnerState settingsState = TopiasSettingsState.getInstance(project).getState();
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
-                final VcsRoot gitRootPath = Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
-                        .filter(x -> x.getVcs().getName().equalsIgnoreCase("git"))
-                        .findAny().orElse(null);
+                final Optional<VirtualFile> gitRootOptional = settingsState.gitRootPath == null || settingsState.gitRootPath.equals("") ?
 
-                if (gitRootPath == null || gitRootPath.getPath() == null) {
+                        Arrays.stream(instance.getAllVcsRoots()).filter(x -> x.getVcs() != null)
+                                .filter(x -> x.getVcs().getName().equalsIgnoreCase("git"))
+                                .findAny().flatMap(x -> Optional.of(x.getPath())) :
+
+                        Optional.of(LocalFileSystem.getInstance().findFileByPath(settingsState.gitRootPath));
+
+
+                if (!gitRootOptional.isPresent() || gitRootOptional.get().getPath() == null) {
                     logger.warn("VCS root not found for project {}", project.getName());
                     ApplicationManager.getApplication().invokeLater(() ->
                             Messages.showWarningDialog("Git root was not found!\nTry to set it manually in settings", "Topias"));
+                    settingsState.isFirstTry = false;
+                    settingsState.isRefreshEnabled = true;
 
                     return;
                 }
 
+                final VirtualFile gitRoot = gitRootOptional.get();
+                settingsState.gitRootPath = gitRoot.getPath();
+
                 final String currentBranchName = Utils.getCurrentBranchName(project);
 
                 final GitLineHandler lineHandler = new GitLineHandler(project,
-                        gitRootPath.getPath(),
+                        gitRoot,
                         GitCommand.REV_LIST
                 );
 
@@ -115,7 +127,7 @@ public class GitCommitsProcessor {
                                     currentBranchName,
                                     indicator,
                                     commitCountToProcess);
-                            GitHistoryUtils.loadDetails(project, gitRootPath.getPath(), commitProcessor::processCommit,
+                            GitHistoryUtils.loadDetails(project, gitRoot, commitProcessor::processCommit,
                                     finalParamsArray);
                             logger.info("Git history processing finished");
                         } catch (VcsException e) {
@@ -129,19 +141,19 @@ public class GitCommitsProcessor {
                     public void onFinished() {
                         final List<Editor> editors = Arrays.asList(EditorFactory.getInstance().getAllEditors());
                         final DrawingUtils drawingUtils = DrawingUtils.getInstance(dbFilePath);
-                        if (!project.isDisposed()) {
-                            if (isFirstTime) {
-                                MessageBus bus = project.getMessageBus();
-                                bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileOpenListener(dbFilePath));
-                                bus.connect().subscribe(GitRepository.GIT_REPO_CHANGE, new GitRepoChangeListener());
-                                logger.info("Applying results to all opened editors");
-                            } else {
-                                editors.forEach(drawingUtils::cleanInlayInEditor);
-                                TopChangedMethodsListPanel.refreshList(project);
-                            }
-                            editors.forEach(x -> drawingUtils.drawInlaysInEditor(x, currentBranchName));
-                            super.onFinished();
+                        if (isFirstTime) {
+                            MessageBus bus = project.getMessageBus();
+                            bus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileOpenListener(dbFilePath));
+                            bus.connect().subscribe(GitRepository.GIT_REPO_CHANGE, new GitRepoChangeListener());
+                            logger.info("Applying results to all opened editors");
+                            settingsState.isFirstTry = false;
+                            settingsState.isRefreshEnabled = true;
+                        } else {
+                            editors.forEach(drawingUtils::cleanInlayInEditor);
+                            TopChangedMethodsListPanel.refreshList(project);
                         }
+                        editors.forEach(x -> drawingUtils.drawInlaysInEditor(x, currentBranchName));
+                        super.onFinished();
                     }
                 };
                 ProgressManager.getInstance().run(backgroundable);

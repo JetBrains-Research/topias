@@ -1,5 +1,6 @@
 package settings;
 
+import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.options.Configurable;
@@ -20,7 +21,7 @@ import java.util.List;
 import static processing.Utils.buildDBUrlForSystem;
 import static processing.Utils.getCurrentBranchName;
 
-public class PluginSettingsConfigurable implements Configurable {
+public class PluginSettingsConfigurable implements Configurable, ProjectComponent {
 
     private final String pluginName = "Topias";
     private PluginSettingsUI pluginSettingsUI;
@@ -52,12 +53,9 @@ public class PluginSettingsConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-        final DiscrType discrType = pluginSettingsUI.getDiscrType();
-        final DiscrType settingsDiscrType = DiscrType.getById(settingsState.discrTypeId);
-        final boolean histEnabled = pluginSettingsUI.isHistogramsEnabled();
-        final boolean histsEnabledSet = settingsState.showHistograms;
         return pluginSettingsUI.getDiscrType().getId() != settingsState.discrTypeId ||
-                pluginSettingsUI.isHistogramsEnabled() != settingsState.showHistograms;
+                pluginSettingsUI.isHistogramsEnabled() != settingsState.showHistograms ||
+                !pluginSettingsUI.getGitRepoRootPath().equals(settingsState.gitRootPath);
     }
 
 

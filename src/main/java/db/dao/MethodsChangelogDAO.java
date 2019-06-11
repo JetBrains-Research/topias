@@ -13,13 +13,13 @@ import java.util.List;
 
 public class MethodsChangelogDAO {
     private final static Logger logger = LoggerFactory.getLogger(MethodsChangelogDAO.class);
-    private final Connection connection;
+    private Connection connection;
 
     public MethodsChangelogDAO(String url) {
         this.connection = DatabaseInitialization.getConnection(url);
     }
 
-    public void insertMethodsChanges(List<MethodChangeLogEntity> entities) {
+    public synchronized void insertMethodsChanges(List<MethodChangeLogEntity> entities) {
         if (entities == null || entities.isEmpty())
             return;
 
@@ -42,10 +42,6 @@ public class MethodsChangelogDAO {
                 " where true \n" +
                 "on conflict (dtDateTime, discrType, signatureId) do update set changesCount=changesCount+1";
 
-        final String upsertStatDaily = "insert into statsData select " +
-                "* from " +
-                "tempStatsData where true on conflict(dtDateTime, discrType, signatureId) do update set changesCount=changesCount + changesC;";
-
         try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
             entities.forEach(y -> {
                 try {
@@ -60,24 +56,23 @@ public class MethodsChangelogDAO {
             });
             statement.executeBatch();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace();e.printStackTrace();
             logger.error("Sql exception occured while trying to execute batch insert to methodsChangeLog table", e);
         }
 
         try (PreparedStatement statement = connection.prepareStatement(insertStatDailyInTemp)) {
             statement.setLong(1, commitTime);
             statement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        try (Statement statement = connection.createStatement()) {
-//            statement.execute(upsertStatDaily);
-            statement.execute(truncateTempTable);
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        connection = null;
     }
 }

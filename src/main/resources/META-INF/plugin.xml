@@ -4,9 +4,10 @@
     <vendor email="svitkovsergey@gmail.com">Contacts</vendor>
     <depends>Git4Idea</depends>
     <description>Plugin for VCS (Git) changes frequency visualization in Java projects. In case of any issues, please create an issue in plugin's GitHub repository: https://github.com/ml-in-programming/topias</description>
-    <version>1.0.1c</version>
+    <version>1.0.1d</version>
     <idea-version since-build="183.2940.10"/>
     <change-notes>
+        1.0.1d: Added reload button and manually selection of git repo path
         1.0.1c: Some performance improvements, VCS search now is performed after indexing;
         1.0.1b: Fixed some crashings. Now plugin should work more stable;
     </change-notes>
@@ -41,7 +42,16 @@
         </component>
         <component>
             <implementation-class>settings.TopiasSettingsState</implementation-class>
+        </component>
 
+        <component>
+            <implementation-class>settings.PluginSettingsConfigurable</implementation-class>
+        </component>
+        <component>
+            <implementation-class>ui.MySideBar</implementation-class>
+        </component>
+        <component>
+            <implementation-class>db.DatabaseInitialization</implementation-class>
         </component>
     </project-components>
     <application-components>

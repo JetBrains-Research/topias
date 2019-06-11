@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.likeanowl'
-version '1.0.1c'
+version '1.0.1d'
 
 sourceCompatibility = 1.8
 

@@ -16,16 +16,14 @@ import javax.swing.*;
 public class Reference {
     private PsiMethod psiElement;
     private int count;
-    private Project project;
 
     public Reference(PsiMethod reference, int count) {
         this.psiElement = reference;
         this.count = count;
-        this.project = psiElement.getProject();
     }
 
     public Navigatable location() {
-        return new OpenFileDescriptor(project, getVirtualFile(), psiElement.getTextOffset());
+        return new OpenFileDescriptor(psiElement.getProject(), getVirtualFile(), psiElement.getTextOffset());
     }
 
     public VirtualFile getVirtualFile() {
@@ -49,27 +47,6 @@ public class Reference {
 
     public PsiFile containingFile() {
         return psiElement.getContainingFile();
-    }
-
-    public int line() {
-        Editor editor = DataHolder.getInstance().EDITOR;
-        FileEditor[] fileEditors = FileEditorManager.getInstance(DataHolder.getInstance().PROJECT).getEditors(getVirtualFile());
-        for (FileEditor fileEditor : fileEditors) {
-            if (fileEditor instanceof TextEditor)
-                editor = ((TextEditor) fileEditor).getEditor();
-        }
-
-        return editor.offsetToVisualPosition(psiElement.getTextOffset()).line + 1;
-    }
-
-    public int column() {
-        Editor editor = DataHolder.getInstance().EDITOR;
-        FileEditor[] fileEditors = FileEditorManager.getInstance(DataHolder.getInstance().PROJECT).getEditors(getVirtualFile());
-        for (FileEditor fileEditor : fileEditors) {
-            editor = ((TextEditor) fileEditor).getEditor();
-        }
-
-        return editor.offsetToVisualPosition(psiElement.getTextOffset()).column + 1;
     }
 
     public String containingPackage() {

@@ -40,29 +40,23 @@ public final class CommitProcessor {
     private final static Logger logger = LoggerFactory.getLogger(CommitProcessor.class);
     private final Map<Type, BiFunction<Project, Change, Optional<List<MethodInfo>>>> handlers;
     private final GitHistoryRefactoringMiner miner = new GitHistoryRefactoringMinerImpl();
-    private final Project project;
     private final Repository repository;
     private final MethodsChangelogDAO methodsChangelogDAO;
     private final MethodsDictionaryDAO methodsDictionaryDAO;
+    private Project project;
     private String branchName;
-    private String hashValue;
-    private boolean foundLastHash = false;
     private final ProgressIndicator indicator;
     private int commitCountToProcess;
     double count = 0.0;
 
     public CommitProcessor(Project project, String branchName, ProgressIndicator indicator, int commitCountToProcess) throws Exception {
         handlers = new HashMap<>();
+        this.project = project;
         this.indicator = indicator;
         this.commitCountToProcess = commitCountToProcess;
-        this.project = project;
         GitService gitService = new GitServiceImpl();
         this.repository = gitService.openRepository(project.getBasePath());
         this.branchName = branchName;
-
-        this.hashValue = Objects.requireNonNull(ChangesState.getInstance(project).getState())
-                .persistentState
-                .get(branchName);
 
         this.methodsChangelogDAO = new MethodsChangelogDAO(buildDBUrlForSystem(project));
         this.methodsDictionaryDAO = new MethodsDictionaryDAO(buildDBUrlForSystem(project));
@@ -83,6 +77,7 @@ public final class CommitProcessor {
         ChangesState.getInstance(project).getState().
                 persistentState.put(branchName, commit.getId().asString());
         count++;
+        System.out.println(count + " out of " + commitCountToProcess);
         indicator.setFraction(count / commitCountToProcess);
     }
 
@@ -183,5 +178,12 @@ public final class CommitProcessor {
         start = currentTimeMillis();
         methodsChangelogDAO.insertMethodsChanges(entities);
         logger.info("Stats upserting took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
+        System.out.println("Commit with id " + commitId + " was processed");
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        this.project = null;
     }
 }

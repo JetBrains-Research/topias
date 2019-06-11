@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 import processing.GitCommitsProcessor;
 
 import java.io.File;
+import java.sql.SQLException;
 
+import static processing.FullProcessInvoker.invoke;
 import static processing.Utils.buildDBUrlForSystem;
 
 
@@ -24,14 +26,17 @@ public class ProjectOpenListener implements ProjectComponent {
     @Override
     public void projectOpened() {
         logger.info("Project {} opened", project.getName());
+        invoke(project, true);
+    }
 
-        final File sqliteFile = new File(buildDBUrlForSystem(project));
-        if (!sqliteFile.exists()) {
-            DatabaseInitialization.createNewDatabase(buildDBUrlForSystem(project));
+    @Override
+    public void projectClosed() {
+        try {
+            System.out.println("closing connection for project " + project.getName());
+            DatabaseInitialization.closeConnection();
+        } catch (SQLException e) {
+            System.out.println("unable to close connection");
+            e.printStackTrace();
         }
-        logger.info("DB file is located at {}", sqliteFile.getAbsolutePath());
-        logger.info("Starting processing of git history");
-        final DumbService dumbService = DumbService.getInstance(project);
-        dumbService.runWhenSmart(() -> GitCommitsProcessor.processGitHistory(project, sqliteFile.getPath(), true));
     }
 }

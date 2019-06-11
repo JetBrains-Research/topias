@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
@@ -37,16 +38,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LabelRenderer extends HintRenderer {
-    private final int lineStartOffset;
+    private int lineStartOffset;
     private XYSeries xySeries;
     private int upperBound;
-
-    public LabelRenderer(@Nullable String text, Pair<StatisticsViewEntity, List<Integer>> methodData, int lineOffset) {
+    private int multiplier;
+    public LabelRenderer(@Nullable String text, Pair<StatisticsViewEntity, List<Integer>> methodData, int lineOffset, Project project) {
         super(text);
         this.lineStartOffset = lineOffset;
         this.xySeries = new XYSeries("");
         final AtomicInteger index = new AtomicInteger(1);
         this.upperBound = Collections.max(methodData.getSecond());
+        multiplier = TopiasSettingsState.getInstance(project).getState().showHistograms ? 3 : 2;
         methodData.getSecond().forEach(val -> xySeries.add(index.getAndIncrement(), val));
     }
 
@@ -58,7 +60,7 @@ public class LabelRenderer extends HintRenderer {
 
     @Override
     public int calcHeightInPixels(@NotNull Inlay inlay) {
-        return inlay.getEditor().getLineHeight() * 3;
+        return inlay.getEditor().getLineHeight() * multiplier;
     }
 
     @Override
@@ -89,10 +91,10 @@ public class LabelRenderer extends HintRenderer {
                     false
             );
 
-            final XYPlot xyPlot = chart.getXYPlot();
-
+            chart.setRenderingHints(new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON));
             chart.getXYPlot().setBackgroundPaint(attributes.getBackgroundColor());
             chart.getXYPlot().getRenderer().setSeriesPaint(0, new Color(0, 0, 255));
+            final XYPlot xyPlot = chart.getXYPlot();
             final ChartPanel chartPanel = new ChartPanel(chart);
             //let our histogram be like 3/5 of caption text length
             final int multiplier = period == 7 ? 14 : 21;
@@ -142,7 +144,8 @@ public class LabelRenderer extends HintRenderer {
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(false));
                 g2d.setClip(r.x, r.y, calcWidthInPixels(inlay), calcHeightInPixels(inlay));
                 final FontMetrics metrics = fontMetrics.getMetrics();
-                final int startX = r.x + 7 + fontMetrics.getMetrics().stringWidth(String.format("%" + lineStartOffset + "s", ""));
+                final int startX = r.x + 7 + fontMetrics.getMetrics().stringWidth(String.format("%" +
+                        lineStartOffset + "s", ""));
                 final int startY = r.y + Math.max(ascent, (r.height + metrics.getAscent() - metrics.getDescent()) / 2) - 1;
 
                 final int widthAdjustment = calcWidthAdjustment(editor, g.getFontMetrics());

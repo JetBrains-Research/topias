@@ -71,14 +71,15 @@ public class DrawingUtils {
                             true,
                             0,
                             new LabelRenderer("Changed " + x.getFirst().getChangesCount() + " time(s) for last " + period.getTextValue(), x,
-                                    countStartColumn(x.getFirst().getStartOffset(), doc))
+                                    countStartColumn(x.getFirst().getStartOffset(), doc), editor.getProject())
                     );
                 }));
     }
 
     public void cleanInlayInEditor(Editor editor) {
-        InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
+        final InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
         final VirtualFile file = ((EditorImpl) editor).getVirtualFile();
+
         if (file == null
                 || !file.getPath().substring(file.getPath().lastIndexOf('.') + 1).equals("java")
                 || !inlay.hasBlockElements())

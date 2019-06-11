@@ -1,10 +1,13 @@
 package settings;
 
+import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.ui.ComponentWithBrowseButton;
+import com.intellij.openapi.ui.FixedSizeButton;
 import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -19,8 +22,11 @@ import settings.enums.DiscrType;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import static com.intellij.openapi.util.io.FileUtil.toSystemIndependentName;
+import static processing.FullProcessInvoker.invoke;
 
 public class PluginSettingsUI {
 
@@ -29,18 +35,23 @@ public class PluginSettingsUI {
     }
 
     public PluginSettingsUI(Project project) {
-        TopiasSettingsState.InnerState state = TopiasSettingsState.getInstance(project).getState();
-        if (state == null)
-            state = new TopiasSettingsState.InnerState();
+        final TopiasSettingsState.InnerState state = TopiasSettingsState.getInstance(project).getState();
 
         final DiscrType[] elems = {DiscrType.MONTH, DiscrType.WEEK};
         dateComboBox.setModel(new DefaultComboBoxModel<>(elems));
         dateComboBox.setSelectedItem(DiscrType.getById(state.discrTypeId));
+
+
         graphicsCheckBox.setSelected(state.showHistograms);
-        String repoPath = "";
-        FileChooserDescriptor descriptor = JavaSdk.getInstance().getHomeChooserDescriptor();
-        BrowseFolderListener listener = new BrowseFolderListener("Select JDK Home", gitRepoRootPath, descriptor, repoPath);
+        final String repoPath = state.gitRootPath;
+        final FileChooserDescriptor descriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
+        BrowseFolderListener listener = new BrowseFolderListener("Select Git Root", gitRepoRootPath, descriptor, repoPath);
         gitRepoRootPath.addActionListener(listener);
+        gitRepoRootPath.setText(state.gitRootPath);
+        refreshButton.setEnabled(state.isRefreshEnabled);
+        refreshButton.setFocusable(state.isRefreshEnabled);
+        refreshButton.setFocusPainted(true);
+        refreshButton.addActionListener(e -> invoke(project, state.isFirstTry));
     }
 
     private JPanel settingsPanel;
@@ -51,6 +62,7 @@ public class PluginSettingsUI {
     private TextFieldWithBrowseButton gitRepoRootPath;
     private JLabel repoPathLabel;
     private JLabel refreshLabel;
+    private FixedSizeButton refreshButton;
 
 
     public DiscrType getDiscrType() {
@@ -59,6 +71,10 @@ public class PluginSettingsUI {
 
     public boolean isHistogramsEnabled() {
         return graphicsCheckBox.isSelected();
+    }
+
+    public String getGitRepoRootPath() {
+        return gitRepoRootPath.getText();
     }
 
     public void setDiscrType(DiscrType discrType) {
