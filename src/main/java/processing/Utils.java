@@ -90,11 +90,13 @@ public final class Utils {
     }
 
     public static String trimClassName(String fullMethodSignature) {
-        return fullMethodSignature.substring(0, fullMethodSignature.lastIndexOf('.'));
+        final String className = fullMethodSignature.substring(0, fullMethodSignature.lastIndexOf('.'));
+        return className;
     }
 
     public static String trimMethodName(String fullMethodName) {
-        return fullMethodName.substring(fullMethodName.lastIndexOf('.') + 1, fullMethodName.lastIndexOf('('));
+        final String methodName = fullMethodName.substring(fullMethodName.lastIndexOf('.') + 1, fullMethodName.lastIndexOf('('));
+        return methodName;
     }
 
     public static String buildDBUrlForSystem(Project project) {

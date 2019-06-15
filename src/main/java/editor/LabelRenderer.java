@@ -11,6 +11,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
+import net.sf.cglib.core.Local;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartFactory;
@@ -33,6 +34,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,6 +51,7 @@ public class LabelRenderer extends HintRenderer {
         this.xySeries = new XYSeries("");
         final AtomicInteger index = new AtomicInteger(1);
         this.upperBound = Collections.max(methodData.getSecond());
+        Collections.reverse(methodData.getSecond());
         multiplier = TopiasSettingsState.getInstance(project).getState().showHistograms ? 3 : 2;
         methodData.getSecond().forEach(val -> xySeries.add(index.getAndIncrement(), val));
     }
@@ -105,13 +109,9 @@ public class LabelRenderer extends HintRenderer {
             chartPanel.setPreferredSize(new java.awt.Dimension(chartWidth, chartHeight));
             final Font font = new Font("Dialog", Font.PLAIN, (int) (fontMetrics.getFont().getSize() * 0.8));
 
-
             ((NumberAxis) xyPlot.getRangeAxis()).setTickUnit(new NumberTickUnit(upperBound));
-
-            if (period == 7) {
-                final NumberAxis domainNumberAxis = (NumberAxis) xyPlot.getDomainAxis();
-                domainNumberAxis.setTickUnit(new NumberTickUnit(period));
-            }
+            final NumberAxis domainNumberAxis = (NumberAxis) xyPlot.getDomainAxis();
+            domainNumberAxis.setTickUnit(new NumberTickUnit(period));
 
             xyPlot.getRangeAxis().setRange(new Range(0, upperBound), false, false);
             xyPlot.getRangeAxis().setUpperMargin(0.3);
@@ -121,6 +121,8 @@ public class LabelRenderer extends HintRenderer {
             xyPlot.getDomainAxis().setLabelFont(font);
             xyPlot.getRangeAxis().setLabelFont(font);
             xyPlot.getDomainAxis().setRange(new Range(0, period));
+            xyPlot.getDomainAxis().setTickLabelPaint(xyPlot.getBackgroundPaint());
+
 
 
             XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
@@ -130,6 +132,18 @@ public class LabelRenderer extends HintRenderer {
             renderer.setShadowVisible(false);
 
             bufferedImage = chart.createBufferedImage(chartWidth, chartHeight);
+            final Graphics2D imageGraphics = bufferedImage.createGraphics();
+            imageGraphics.setFont(font);
+            imageGraphics.setColor(Color.DARK_GRAY);
+            imageGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(true));
+            final LocalDate now = LocalDate.now();
+            final LocalDate from = now.minusDays(period);
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM-dd");
+            final int xStartOffset = period == 30 ? (int) (chartWidth * 0.07) : (int) (chartWidth * 0.1);
+            final int xEndOffset = period == 30 ? (int) (chartWidth * 0.8) : (int) (chartWidth * 0.75);
+            final int yOffset = (int) (chartHeight * 0.87);
+            imageGraphics.drawString(now.format(formatter), xStartOffset, yOffset);
+            imageGraphics.drawString(from.format(formatter), xEndOffset, yOffset);
 
         }
 
@@ -141,7 +155,7 @@ public class LabelRenderer extends HintRenderer {
 
                 g.setColor(foregroundColor);
                 g.setFont(getFont(editor));
-                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(false));
+                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(true));
                 g2d.setClip(r.x, r.y, calcWidthInPixels(inlay), calcHeightInPixels(inlay));
                 final FontMetrics metrics = fontMetrics.getMetrics();
                 final int startX = r.x + 7 + fontMetrics.getMetrics().stringWidth(String.format("%" +

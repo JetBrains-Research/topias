@@ -166,6 +166,12 @@ public final class CommitProcessor {
         logger.info("Stats upserting took only " + (currentTimeMillis() - start) / 1000.0 + " secs!");
     }
 
+    private static boolean compareMethodSigs(MethodInfo first, MethodInfo second) {
+        final String sigFst = first.getMethodFullName();
+        final String sigSnd = second.getMethodFullName();
+        return sigFst.substring(sigFst.lastIndexOf('.') + 1).equalsIgnoreCase(sigSnd.substring(sigSnd.lastIndexOf('.') + 1));
+    }
+
     @Override
     protected void finalize() throws Throwable {
         super.finalize();

@@ -7,7 +7,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.psi.*;
+import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.FileContentUtil;
 import db.dao.StatisticsViewDAO;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
@@ -45,11 +47,10 @@ public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
             }
             final List<StatisticsViewEntity> entities = dao.getMostChangedMethods(period, branchName);
             final JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
-
             final List<Pair<PsiMethod, Integer>> methodCountPairs = entities.stream().map(x -> {
-                final PsiClass psiClass = facade.findClass(trimClassName(x.getFullSignature()), GlobalSearchScope.projectScope(project));
+                final PsiClass psiClass = facade.findClass(trimClassName(x.getFullSignature()), GlobalSearchScope.allScope(project));
                 if (psiClass != null) {
-                    final PsiMethod[] methods = psiClass.findMethodsByName(trimMethodName(x.getFullSignature()), false);
+                    final PsiMethod[] methods = psiClass.findMethodsByName(trimMethodName(x.getFullSignature()), true);
 
                     if (methods.length != 0 && methods[0] != null)
                         return new Pair<>(methods[0], x.getChangesCount());
