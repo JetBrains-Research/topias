@@ -7,6 +7,7 @@ import db.DatabaseInitialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.GitCommitsProcessor;
+import state.IsRunning;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -31,6 +32,7 @@ public class ProjectOpenListener implements ProjectComponent {
 
     @Override
     public void projectClosed() {
+        IsRunning.getInstance().setRunning(false);
         try {
             logger.info("Closing db connection for project " + project.getName());
             DatabaseInitialization.closeConnection();
