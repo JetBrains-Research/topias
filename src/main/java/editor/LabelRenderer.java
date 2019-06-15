@@ -51,7 +51,7 @@ public class LabelRenderer extends HintRenderer {
         this.xySeries = new XYSeries("");
         final AtomicInteger index = new AtomicInteger(1);
         this.upperBound = Collections.max(methodData.getSecond());
-        Collections.reverse(methodData.getSecond());
+//        Collections.reverse(methodData.getSecond());
         multiplier = TopiasSettingsState.getInstance(project).getState().showHistograms ? 3 : 2;
         methodData.getSecond().forEach(val -> xySeries.add(index.getAndIncrement(), val));
     }
@@ -142,8 +142,8 @@ public class LabelRenderer extends HintRenderer {
             final int xStartOffset = period == 30 ? (int) (chartWidth * 0.07) : (int) (chartWidth * 0.1);
             final int xEndOffset = period == 30 ? (int) (chartWidth * 0.8) : (int) (chartWidth * 0.75);
             final int yOffset = (int) (chartHeight * 0.87);
-            imageGraphics.drawString(now.format(formatter), xStartOffset, yOffset);
-            imageGraphics.drawString(from.format(formatter), xEndOffset, yOffset);
+            imageGraphics.drawString(from.format(formatter), xStartOffset, yOffset);
+            imageGraphics.drawString(now.format(formatter), xEndOffset, yOffset);
 
         }
 
@@ -164,9 +164,9 @@ public class LabelRenderer extends HintRenderer {
 
                 final int widthAdjustment = calcWidthAdjustment(editor, g.getFontMetrics());
                 if (widthAdjustment == 0) {
-                    g.drawString(super.getText(), startX + 4, startY - 4);
+                    g.drawString(super.getText(), startX + 7, startY - 4);
                     if (showHistograms)
-                        g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 37, startY -
+                        g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 33, startY -
                                 (int) (fontMetrics.getLineHeight() * 4.5 * 0.6));
 
                 } else {
