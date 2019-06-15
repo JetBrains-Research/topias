@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import settings.TopiasSettingsState;
 import state.ChangesState;
+import state.IsRunning;
 import ui.TopChangedMethodsListPanel;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class GitCommitsProcessor {
     private final static Logger logger = LoggerFactory.getLogger(GitCommitsProcessor.class);
 
     public static synchronized void processGitHistory(Project project, String dbFilePath, boolean isFirstTime) {
-
+        IsRunning.getInstance().setRunning(true);
         final ProjectLevelVcsManagerImpl instance = (ProjectLevelVcsManagerImpl) ProjectLevelVcsManager.getInstance(project);
         final TopiasSettingsState.InnerState settingsState = TopiasSettingsState.getInstance(project).getState();
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
@@ -153,6 +154,7 @@ public class GitCommitsProcessor {
                             TopChangedMethodsListPanel.refreshList(project);
                         }
                         editors.forEach(x -> drawingUtils.drawInlaysInEditor(x, currentBranchName));
+                        IsRunning.getInstance().setRunning(false);
                         super.onFinished();
                     }
                 };

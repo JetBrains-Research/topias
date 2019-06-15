@@ -37,7 +37,6 @@ public final class TopiasSettingsState implements ProjectComponent,
     @Override
     public void noStateLoaded() {
         log.debug("No state was loaded");
-        System.out.println("No state was loaded");
     }
 
     public static class InnerState {

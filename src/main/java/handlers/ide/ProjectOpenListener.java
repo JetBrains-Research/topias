@@ -32,11 +32,10 @@ public class ProjectOpenListener implements ProjectComponent {
     @Override
     public void projectClosed() {
         try {
-            System.out.println("closing connection for project " + project.getName());
+            logger.info("Closing db connection for project " + project.getName());
             DatabaseInitialization.closeConnection();
         } catch (SQLException e) {
-            System.out.println("unable to close connection");
-            e.printStackTrace();
+            logger.error("Unable to close connection", e);
         }
     }
 }
