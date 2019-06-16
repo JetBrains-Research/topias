@@ -32,7 +32,8 @@ public class ProjectOpenListener implements ProjectComponent {
 
     @Override
     public void projectClosed() {
-        IsRunning.getInstance().setRunning(false);
+        IsRunning.getInstance().setRunning(project, false);
+        IsRunning.getInstance().onProjectClose(project);
         try {
             logger.info("Closing db connection for project " + project.getName());
             DatabaseInitialization.closeConnection();

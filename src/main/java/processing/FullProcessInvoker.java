@@ -26,11 +26,12 @@ public class FullProcessInvoker {
         sqliteFile = null;
         logger.info("DB file is located at {}", sqlitePath);
         logger.info("Starting processing of git history");
-        if (IsRunning.getInstance().isRunning()) {
+        if (IsRunning.getInstance().isRunning(project)) {
             ApplicationManager.getApplication().invokeLater(() ->
                     Messages.showWarningDialog("History processing is already running!", "Topias"));
             return;
         }
+
         final DumbService dumbService = DumbService.getInstance(project);
         dumbService.runWhenSmart(() -> processGitHistory(project, sqlitePath, isFirstTry));
     }

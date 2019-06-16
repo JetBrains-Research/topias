@@ -166,7 +166,7 @@ public class LabelRenderer extends HintRenderer {
                 if (widthAdjustment == 0) {
                     g.drawString(super.getText(), startX + 7, startY - 4);
                     if (showHistograms)
-                        g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 33, startY -
+                        g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 36, startY -
                                 (int) (fontMetrics.getLineHeight() * 4.5 * 0.6));
 
                 } else {
