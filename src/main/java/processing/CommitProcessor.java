@@ -67,7 +67,7 @@ public final class CommitProcessor {
         handlers.put(Type.NEW, new AddedChangeHandler());
     }
 
-    void processCommit(GitCommit commit) {
+    void processGitCommit(GitCommit commit) {
         final String authorName = commit.getAuthor().getEmail();
         final long commitTime = commit.getCommitTime();
 

@@ -128,7 +128,7 @@ public class GitCommitsProcessor {
                                     currentBranchName,
                                     indicator,
                                     commitCountToProcess);
-                            GitHistoryUtils.loadDetails(project, gitRoot, commitProcessor::processCommit,
+                            GitHistoryUtils.loadDetails(project, gitRoot, commitProcessor::processGitCommit,
                                     finalParamsArray);
                             logger.info("Git history processing finished");
                         } catch (VcsException e) {
