@@ -74,6 +74,7 @@ public final class CommitProcessor {
         processNewCommit(commit.getChanges(),
                 commit.getId().asString(), authorName, commitTime);
         System.out.println("Some text");
+        System.out.println("Some other text");
 
         ChangesState.getInstance(project).getState().
                 persistentState.put(branchName, commit.getId().asString());
