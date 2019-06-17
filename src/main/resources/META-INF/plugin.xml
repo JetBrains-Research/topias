@@ -6,9 +6,11 @@
     <description>Plugin for VCS (Git) changes frequency visualization in Java projects.
         Topias plugin analyzes Git commit history and helps developers to notice some suspiciously often changed methods.
         In case of any issues, please create an issue in a plugin's GitHub repository: https://github.com/ml-in-programming/topias</description>
-    <version>1.0.3b</version>
+    <version>1.0.4</version>
     <idea-version since-build="183.2940.10"/>
     <change-notes>
+        1.0.4: Some fixes of refactoring processing;
+
         1.0.3: Changed visual representation of histograms, fixed case when multiple history processing tasks could be run;
 
         1.0.2: Fixed memory issues, and some crashes when another project opened from same IDE;

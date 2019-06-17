@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.ui.JBColor;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
 import net.sf.cglib.core.Local;
@@ -45,7 +46,7 @@ public class LabelRenderer extends HintRenderer {
     private XYSeries xySeries;
     private int upperBound;
     private int multiplier;
-    public LabelRenderer(@Nullable String text, Pair<StatisticsViewEntity, List<Integer>> methodData, int lineOffset, Project project) {
+    LabelRenderer(@Nullable String text, Pair<StatisticsViewEntity, List<Integer>> methodData, int lineOffset, Project project) {
         super(text);
         this.lineStartOffset = lineOffset;
         this.xySeries = new XYSeries("");
@@ -105,7 +106,7 @@ public class LabelRenderer extends HintRenderer {
             final double maxBarWidth = 1.0 / (period + 1.0);
             final int chartWidth = fontMetrics.getSymbolWidth() * multiplier;
             // 1.5 of char height
-            final int chartHeight = (int) (fontMetrics.getLineHeight() * 4.5);
+            final int chartHeight = (int) (fontMetrics.getLineHeight() * 4.5) - 5;
             chartPanel.setPreferredSize(new java.awt.Dimension(chartWidth, chartHeight));
             final Font font = new Font("Dialog", Font.PLAIN, (int) (fontMetrics.getFont().getSize() * 0.8));
 
@@ -134,7 +135,7 @@ public class LabelRenderer extends HintRenderer {
             bufferedImage = chart.createBufferedImage(chartWidth, chartHeight);
             final Graphics2D imageGraphics = bufferedImage.createGraphics();
             imageGraphics.setFont(font);
-            imageGraphics.setColor(Color.DARK_GRAY);
+            imageGraphics.setColor(JBColor.DARK_GRAY);
             imageGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(true));
             final LocalDate now = LocalDate.now();
             final LocalDate from = now.minusDays(period);
@@ -142,8 +143,8 @@ public class LabelRenderer extends HintRenderer {
             final int xStartOffset = period == 30 ? (int) (chartWidth * 0.07) : (int) (chartWidth * 0.1);
             final int xEndOffset = period == 30 ? (int) (chartWidth * 0.8) : (int) (chartWidth * 0.75);
             final int yOffset = (int) (chartHeight * 0.87);
-            imageGraphics.drawString(from.format(formatter), xStartOffset, yOffset);
-            imageGraphics.drawString(now.format(formatter), xEndOffset, yOffset);
+            imageGraphics.drawString(from.format(formatter), xStartOffset , yOffset);
+            imageGraphics.drawString(now.format(formatter), xEndOffset + 3, yOffset);
 
         }
 
@@ -166,7 +167,7 @@ public class LabelRenderer extends HintRenderer {
                 if (widthAdjustment == 0) {
                     g.drawString(super.getText(), startX + 7, startY - 4);
                     if (showHistograms)
-                        g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 36, startY -
+                        g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 36, startY + 5 -
                                 (int) (fontMetrics.getLineHeight() * 4.5 * 0.6));
 
                 } else {
@@ -192,7 +193,7 @@ public class LabelRenderer extends HintRenderer {
                 - doCalcWidth(super.getText(), fontMetrics));
     }
 
-    protected CustomFontMetrics getMetrics(Editor editor) {
+    private CustomFontMetrics getMetrics(Editor editor) {
         Key<CustomFontMetrics> LABEL_FONT_METRICS = new Key<>("ParameterHintFontMetrics");
         final String familyName = UIManager.getFont("Label.font").getFamily();
         final int size = Math.max(1, editor.getColorsScheme().getEditorFontSize() - 1);
