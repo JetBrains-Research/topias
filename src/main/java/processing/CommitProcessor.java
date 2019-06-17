@@ -92,13 +92,15 @@ public final class CommitProcessor {
                 .collect(Collectors.toList());
 
         long start = currentTimeMillis();
-        final RefactoringProcessor processor = new RefactoringProcessor(changedMethods);
+        final RefactoringProcessor processor = new RefactoringProcessor(project.getBasePath());
         final List<RefactoringData> data = new LinkedList<>();
-        miner.churnAtCommit(repository, commitId, new RefactoringHandler() {
+        miner.detectAtCommit(repository, "", commitId, new RefactoringHandler() {
             @Override
             public void handle(RevCommit commitData, List<Refactoring> refactorings) {
-                data.addAll(refactorings.stream().map(processor::process).filter(Objects::nonNull)
-                        .collect(Collectors.toCollection(LinkedList::new)));
+                final List<RefactoringData> refs = refactorings.stream().map(processor::process)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                data.addAll(refs);
             }
         });
         logger.info("Refactorings were processed for " + (currentTimeMillis() - start) / 1000.0 + " secs!");
@@ -108,24 +110,27 @@ public final class CommitProcessor {
         final List<MethodInfo> added = methodsStorage.getAddedMethods();
         final List<RefactoringData> moved = methodsStorage.getMovedMethods();
 
-        moved.forEach(x -> {
-                added.remove(x.getNewMethod());
-                deleted.remove(x.getOldMethod());
-        });
+//        moved.forEach(x -> {
+//                added.remove(x.getNewMethod());
+//                deleted.remove(x.getOldMethod());
+//        });
 
         for (RefactoringData refactoringData : data) {
             deleted.remove(refactoringData.getOldMethod());
             added.remove(refactoringData.getNewMethod());
+            if (!changedMethods.contains(refactoringData.getNewMethod()))
+                changedMethods.add(refactoringData.getNewMethod());
+
             moved.remove(data);
         }
 
-        data.addAll(moved);
-        methodsDictionaryDAO.addToDictionary(added
-                .stream()
-                .map(x -> new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName()))
-                .collect(Collectors.toList()));
+//        data.addAll(moved);
+//        methodsDictionaryDAO.addToDictionary(added
+//                .stream()
+//                .map(x -> new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName()))
+//                .collect(Collectors.toList()));
 
-        deleted.forEach(x -> methodsDictionaryDAO.removeFromDictionary(x.getMethodFullName()));
+//        deleted.forEach(x -> methodsDictionaryDAO.removeFromDictionary(x.getMethodFullName()));
 
         methodsDictionaryDAO.updateBySignature(data.stream().map(x -> new Pair<>(
                 x.getOldMethod().getMethodFullName(),
@@ -135,14 +140,14 @@ public final class CommitProcessor {
         )).collect(Collectors.toList()));
 
 
-        methodsDictionaryDAO.addToDictionary(
-                methodsStorage.getRecalcMethods()
-                        .stream()
-                        .map(x -> new MethodDictionaryEntity(x.getMethodFullName(),
-                                x.getStartOffset(),
-                                x.getFileName()))
-                        .collect(Collectors.toList())
-        );
+//        methodsDictionaryDAO.addToDictionary(
+//                methodsStorage.getRecalcMethods()
+//                        .stream()
+//                        .map(x -> new MethodDictionaryEntity(x.getMethodFullName(),
+//                                x.getStartOffset(),
+//                                x.getFileName()))
+//                        .collect(Collectors.toList())
+//        );
         //Just clearing
         methodsStorage.clear();
 

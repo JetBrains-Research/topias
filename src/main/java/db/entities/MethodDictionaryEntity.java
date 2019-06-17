@@ -13,10 +13,11 @@ public class MethodDictionaryEntity {
         this.fileName = fileName;
     }
 
-    public MethodDictionaryEntity(int id, String fullMethodSignature, int startOffset) {
+    public MethodDictionaryEntity(int id, String fullMethodSignature, String fileName) {
         this.id = id;
         this.fullMethodSignature = fullMethodSignature;
-        this.startOffset = startOffset;
+        this.startOffset = 0;
+        this.fileName = fileName;
     }
 
     public String getFullMethodSignature() {

@@ -16,10 +16,8 @@ public final class TopiasSettingsState implements ProjectComponent,
         PersistentStateComponent<TopiasSettingsState.InnerState> {
     private static final Logger log = LoggerFactory.getLogger(TopiasSettingsState.class);
     private InnerState innerState = new InnerState();
-    private static String projectPath;
 
     public static TopiasSettingsState getInstance(Project project) {
-        projectPath = project.getBasePath();
         return project.getComponent(TopiasSettingsState.class);
     }
 

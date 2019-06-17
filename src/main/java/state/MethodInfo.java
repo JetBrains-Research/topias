@@ -32,10 +32,11 @@ public final class MethodInfo implements Comparable<MethodInfo>, PersistentState
         this.fileName = fileName;
     }
 
-    public MethodInfo(int startOffset, int endOffset, String methodFullName) {
+    public MethodInfo(int startOffset, int endOffset, String methodFullName, String fileName) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.methodFullName = methodFullName;
+        this.fileName = fileName;
     }
 
     public void update(int startOffset, int endOffset) {

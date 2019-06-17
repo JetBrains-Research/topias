@@ -27,15 +27,17 @@ import static processing.Utils.*;
 public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
     private final MySideBar sideBar;
     private static TopChangedMethodsListPanel instance = null;
+    private DumbService dumbService;
 
     public TopChangedMethodsListPanel(boolean vertical, boolean borderless, Project project) {
         super(false, true);
         sideBar = new MySideBar(project);
+        this.dumbService = DumbService.getInstance(project);
         refresh(project);
     }
 
     private void refresh(Project project) {
-        DumbService.getInstance(project).runWhenSmart(() -> {
+        dumbService.runWhenSmart(() -> {
             final StatisticsViewDAO dao = new StatisticsViewDAO(buildDBUrlForSystem(project));
             final TopiasSettingsState.InnerState settingsState = TopiasSettingsState.getInstance(project).getState();
             final DiscrType period = settingsState != null ? DiscrType.getById(settingsState.discrTypeId) : DiscrType.MONTH;
@@ -85,4 +87,10 @@ public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
             instance.refresh(project);
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        this.dumbService = null;
+        instance = null;
+    }
 }

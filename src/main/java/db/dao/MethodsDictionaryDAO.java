@@ -97,6 +97,9 @@ public class MethodsDictionaryDAO {
     }
 
     public synchronized void updateBySignature(List<Pair<String, MethodDictionaryEntity>> sigEntPairs) {
+        if (sigEntPairs.size() == 0)
+            return;
+
         final String questionMarks = String.join(", ", Collections.nCopies(sigEntPairs.size(), "?"));
         final String searchSql = "select * from methodsDictionary where fullSignature in (" + questionMarks + ")";
         final AtomicInteger counter = new AtomicInteger();
@@ -114,8 +117,8 @@ public class MethodsDictionaryDAO {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 entitiesForUpdate.add(new MethodDictionaryEntity(
+                        resultSet.getInt(1),
                         resultSet.getString(2),
-                        0,
                         resultSet.getString(3)
                 ));
             }
@@ -123,20 +126,30 @@ public class MethodsDictionaryDAO {
             logger.error("Sql exception occured while trying to execute batch update to methodsDictionary table", e);
         }
 
-        final String sql = "update methodsDictionary set fullSignature = ?, fileName = ? "
-                + "where fullSignature = ?";
+        final List<Pair<Integer, MethodDictionaryEntity>> entsForUpd =
+                sigEntPairs.stream().filter(x -> entitiesForUpdate.stream().anyMatch(y -> y.getFullMethodSignature().equals(x.getFirst())))
+                .map(x -> new Pair<>(entitiesForUpdate.stream()
+                        .filter(y -> y.getFullMethodSignature().equals(x.getFirst()))
+                        .findFirst()
+                        .flatMap(y -> Optional.of(y.getId()))
+                        .orElse(-1),
+                        x.getSecond()))
+                .collect(Collectors.toList());
 
-        final Iterator<Pair<String, MethodDictionaryEntity>> iter = sigEntPairs.iterator();
+        final String sql = "update methodsDictionary set fullSignature = ?, fileName = ? "
+                + "where id = ?";
+
+        final Iterator<Pair<Integer, MethodDictionaryEntity>> iter = entsForUpd.iterator();
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             while (iter.hasNext()) {
                 try {
-                    final Pair<String, MethodDictionaryEntity> x = iter.next();
+                    final Pair<Integer, MethodDictionaryEntity> x = iter.next();
                     statement.setString(1, x.getSecond().getFullMethodSignature());
                     statement.setString(2, x.getSecond().getFileName());
-                    statement.setString(3, x.getFirst());
+                    statement.setInt(3, x.getFirst());
                     statement.addBatch();
-                    iter.remove();
+                    sigEntPairs.removeIf(y -> y.getSecond().getFullMethodSignature().equals(x.getSecond().getFullMethodSignature()));
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
