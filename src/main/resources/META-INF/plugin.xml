@@ -3,9 +3,9 @@
     <name>Topias</name>
     <vendor email="svitkovsergey@gmail.com">Contacts</vendor>
     <depends>Git4Idea</depends>
-    <description>Plugin for VCS (Git) changes frequency visualization in Java projects.
-        Topias plugin analyzes Git commit history and helps developers to notice some suspiciously often changed methods.
-        In case of any issues, please create an issue in a plugin's GitHub repository: https://github.com/ml-in-programming/topias</description>
+    <description>
+        Topias is a plugin that helps to visualize frequency of methods changes in  Java projects based on their Git histories. This way it can help developers to find methods that are changed suspiciously often, which could be caused by technical (some hardcoded parameters should be moved to a configuration file), architectural (this piece of code performs more than one task and should be split into several entities), or even external (a particular business rule changing too often) issues.
+    </description>
     <version>1.0.4</version>
     <idea-version since-build="183.2940.10"/>
     <change-notes>
