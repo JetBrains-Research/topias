@@ -1,10 +1,23 @@
 package db;
 
-import com.intellij.openapi.components.ProjectComponent;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import com.intellij.openapi.components.ProjectComponent;
+
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
 
 public class DatabaseInitialization implements ProjectComponent {
     private final static Logger logger = LoggerFactory.getLogger(DatabaseInitialization.class);
@@ -12,57 +25,6 @@ public class DatabaseInitialization implements ProjectComponent {
 
     public static void createNewDatabase(String path) {
         final String url = "jdbc:sqlite:" + path;
-
-        final String methodsDictionary = "create table methodsDictionary \n" +
-                "(\n" +
-                "  id integer primary key,\n" +
-                "  fullSignature varchar(1024) unique ,\n" +
-                "  fileName varchar(1024) not null,\n" +
-                "  unique (fullSignature, fileName)" +
-                ");";
-
-        final String methodDictInd = "create index fullSignatureInd\n" +
-                "  on methodsDictionary(fullSignature);";
-
-        final String methodsChangeLog = "CREATE TABLE methodsChangeLog (\n" +
-                "  dtChanged timestamp not null,\n" +
-                "  authorName varchar(512) not null,\n" +
-                "  branchName varchar(512) not null,\n" +
-                "  signatureId integer not null,\n" +
-                "  CONSTRAINT fk_sig_id\n" +
-                "    FOREIGN KEY (signatureId)\n" +
-                "    REFERENCES methodsDictionary(id)\n" +
-                ");";
-
-        final String statsTable = "create table statsData \n" +
-                "(\n" +
-                "  dtDateTime   timestamp not null,\n" +
-                "  discrType    integer   not null,\n" +
-                "  signatureId  integer   not null,\n" +
-                "  branchName varchar(512) not null,\n" +
-                "  changesCount integer   not null,\n" +
-                "  unique (dtDateTime, discrType, signatureId)\n" +
-                ");";
-
-        final String tempStatsTable = "create table tempStatsData \n" +
-                "(\n" +
-                "  dtDateTime   timestamp not null,\n" +
-                "  discrType    integer   not null,\n" +
-                "  signatureId  integer   not null,\n" +
-                "  branchName varchar(512) not null,\n" +
-                "  changesC integer   not null,\n" +
-                "  unique (dtDateTime, discrType, signatureId)\n" +
-                ");";
-
-        final String statsView = "create view statisticsView as\n" +
-                "select dtDateTime,\n" +
-                "       discrType,\n" +
-                "       fullSignature,\n" +
-                "       changesCount,\n" +
-                "       fileName,\n" +
-                "       branchName\n" +
-                "from statsData \n" +
-                "       join methodsDictionary on statsData.signatureId = id;";
         try {
             DriverManager.registerDriver(new org.sqlite.JDBC());
         } catch (SQLException e) {
@@ -70,19 +32,15 @@ public class DatabaseInitialization implements ProjectComponent {
         }
         try {
             connection = DriverManager.getConnection(url);
-            connection.setAutoCommit(false);
             final DatabaseMetaData meta = connection.getMetaData();
             logger.info("The driver name is " + meta.getDriverName() + "  " + meta.getDriverVersion());
+
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            Liquibase liquibase = new Liquibase("/db/db.changelog.xml", new ClassLoaderResourceAccessor(), database);
+            liquibase.update(new Contexts(), new LabelExpression());
+
             logger.info("A new database has been created.");
-            final Statement statement = connection.createStatement();
-            statement.execute(methodsDictionary);
-            statement.execute(methodDictInd);
-            statement.execute(methodsChangeLog);
-            statement.execute(statsTable);
-            statement.execute(tempStatsTable);
-            statement.execute(statsView);
-            connection.commit();
-        } catch (SQLException e) {
+        } catch (SQLException | LiquibaseException e) {
             e.printStackTrace();
         }
     }
