@@ -1,0 +1,106 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:appdba="http://www.datical.net/xml/ns/appdba" xmlns:datical="http://www.datical.net/xml/ns/datical" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet author="shivam" id="1571496155452-1">
+        <createTable tableName="methodsChangeLog">
+            <column name="dtChanged" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authorName" type="VARCHAR(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="branchName" type="VARCHAR(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="signatureId" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shivam" id="1571496155452-2">
+        <createTable tableName="methodsDictionary">
+            <column name="id" type="INTEGER">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="fullSignature" type="VARCHAR(1024)"/>
+            <column name="fileName" type="VARCHAR(1024)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shivam" id="1571496155452-3">
+        <createTable tableName="statsData">
+            <column name="dtDateTime" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="discrType" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="signatureId" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="branchName" type="VARCHAR(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changesCount" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shivam" id="1571496155452-4">
+        <createTable tableName="tempStatsData">
+            <column name="dtDateTime" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="discrType" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="signatureId" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="branchName" type="VARCHAR(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changesC" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shivam" id="1571496155452-5">
+        <createIndex indexName="sqlite_autoindex_methodsDictionary_1" tableName="methodsDictionary" unique="true">
+            <column name="fullSignature"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="shivam" id="1571496155452-6">
+        <createIndex indexName="sqlite_autoindex_methodsDictionary_2" tableName="methodsDictionary" unique="true">
+            <column name="fullSignature"/>
+            <column name="fileName"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="shivam" id="1571496155452-7">
+        <createIndex indexName="sqlite_autoindex_statsData_1" tableName="statsData" unique="true">
+            <column name="dtDateTime"/>
+            <column name="discrType"/>
+            <column name="signatureId"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="shivam" id="1571496155452-8">
+        <createIndex indexName="sqlite_autoindex_tempStatsData_1" tableName="tempStatsData" unique="true">
+            <column name="dtDateTime"/>
+            <column name="discrType"/>
+            <column name="signatureId"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="shivam" id="1571496155452-9">
+        <addForeignKeyConstraint baseColumnNames="signatureId" baseTableName="methodsChangeLog" constraintName="fk_sig_id" deferrable="true" initiallyDeferred="true" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="methodsDictionary" validate="true"/>
+    </changeSet>
+    <changeSet author="shivam" id="1571496155452-10">
+        <createView fullDefinition="false" viewName="statisticsView">select dtDateTime,
+            discrType,
+            fullSignature,
+            changesCount,
+            fileName,
+            branchName
+            from statsData
+            join methodsDictionary on statsData.signatureId = id</createView>
+    </changeSet>
+</databaseChangeLog>
