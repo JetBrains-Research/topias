@@ -106,7 +106,7 @@ public class LabelRenderer extends HintRenderer {
             final double maxBarWidth = 1.0 / (period + 1.0);
             final int chartWidth = fontMetrics.getSymbolWidth() * multiplier;
             // 1.5 of char height
-            final int chartHeight = (int) (fontMetrics.getLineHeight() * 4.5) - 5;
+            final int chartHeight = (int) (fontMetrics.lineHeight() * 4.5) - 5;
             chartPanel.setPreferredSize(new java.awt.Dimension(chartWidth, chartHeight));
             final Font font = new Font("Dialog", Font.PLAIN, (int) (fontMetrics.getFont().getSize() * 0.8));
 
@@ -158,8 +158,8 @@ public class LabelRenderer extends HintRenderer {
                 g.setFont(getFont(editor));
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, AntialiasingType.getKeyForCurrentScope(true));
                 g2d.setClip(r.x, r.y, calcWidthInPixels(inlay), calcHeightInPixels(inlay));
-                final FontMetrics metrics = fontMetrics.getMetrics();
-                final int startX = r.x + 7 + fontMetrics.getMetrics().stringWidth(String.format("%" +
+                final FontMetrics metrics = fontMetrics.metrics();
+                final int startX = r.x + 7 + fontMetrics.metrics().stringWidth(String.format("%" +
                         lineStartOffset + "s", ""));
                 final int startY = r.y + Math.max(ascent, (r.height + metrics.getAscent() - metrics.getDescent()) / 2) - 1;
 
@@ -168,7 +168,7 @@ public class LabelRenderer extends HintRenderer {
                     g.drawString(super.getText(), startX + 7, startY - 4);
                     if (showHistograms)
                         g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 36, startY + 5 -
-                                (int) (fontMetrics.getLineHeight() * 4.5 * 0.6));
+                                (int) (fontMetrics.lineHeight() * 4.5 * 0.6));
 
                 } else {
                     final int adjustmentPosition = this.getWidthAdjustment().getAdjustmentPosition();
