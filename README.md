@@ -1,4 +1,4 @@
-### Topias &mdash; Intellij IDEA plugin for visualization of VCS changes frequency.
+### Topias &mdash; IntelliJ IDEA plugin for visualization of VCS changes frequency.
 
 [![Build Status](https://travis-ci.org/ml-in-programming/topias.svg?branch=master)](https://travis-ci.org/ml-in-programming/topias)
 
