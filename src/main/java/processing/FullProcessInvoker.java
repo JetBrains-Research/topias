@@ -28,7 +28,7 @@ public class FullProcessInvoker {
         logger.info("Starting processing of git history");
         if (IsRunning.getInstance().isRunning(project)) {
             ApplicationManager.getApplication().invokeLater(() ->
-                    Messages.showWarningDialog("History processing is already running!", "Topias"));
+                    Messages.showWarningDialog("History processing is already running!", "vcs_analysis_plugin"));
             return;
         }
 

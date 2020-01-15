@@ -14,7 +14,7 @@ import kotlin.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processing.PsiBuilder;
-import settings.TopiasSettingsState;
+import settings.MyPluginSettingsState;
 import settings.enums.DiscrType;
 import state.MethodInfo;
 
@@ -35,7 +35,7 @@ public class DrawingUtils {
     }
 
     public void drawInlaysInEditor(Editor editor, String branchName) {
-        final TopiasSettingsState.InnerState state = TopiasSettingsState.getInstance(editor.getProject()).getState();
+        final MyPluginSettingsState.InnerState state = MyPluginSettingsState.getInstance(editor.getProject()).getState();
         final DiscrType period = state == null ? DiscrType.MONTH : DiscrType.getById(state.discrTypeId);
 
         if (editor == null)

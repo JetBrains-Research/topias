@@ -6,11 +6,10 @@ import com.intellij.ui.components.JBList;
 import navigation.ReferenceNavigator;
 import navigation.ui.ReferenceListCellRenderer;
 import navigation.wrappers.Reference;
-import settings.TopiasSettingsState;
+import settings.MyPluginSettingsState;
 import settings.enums.DiscrType;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -44,7 +43,7 @@ public class MySideBar implements ProjectComponent {
                 }
             }
         });
-        final TopiasSettingsState state = TopiasSettingsState.getInstance(project);
+        final MyPluginSettingsState state = MyPluginSettingsState.getInstance(project);
         final String title = "Most changed methods for last " + DiscrType.getById(state.getState().discrTypeId).textValue;
         ((TitledBorder) panel.getBorder()).setTitle(title);
     }
@@ -77,7 +76,7 @@ public class MySideBar implements ProjectComponent {
                 }
             }
         });
-        final TopiasSettingsState state = TopiasSettingsState.getInstance(project);
+        final MyPluginSettingsState state = MyPluginSettingsState.getInstance(project);
         final String title = "Most changed methods for last " + DiscrType.getById(state.getState().discrTypeId).textValue;
         ((TitledBorder) panel.getBorder()).setTitle(title);
     }

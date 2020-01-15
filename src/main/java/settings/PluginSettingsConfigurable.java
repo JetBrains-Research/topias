@@ -23,17 +23,17 @@ import static processing.Utils.getCurrentBranchName;
 
 public class PluginSettingsConfigurable implements Configurable, ProjectComponent {
 
-    private final String pluginName = "Topias";
+    private final String pluginName = "vcs_analysis_plugin";
     private PluginSettingsUI pluginSettingsUI;
-    private TopiasSettingsState.InnerState settingsState;
+    private MyPluginSettingsState.InnerState settingsState;
     private Project project;
 
     public PluginSettingsConfigurable(Project project) {
         this.project = project;
         this.pluginSettingsUI = new PluginSettingsUI(project);
-        this.settingsState = TopiasSettingsState.getInstance(project).getState();
+        this.settingsState = MyPluginSettingsState.getInstance(project).getState();
         if (settingsState == null) {
-            settingsState = new TopiasSettingsState.InnerState();
+            settingsState = new MyPluginSettingsState.InnerState();
             settingsState.discrTypeId = 1;
             settingsState.showHistograms = true;
         }

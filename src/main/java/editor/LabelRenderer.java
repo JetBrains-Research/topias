@@ -12,7 +12,6 @@ import com.intellij.openapi.util.Key;
 import com.intellij.ui.JBColor;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
-import net.sf.cglib.core.Local;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartFactory;
@@ -20,21 +19,18 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.NumberTickUnit;
-import org.jfree.chart.axis.TickUnitSource;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.Range;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import settings.TopiasSettingsState;
+import settings.MyPluginSettingsState;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -53,7 +49,7 @@ public class LabelRenderer extends HintRenderer {
         final AtomicInteger index = new AtomicInteger(1);
         this.upperBound = Collections.max(methodData.getSecond());
 //        Collections.reverse(methodData.getSecond());
-        multiplier = TopiasSettingsState.getInstance(project).getState().showHistograms ? 3 : 2;
+        multiplier = MyPluginSettingsState.getInstance(project).getState().showHistograms ? 3 : 2;
         methodData.getSecond().forEach(val -> xySeries.add(index.getAndIncrement(), val));
     }
 
@@ -81,8 +77,8 @@ public class LabelRenderer extends HintRenderer {
 
         BufferedImage bufferedImage = null;
         final CustomFontMetrics fontMetrics = getMetrics(editor);
-        final boolean showHistograms = TopiasSettingsState.getInstance(editor.getProject()).getState().showHistograms;
-        final int period = TopiasSettingsState.getInstance(editor.getProject()).getState().discrTypeId == 0 ? 7 : 30;
+        final boolean showHistograms = MyPluginSettingsState.getInstance(editor.getProject()).getState().showHistograms;
+        final int period = MyPluginSettingsState.getInstance(editor.getProject()).getState().discrTypeId == 0 ? 7 : 30;
         if (showHistograms) {
             final XYSeriesCollection data = new XYSeriesCollection(xySeries);
             final JFreeChart chart = ChartFactory.createHistogram(

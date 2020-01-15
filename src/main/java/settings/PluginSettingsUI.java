@@ -1,19 +1,15 @@
 package settings;
 
-import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.ui.ComponentWithBrowseButton;
 import com.intellij.openapi.ui.FixedSizeButton;
 import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.components.JBCheckBox;
-import com.intellij.ui.components.JBTextField;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -22,8 +18,6 @@ import settings.enums.DiscrType;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import static com.intellij.openapi.util.io.FileUtil.toSystemIndependentName;
 import static processing.FullProcessInvoker.invoke;
@@ -35,7 +29,7 @@ public class PluginSettingsUI {
     }
 
     public PluginSettingsUI(Project project) {
-        final TopiasSettingsState.InnerState state = TopiasSettingsState.getInstance(project).getState();
+        final MyPluginSettingsState.InnerState state = MyPluginSettingsState.getInstance(project).getState();
 
         final DiscrType[] elems = {DiscrType.MONTH, DiscrType.WEEK};
         dateComboBox.setModel(new DefaultComboBoxModel<>(elems));
@@ -102,7 +96,7 @@ public class PluginSettingsUI {
     private void $$$setupUI$$$() {
         settingsPanel = new JPanel();
         settingsPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
-        settingsPanel.setBorder(BorderFactory.createTitledBorder("Topias"));
+        settingsPanel.setBorder(BorderFactory.createTitledBorder("vcs_analysis_plugin"));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
         settingsPanel.add(panel1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(55, 62), null, 0, false));

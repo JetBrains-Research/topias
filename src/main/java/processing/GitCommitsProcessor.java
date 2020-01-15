@@ -28,7 +28,7 @@ import handlers.ide.GitRepoChangeListener;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import settings.TopiasSettingsState;
+import settings.MyPluginSettingsState;
 import state.ChangesState;
 import state.IsRunning;
 import ui.TopChangedMethodsListPanel;
@@ -44,7 +44,7 @@ public class GitCommitsProcessor {
     public static synchronized void processGitHistory(Project project, String dbFilePath, boolean isFirstTime) {
         IsRunning.getInstance().setRunning(project,true);
         final ProjectLevelVcsManagerImpl instance = (ProjectLevelVcsManagerImpl) ProjectLevelVcsManager.getInstance(project);
-        final TopiasSettingsState.InnerState settingsState = TopiasSettingsState.getInstance(project).getState();
+        final MyPluginSettingsState.InnerState settingsState = MyPluginSettingsState.getInstance(project).getState();
         instance.addInitializationRequest(VcsInitObject.AFTER_COMMON, () -> {
             try {
                 final Optional<VirtualFile> gitRootOptional = settingsState.gitRootPath == null || settingsState.gitRootPath.equals("") ?
@@ -59,7 +59,7 @@ public class GitCommitsProcessor {
                 if (!gitRootOptional.isPresent() || gitRootOptional.get().getPath() == null) {
                     logger.warn("VCS root not found for project {}", project.getName());
                     ApplicationManager.getApplication().invokeLater(() ->
-                            Messages.showWarningDialog("Git root was not found!\nTry to set it manually in settings", "Topias"));
+                            Messages.showWarningDialog("Git root was not found!\nTry to set it manually in settings", "vcs_analysis_plugin"));
                     settingsState.isFirstTry = false;
                     settingsState.isRefreshEnabled = true;
 
@@ -120,7 +120,7 @@ public class GitCommitsProcessor {
                 paramsArray = sinceWhat.toArray(paramsArray);
                 final String[] finalParamsArray = paramsArray;
 
-                final Task.Backgroundable backgroundable = new Task.Backgroundable(project, "Topias Plugin: Processing Git Commit History", false) {
+                final Task.Backgroundable backgroundable = new Task.Backgroundable(project, "vcs_analysis_plugin: Processing Git Commit History", false) {
                     @Override
                     public void run(@NotNull ProgressIndicator indicator) {
                         try {

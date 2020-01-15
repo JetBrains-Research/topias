@@ -7,15 +7,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.psi.*;
-import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.FileContentUtil;
 import db.dao.StatisticsViewDAO;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
 import navigation.wrappers.DataHolder;
 import navigation.wrappers.Reference;
-import settings.TopiasSettingsState;
+import settings.MyPluginSettingsState;
 import settings.enums.DiscrType;
 
 import java.util.List;
@@ -39,7 +37,7 @@ public class TopChangedMethodsListPanel extends SimpleToolWindowPanel {
     private void refresh(Project project) {
         dumbService.runWhenSmart(() -> {
             final StatisticsViewDAO dao = new StatisticsViewDAO(buildDBUrlForSystem(project));
-            final TopiasSettingsState.InnerState settingsState = TopiasSettingsState.getInstance(project).getState();
+            final MyPluginSettingsState.InnerState settingsState = MyPluginSettingsState.getInstance(project).getState();
             final DiscrType period = settingsState != null ? DiscrType.getById(settingsState.discrTypeId) : DiscrType.MONTH;
             String branchName;
             try {

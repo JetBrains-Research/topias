@@ -10,15 +10,15 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@State(name = "TopiasSettingsState",
+@State(name = "MyPluginSettingsState",
         storages = {@Storage("settings_state.xml")})
-public final class TopiasSettingsState implements ProjectComponent,
-        PersistentStateComponent<TopiasSettingsState.InnerState> {
-    private static final Logger log = LoggerFactory.getLogger(TopiasSettingsState.class);
+public final class MyPluginSettingsState implements ProjectComponent,
+        PersistentStateComponent<MyPluginSettingsState.InnerState> {
+    private static final Logger log = LoggerFactory.getLogger(MyPluginSettingsState.class);
     private InnerState innerState = new InnerState();
 
-    public static TopiasSettingsState getInstance(Project project) {
-        return project.getComponent(TopiasSettingsState.class);
+    public static MyPluginSettingsState getInstance(Project project) {
+        return project.getComponent(MyPluginSettingsState.class);
     }
 
     @Nullable
