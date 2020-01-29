@@ -1,7 +1,7 @@
 package editor
 
-import java.awt.{Canvas, Font, FontMetrics, RenderingHints}
 import java.awt.font.FontRenderContext
+import java.awt.{Canvas, Font, FontMetrics, RenderingHints}
 
 import com.intellij.ide.ui.AntialiasingType
 import com.intellij.openapi.editor.Editor

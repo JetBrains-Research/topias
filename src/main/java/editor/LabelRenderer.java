@@ -12,7 +12,6 @@ import com.intellij.openapi.util.Key;
 import com.intellij.ui.JBColor;
 import db.entities.StatisticsViewEntity;
 import kotlin.Pair;
-import net.sf.cglib.core.Local;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartFactory;
@@ -198,7 +197,7 @@ public class LabelRenderer extends HintRenderer {
         final String familyName = UIManager.getFont("Label.font").getFamily();
         final int size = Math.max(1, editor.getColorsScheme().getEditorFontSize() - 1);
         CustomFontMetrics metrics = editor.getUserData(LABEL_FONT_METRICS);
-        if (metrics != null && !metrics.isActual(editor, familyName, size)) {
+        if (metrics == null && !metrics.isActual(editor, familyName, size)) {
             metrics = null;
         }
         if (metrics == null) {
