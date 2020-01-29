@@ -7,4 +7,4 @@ os:
 - linux
 dist: trusty
 
-script: ./gradlew wrapper --gradle-version 6.1 && ./gradlew assemble
+script: ./gradlew -DXms512M -DXmx4G wrapper --gradle-version 6.1 && ./gradlew -DXms512M -DXmx4G jar
