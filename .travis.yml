@@ -7,4 +7,7 @@ os:
 - linux
 dist: trusty
 
-script: ./gradlew -DXms512M -DXmx4G wrapper --gradle-version 6.1 && ./gradlew -DXms512M -DXmx4G jar
+before_install:
+  - export GRADLE_OPTS="\-Dorg.gradle.jvmargs='-Xmx2048m -XX:MaxPermSize=512m'"
+
+script: ./gradlew wrapper --gradle-version 6.1 && ./gradlew jar
