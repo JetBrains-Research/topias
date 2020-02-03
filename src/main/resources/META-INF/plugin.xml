@@ -7,18 +7,19 @@
     <description>
         Topias is a plugin that helps to visualize frequency of methods changes in  Java projects based on their Git histories. This way it can help developers to find methods that are changed suspiciously often, which could be caused by technical (some hardcoded parameters should be moved to a configuration file), architectural (this piece of code performs more than one task and should be split into several entities), or even external (a particular business rule changing too often) issues.
     </description>
-    <version>1.0.4b</version>
-    <idea-version since-build="183.*" until-build="193.*"/>
+    <version>1.0.4c</version>
+    <idea-version since-build="183" until-build="193.*"/>
     <change-notes>
         <![CDATA[
         <p>
-            1.0.4b: Updated plugin's description<br/>
+            1.0.4c: Fixed compatibility issues with newer IDEA versions<br/>
+            1.0.4b: Updated a plugin's description<br/>
             1.0.4: Some fixes of refactoring processing;<br/>
             1.0.3: Changed visual representation of histograms, fixed case when multiple history processing tasks could be run;<br/>
             1.0.2: Fixed memory issues, and some crashes when another project opened from same IDE;<br/>
             1.0.1d: Added reload button and manually selection of git repo path;<br/>
             1.0.1c: Some performance improvements, VCS search now is performed after indexing;<br/>
-            1.0.1b: Fixed some crashings. Now plugin should work more stable;<br/>
+            1.0.1b: Fixed some crashes. Now plugin should work more stable;<br/>
         </p>
         ]]>
     </change-notes>
