@@ -26,8 +26,8 @@ sourceSets {
 }
 
 intellij {
-    version '2018.3'
-    plugins 'git4idea'
+    version '2019.3'
+    plugins 'git4idea', 'java'
     pluginName 'topias'
     downloadSources true
     updateSinceUntilBuild false
@@ -36,6 +36,8 @@ intellij {
 dependencies {
     implementation 'org.scala-lang:scala-library:2.12.10'
     compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.0'
+    // https://mvnrepository.com/artifact/com.typesafe.slick/slick
+    compile group: 'com.typesafe.slick', name: 'slick_2.12', version: '3.3.2'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     implementation files('lib/RefactoringMiner.jar')
     // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
