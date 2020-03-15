@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'io.github.likeanowl'
-version '1.0.4c'
+version '1.0.4d'
 
 sourceCompatibility = 1.8
 
@@ -28,7 +28,7 @@ sourceSets {
 intellij {
     version '2019.3'
     plugins 'git4idea', 'java'
-    pluginName 'topias'
+    pluginName 'Topias'
     downloadSources true
     updateSinceUntilBuild false
 }

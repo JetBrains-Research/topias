@@ -70,7 +70,7 @@ public class DrawingUtils {
                             false,
                             true,
                             0,
-                            new LabelRenderer("Changed " + x.getFirst().getChangesCount() + " time(s) for last " + period.getTextValue(), x,
+                            new LabelRenderer("Changed " + x.getFirst().getChangesCount() + " time(s) in the last " + period.getTextValue(), x,
                                     countStartColumn(x.getFirst().getStartOffset(), doc), editor.getProject())
                     );
                 }));

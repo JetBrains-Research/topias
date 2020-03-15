@@ -166,7 +166,7 @@ public class LabelRenderer extends HintRenderer {
                 if (widthAdjustment == 0) {
                     g.drawString(super.getText(), startX + 7, startY - 4);
                     if (showHistograms)
-                        g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 36, startY + 5 -
+                        g2d.drawImage(bufferedImage, null, startX + fontMetrics.getSymbolWidth() * 40, startY + 5 -
                                 (int) (fontMetrics.lineHeight() * 4.5 * 0.6));
 
                 } else {
@@ -197,7 +197,7 @@ public class LabelRenderer extends HintRenderer {
         final String familyName = UIManager.getFont("Label.font").getFamily();
         final int size = Math.max(1, editor.getColorsScheme().getEditorFontSize() - 1);
         CustomFontMetrics metrics = editor.getUserData(LABEL_FONT_METRICS);
-        if (metrics == null && !metrics.isActual(editor, familyName, size)) {
+        if (metrics != null && !metrics.isActual(editor, familyName, size)) {
             metrics = null;
         }
         if (metrics == null) {

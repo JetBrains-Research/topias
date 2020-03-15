@@ -110,11 +110,6 @@ public final class CommitProcessor {
         final List<MethodInfo> added = methodsStorage.getAddedMethods();
         final List<RefactoringData> moved = methodsStorage.getMovedMethods();
 
-//        moved.forEach(x -> {
-//                added.remove(x.getNewMethod());
-//                deleted.remove(x.getOldMethod());
-//        });
-
         for (RefactoringData refactoringData : data) {
             deleted.remove(refactoringData.getOldMethod());
             added.remove(refactoringData.getNewMethod());
@@ -124,14 +119,6 @@ public final class CommitProcessor {
             moved.remove(data);
         }
 
-//        data.addAll(moved);
-//        methodsDictionaryDAO.addToDictionary(added
-//                .stream()
-//                .map(x -> new MethodDictionaryEntity(x.getMethodFullName(), x.getStartOffset(), x.getFileName()))
-//                .collect(Collectors.toList()));
-
-//        deleted.forEach(x -> methodsDictionaryDAO.removeFromDictionary(x.getMethodFullName()));
-
         methodsDictionaryDAO.updateBySignature(data.stream().map(x -> new Pair<>(
                 x.getOldMethod().getMethodFullName(),
                 new MethodDictionaryEntity(x.getNewMethod().getMethodFullName(),
@@ -139,15 +126,6 @@ public final class CommitProcessor {
                         x.getNewMethod().getFileName())
         )).collect(Collectors.toList()));
 
-
-//        methodsDictionaryDAO.addToDictionary(
-//                methodsStorage.getRecalcMethods()
-//                        .stream()
-//                        .map(x -> new MethodDictionaryEntity(x.getMethodFullName(),
-//                                x.getStartOffset(),
-//                                x.getFileName()))
-//                        .collect(Collectors.toList())
-//        );
         //Just clearing
         methodsStorage.clear();
 
