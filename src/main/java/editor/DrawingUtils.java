@@ -38,9 +38,6 @@ public class DrawingUtils {
         final TopiasSettingsState.InnerState state = TopiasSettingsState.getInstance(editor.getProject()).getState();
         final DiscrType period = state == null ? DiscrType.MONTH : DiscrType.getById(state.discrTypeId);
 
-        if (editor == null)
-            return;
-
         final Document doc = editor.getDocument();
         final InlayModelImpl inlay = (InlayModelImpl) editor.getInlayModel();
         final VirtualFile file = ((EditorImpl) editor).getVirtualFile();

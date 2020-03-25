@@ -47,21 +47,6 @@ public class MethodsDictionaryDAO {
         return updatedObjectsCount.get();
     }
 
-    public synchronized int removeFromDictionary(String name) {
-        final String sql = "delete from methodsDictionary where fullSignature = ?";
-        final AtomicInteger updatedObjectsCount = new AtomicInteger();
-
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, name);
-            statement.executeUpdate();
-            connection.commit();
-        } catch (SQLException e) {
-            logger.error("Sql exception occured while trying to delete entry from methodsDictionary table", e);
-        }
-
-        return updatedObjectsCount.get();
-    }
-
     public synchronized List<MethodChangeLogEntity> buildChangelogs(List<MethodInfo> changes) {
         final String questionMarks = String.join(", ", Collections.nCopies(changes.size(), "?"));
         final String sql = "select id from methodsDictionary where fullSignature in (" + questionMarks + ")";

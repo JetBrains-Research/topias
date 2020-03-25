@@ -20,13 +20,10 @@ public final class RefactoringProcessor {
     private final String projectPath;
     private final Map<RefactoringType, Function<Refactoring, RefactoringData>> handlers =
             new HashMap<RefactoringType, Function<Refactoring, RefactoringData>>() {{
-//                put(EXTRACT_OPERATION, new ExtractOperationHandler());
                 put(RENAME_METHOD, new RenameMethodRefactoringHandler());
                 put(MOVE_OPERATION, new MoveOperationRefactoringHandler());
                 put(PULL_UP_OPERATION, new PullUpOperationRefactoringHandler());
                 put(PUSH_DOWN_OPERATION, new PushDownOperationRefactoringHandler());
-//                put(EXTRACT_AND_MOVE_OPERATION, new ExtractAndMoveOperationRefactoringHandler());
-//                put(INLINE_OPERATION, new InlineOperationRefactoringHandler());
             }};
 
     public RefactoringProcessor(String projectPath) {
@@ -37,31 +34,6 @@ public final class RefactoringProcessor {
     public RefactoringData process(Refactoring refactoring) {
         return handlers.getOrDefault(refactoring.getRefactoringType(), x -> null).apply(refactoring);
     }
-
-//    private class ExtractAndMoveOperationRefactoringHandler implements Function<Refactoring, RefactoringData> {
-//        @Override
-//        public RefactoringData apply(Refactoring refactoring) {
-//            final ExtractAndMoveOperationRefactoring ref =
-//                    (ExtractAndMoveOperationRefactoring) refactoring;
-//            final MethodsStorage storage = MethodsStorage.getInstance();
-//            final UMLOperation operation = ref.getExtractedOperation();
-//            storage.storeAddedMethods(new MethodInfo(
-//                    ref
-//            ));
-//            return null;
-//        }
-//    }
-
-//    private class ExtractOperationHandler implements Function<Refactoring, RefactoringData> {
-//        @Override
-//        public RefactoringData apply(Refactoring refactoring) {
-//            final ExtractOperationRefactoring ref = (ExtractOperationRefactoring) refactoring;
-//
-//
-//            return null;
-//        }
-//    }
-
 
     private class MoveOperationRefactoringHandler implements Function<Refactoring, RefactoringData> {
         @Override
