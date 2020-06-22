@@ -14,5 +14,7 @@ https://youtu.be/xsqc4gCTxfA
 Just install plugin from official JetBrains repository, and it will find a VCS root in your Java project. If VCS root was not found, you could set it manually in plugin's settings (Settings -> Topias plugin settings).
 
 ### Screenshots
-![pic](https://i.imgur.com/2NklP9J.png)
-![pic1](https://i.imgur.com/1Og2nWO.png)
+![pic](./files/renowed_method_sig.png)
+
+
+![pic1](./files/methods_list.png)

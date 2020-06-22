@@ -45,7 +45,7 @@ public class MySideBar implements ProjectComponent {
             }
         });
         final TopiasSettingsState state = TopiasSettingsState.getInstance(project);
-        final String title = "Most changed methods for last " + DiscrType.getById(state.getState().discrTypeId).textValue;
+        final String title = "Most changed methods in the last " + DiscrType.getById(state.getState().discrTypeId).textValue;
         ((TitledBorder) panel.getBorder()).setTitle(title);
     }
 
@@ -78,7 +78,7 @@ public class MySideBar implements ProjectComponent {
             }
         });
         final TopiasSettingsState state = TopiasSettingsState.getInstance(project);
-        final String title = "Most changed methods for last " + DiscrType.getById(state.getState().discrTypeId).textValue;
+        final String title = "Most changed methods in the last " + DiscrType.getById(state.getState().discrTypeId).textValue;
         ((TitledBorder) panel.getBorder()).setTitle(title);
     }
 
@@ -100,7 +100,7 @@ public class MySideBar implements ProjectComponent {
         panel = new JPanel();
         panel.setLayout(new BorderLayout(0, 0));
         panel.setEnabled(true);
-        panel.setBorder(BorderFactory.createTitledBorder("Most changed methods for last 30 days"));
+        panel.setBorder(BorderFactory.createTitledBorder("Most changed methods in the last 30 days"));
         list = new JBList();
         panel.add(list, BorderLayout.CENTER);
     }
